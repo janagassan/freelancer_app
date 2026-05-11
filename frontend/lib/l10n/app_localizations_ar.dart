@@ -48,7 +48,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get profile => 'الملف الشخصي';
 
   @override
-  String get freelancer => 'مستقل';
+  String get freelancer => 'الفريلانسر';
 
   @override
   String get jobSuccessScore => 'نسبة النجاح';
@@ -57,7 +57,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get activeProjects => 'المشاريع النشطة';
 
   @override
-  String get proposals => 'العروض';
+  String get proposals => 'عرض';
 
   @override
   String get rating => 'التقييم';
@@ -138,7 +138,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get language => 'اللغة';
 
   @override
-  String get currency => 'العملة';
+  String get currency => 'ريال';
 
   @override
   String get support => 'الدعم';
@@ -807,7 +807,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get completed => 'مكتمل';
 
   @override
-  String get pending => 'قيد الانتظار';
+  String get pending => 'معلق';
 
   @override
   String get submitWork => 'تقديم العمل';
@@ -826,7 +826,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get message => 'رسالة';
 
   @override
-  String get client => 'عميل';
+  String get client => 'العميل';
 
   @override
   String get typeYourMessage => 'اكتب رسالتك...';
@@ -1285,7 +1285,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get pool => 'المجموع';
 
   @override
-  String get coupon => 'قسيمة';
+  String get coupon => 'كوبون';
 
   @override
   String get dollar => '\$';
@@ -2021,7 +2021,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get addFeedback => 'إضافة ملاحظات';
 
   @override
-  String get expired => 'منتهية';
+  String get expired => 'منتهي';
 
   @override
   String get invitationExpired => 'هذه الدعوة انتهت صلاحيتها';
@@ -2645,7 +2645,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get postNewProject => 'نشر مشروع جديد';
 
   @override
-  String get templates => 'القوالب';
+  String get templates => 'قالب';
 
   @override
   String get projectDetailsHint =>
@@ -3276,7 +3276,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get mySubscription => 'اشتراكي';
 
   @override
-  String get ads => 'الاعلانات';
+  String get ads => 'الإعلانات';
 
   @override
   String get myCampaigns => 'حملاتي';
@@ -3284,132 +3284,1106 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get createCampaign => 'انشاء حملة';
 
-  // Dispute Screen
-String get createDispute => 'رفع نزاع';
-String get disputeInstruction => 'يرجى تقديم تفاصيل النزاع بوضوح';
-String get disputeTitleHint => 'عنوان النزاع';
-String get disputeDescriptionHint => 'يرجى شرح المشكلة بالتفصيل';
-String get evidenceAttachments => 'المرفقات والإثباتات';
-String get uploadEvidenceHint => 'رفع صور، مستندات أو لقطات شاشة (قريباً)';
-String get importantNotes => 'ملاحظات مهمة';
-String get submitDispute => 'إرسال النزاع';
-String get disputeSubmittedSuccess => 'تم إرسال النزاع بنجاح. سيتم مراجعته من قبل الإدارة';
+  @override
+  String get createDispute => 'رفع نزاع';
 
-// Validation
-String get titleRequired => 'الرجاء إدخال عنوان النزاع';
-String get titleTooShort => 'يجب أن لا يقل العنوان عن 5 أحرف';
-String get descriptionRequired => 'الرجاء إدخال تفاصيل النزاع';
-String get descriptionTooShort => 'يجب أن لا تقل التفاصيل عن 20 حرف';
+  @override
+  String get disputeInstruction => 'يرجى تقديم تفاصيل النزاع بوضوح';
 
-// Notes
-String get disputeNote1 => 'سيتم مراجعة النزاع من قبل فريق الإدارة';
-String get disputeNote2 => 'يرجى تقديم أدلة واضحة وموثوقة';
-String get disputeNote3 => 'قد يستغرق حل النزاع عدة أيام';
-String get disputeNote4 => 'سيتم إشعار جميع الأطراف بالقرار النهائي';
-// Dispute Details Screen
-@override
-String get disputeDetails => 'تفاصيل النزاع';
+  @override
+  String get disputeTitleHint => 'عنوان النزاع';
 
-@override
-String get disputeInfo => 'معلومات النزاع';
+  @override
+  String get disputeDescriptionHint => 'يرجى شرح المشكلة بالتفصيل';
 
-@override
-String get disputeId => 'رقم النزاع';
+  @override
+  String get evidenceAttachments => 'المرفقات والإثباتات';
 
-@override
-String get disputeTitle => 'العنوان';
+  @override
+  String get uploadEvidenceHint => 'رفع صور، مستندات أو لقطات شاشة (قريباً)';
 
-@override
-String get disputeDescription => 'وصف النزاع';
+  @override
+  String get importantNotes => 'ملاحظات مهمة';
 
-@override
-String get createdAt => 'تاريخ الإنشاء';
+  @override
+  String get submitDispute => 'إرسال النزاع';
 
-@override
-String get lastUpdated => 'آخر تحديث';
+  @override
+  String get disputeSubmittedSuccess =>
+      'تم إرسال النزاع بنجاح. سيتم مراجعته من قبل الإدارة';
 
-@override
-String get disputeNotFound => 'لم يتم العثور على النزاع';
+  @override
+  String get titleRequired => 'الرجاء إدخال عنوان النزاع';
 
+  @override
+  String get titleTooShort => 'يجب أن لا يقل العنوان عن 5 أحرف';
 
+  @override
+  String get descriptionRequired => 'الرجاء إدخال تفاصيل النزاع';
 
-@override
-String get errorLoadingDetails => 'حدث خطأ في تحميل التفاصيل';
+  @override
+  String get descriptionTooShort => 'يجب أن لا تقل التفاصيل عن 20 حرف';
 
-// Contract Info
-@override
-String get contractInfo => 'معلومات العقد';
+  @override
+  String get connectionError => 'حدث خطأ في الاتصال. يرجى المحاولة مرة أخرى';
 
-@override
-String get contractId => 'رقم العقد';
+  @override
+  String get disputeNote1 => 'سيتم مراجعة النزاع من قبل فريق الإدارة';
 
+  @override
+  String get disputeNote2 => 'يرجى تقديم أدلة واضحة وموثوقة';
 
-@override
-String get viewContractDetails => 'عرض تفاصيل العقد';
+  @override
+  String get disputeNote3 => 'قد يستغرق حل النزاع عدة أيام';
 
-@override
-String get notSpecified => 'غير محدد';
+  @override
+  String get disputeNote4 => 'سيتم إشعار جميع الأطراف بالقرار النهائي';
 
-// Evidence
-@override
-String get evidenceFiles => 'ملفات الأدلة';
+  @override
+  String get disputeDetails => 'تفاصيل النزاع';
 
-// Status
-@override
-String get disputeStatusPending => 'في الانتظار';
+  @override
+  String get disputeInfo => 'معلومات النزاع';
 
-@override
-String get disputeStatusUnderReview => 'قيد المراجعة';
+  @override
+  String get disputeId => 'رقم النزاع';
 
-@override
-String get disputeStatusResolved => 'تم الحل';
+  @override
+  String get disputeTitle => 'العنوان';
 
-@override
-String get disputeStatusRejected => 'مرفوض';
+  @override
+  String get disputeDescription => 'وصف النزاع';
 
-@override
-String get disputeStatusPendingDesc => 'النزاع في انتظار المراجعة من قبل الإدارة';
+  @override
+  String get createdAt => 'تاريخ الإنشاء';
 
-@override
-String get disputeStatusUnderReviewDesc => 'النزاع قيد المراجعة والتحقيق';
+  @override
+  String get lastUpdated => 'آخر تحديث';
 
-@override
-String get disputeStatusResolvedDesc => 'تم حل النزاع واتخاذ القرار المناسب';
+  @override
+  String get disputeNotFound => 'لم يتم العثور على النزاع';
 
-@override
-String get disputeStatusRejectedDesc => 'تم رفض النزاع بعد المراجعة';
+  @override
+  String get errorLoadingDetails => 'حدث خطأ في تحميل التفاصيل';
 
-// Resolution
-@override
-String get disputeResolved => 'تم حل النزاع';
+  @override
+  String get contractInfo => 'معلومات العقد';
 
-@override
-String get disputeRejected => 'تم رفض النزاع';
+  @override
+  String get contractId => 'رقم العقد';
 
-@override
-String get refundAmount => 'مبلغ الاسترداد';
+  @override
+  String get viewContractDetails => 'عرض تفاصيل العقد';
 
+  @override
+  String get notSpecified => 'غير محدد';
 
+  @override
+  String get evidenceFiles => 'ملفات الأدلة';
 
-@override
-String get connectionError => 'حدث خطأ في الاتصال. يرجى المحاولة مرة أخرى';
+  @override
+  String get disputeStatusPending => 'في الانتظار';
 
-// My Disputes Screen
-@override
-String get myDisputes => 'النزاعات';
+  @override
+  String get disputeStatusUnderReview => 'قيد المراجعة';
 
-@override
-String get filterByStatus => 'تصفية حسب الحالة';
+  @override
+  String get disputeStatusResolved => 'تم الحل';
 
-@override
-String get allDisputes => 'جميع النزاعات';
+  @override
+  String get disputeStatusRejected => 'مرفوض';
 
-@override
-String get noDisputes => 'لا توجد نزاعات';
+  @override
+  String get disputeStatusPendingDesc =>
+      'النزاع في انتظار المراجعة من قبل الإدارة';
 
-@override
-String get noDisputesDesc => 'لم تقم برفع أي نزاع حتى الآن';
+  @override
+  String get disputeStatusUnderReviewDesc => 'النزاع قيد المراجعة والتحقيق';
 
-@override
-String get errorLoadingDisputes => 'حدث خطأ في تحميل النزاعات';
+  @override
+  String get disputeStatusResolvedDesc => 'تم حل النزاع واتخاذ القرار المناسب';
+
+  @override
+  String get disputeStatusRejectedDesc => 'تم رفض النزاع بعد المراجعة';
+
+  @override
+  String get disputeResolved => 'تم حل النزاع';
+
+  @override
+  String get disputeRejected => 'تم رفض النزاع';
+
+  @override
+  String get refundAmount => 'مبلغ الاسترداد';
+
+  @override
+  String get myDisputes => 'النزاعات';
+
+  @override
+  String get filterByStatus => 'تصفية حسب الحالة';
+
+  @override
+  String get allDisputes => 'All Disputes';
+
+  @override
+  String get noDisputes => 'لا توجد نزاعات';
+
+  @override
+  String get noDisputesDesc => 'You haven\'t raised any disputes yet';
+
+  @override
+  String get errorLoadingDisputes => 'حدث خطأ في تحميل النزاعات';
+
+  @override
+  String get users => 'المستخدمين';
+
+  @override
+  String get addUser => 'إضافة مستخدم';
+
+  @override
+  String get searchByNameOrEmail => 'البحث بالاسم أو البريد الإلكتروني...';
+
+  @override
+  String get role => 'الدور';
+
+  @override
+  String get status => 'الحالة';
+
+  @override
+  String get allUsers => 'الكل';
+
+  @override
+  String get suspended => 'معلق';
+
+  @override
+  String get usersCount => 'مستخدم';
+
+  @override
+  String get usersCount_plural => 'مستخدمين';
+
+  @override
+  String get noUsersFound => 'لا يوجد مستخدمين';
+
+  @override
+  String get tryAdjustingFilters => 'حاول تعديل فلتر البحث';
+
+  @override
+  String get createNewUser => 'إنشاء مستخدم جديد';
+
+  @override
+  String get name => 'الاسم';
+
+  @override
+  String get email => 'البريد الإلكتروني';
+
+  @override
+  String get phoneOptional => 'رقم الهاتف (اختياري)';
+
+  @override
+  String get nationalIdOptional => 'رقم الهوية (اختياري)';
+
+  @override
+  String get clientTypeOptional => 'نوع العميل (اختياري)';
+
+  @override
+  String get companyNameOptional => 'اسم الشركة (اختياري)';
+
+  @override
+  String get commercialRegisterOptional => 'رقم السجل التجاري (اختياري)';
+
+  @override
+  String get taxNumberOptional => 'الرقم الضريبي (اختياري)';
+
+  @override
+  String get hourlyRateOptional => 'السعر بالساعة (اختياري)';
+
+  @override
+  String get skillsOptional => 'المهارات (اختياري، مفصولة بفواصل)';
+
+  @override
+  String get nameRequired => 'الاسم مطلوب';
+
+  @override
+  String get emailRequired => 'البريد الإلكتروني مطلوب';
+
+  @override
+  String get enterValidEmail => 'أدخل بريداً إلكترونياً صحيحاً';
+
+  @override
+  String get userCreated =>
+      '✅ تم إنشاء المستخدم. تم إرسال كلمة المرور بالبريد الإلكتروني.';
+
+  @override
+  String get failedToCreateUser => 'فشل في إنشاء المستخدم';
+
+  @override
+  String get userActivated => '✅ تم تفعيل المستخدم بنجاح';
+
+  @override
+  String get userSuspended => '✅ تم تعليق المستخدم بنجاح';
+
+  @override
+  String get userVerified => '✅ تم توثيق المستخدم بنجاح';
+
+  @override
+  String get verificationRemoved => '✅ تم إزالة التوثيق';
+
+  @override
+  String get accountEmailResent =>
+      '✅ تم إعادة إرسال البريد الإلكتروني للحساب بنجاح';
+
+  @override
+  String get failedToResendEmail => 'فشل في إعادة إرسال البريد الإلكتروني';
+
+  @override
+  String get resendAccountEmail => 'إعادة إرسال بريد الحساب';
+
+  @override
+  String get verifyUser => 'توثيق المستخدم';
+
+  @override
+  String get removeVerification => 'إزالة التوثيق';
+
+  @override
+  String get suspendUser => 'تعليق المستخدم';
+
+  @override
+  String get activateUser => 'تفعيل المستخدم';
+
+  @override
+  String get userDetails => 'تفاصيل المستخدم';
+
+  @override
+  String get page => 'صفحة';
+
+  @override
+  String get ofWord => 'من';
+
+  @override
+  String get monthlyRecurring => 'الإيرادات الشهرية المتكررة';
+
+  @override
+  String get yearlyRecurring => 'الإيرادات السنوية المتكررة';
+
+  @override
+  String get subscriptionMetrics => 'مؤشرات الاشتراكات';
+
+  @override
+  String get trialing => 'تجريبي';
+
+  @override
+  String get canceled => 'ملغي';
+
+  @override
+  String get upgradeRate => 'نسبة الترقية';
+
+  @override
+  String get churnRate => 'نسبة الإلغاء';
+
+  @override
+  String get mostPopularPlan => 'الباقة الأكثر شيوعاً';
+
+  @override
+  String get revenueByPlan => 'الإيرادات حسب الباقة';
+
+  @override
+  String get failedToLoadStats => 'فشل في تحميل الإحصائيات';
+
+  @override
+  String get noDataAvailable => 'لا توجد بيانات متاحة';
+
+  @override
+  String get mrr => 'الإيرادات المتكررة الشهرية';
+
+  @override
+  String get mostSubscribedPlan => 'الباقة الأكثر اشتراكاً';
+
+  @override
+  String get subs => 'اشتراك';
+
+  @override
+  String get subs_plural => 'اشتراكات';
+
+  @override
+  String get subscriptionManagement => 'إدارة الاشتراكات';
+
+  @override
+  String get plans => 'الباقات';
+
+  @override
+  String get coupons => 'كوبونات';
+
+  @override
+  String get adminSettings => 'إعدادات المشرف';
+
+  @override
+  String get general => 'عام';
+
+  @override
+  String get security => 'الأمان';
+
+  @override
+  String get platformControls => 'تحكمات المنصة';
+
+  @override
+  String get maintenanceMode => 'وضع الصيانة';
+
+  @override
+  String get maintenanceModeDesc => 'تعطيل وصول المستخدمين إلى المنصة مؤقتاً';
+
+  @override
+  String get allowNewRegistrations => 'السماح بالتسجيلات الجديدة';
+
+  @override
+  String get allowNewRegistrationsDesc =>
+      'تمكين التسجيل للمستخدمين الجدد على المنصة';
+
+  @override
+  String get defaultConfiguration => 'الإعدادات الافتراضية';
+
+  @override
+  String get defaultClientPlan => 'الباقة الافتراضية للعميل';
+
+  @override
+  String get defaultFreelancerVisibility => 'رؤية المستقل الافتراضية';
+
+  @override
+  String get platformCommissionRate => 'نسبة عمولة المنصة';
+
+  @override
+  String get platformTheme => 'ثيم المنصة';
+
+  @override
+  String get defaultTheme => 'افتراضي';
+
+  @override
+  String get logoBranding => 'الشعار والعلامة التجارية';
+
+  @override
+  String get configured => 'تم التكوين';
+
+  @override
+  String get verification => 'التحقق';
+
+  @override
+  String get autoVerifyEmail => 'التحقق التلقائي من البريد الإلكتروني';
+
+  @override
+  String get autoVerifyEmailDesc =>
+      'التحقق تلقائياً من نطاقات البريد الإلكتروني الموثوقة';
+
+  @override
+  String get flagHighRiskPayments => 'الإبلاغ عن المدفوعات عالية المخاطر';
+
+  @override
+  String get flagHighRiskPaymentsDesc => 'اكتشاف وتحديد نشاط الدفع المشبوه';
+
+  @override
+  String get accessRules => 'قواعد الوصول';
+
+  @override
+  String get adminSessionTimeout => 'مهلة جلسة المشرف';
+
+  @override
+  String get twoFactorAuth => 'المصادقة الثنائية';
+
+  @override
+  String get requiredForAdmins => 'مطلوبة للمشرفين';
+
+  @override
+  String get ipWhitelist => 'القائمة البيضاء للـ IP';
+
+  @override
+  String get notConfigured => 'غير مهيأ';
+
+  @override
+  String get securityStatusGood => 'حالة الأمان: جيدة';
+
+  @override
+  String get securityStatusDesc => 'جميع ميزات الأمان الحرجة مهيأة بشكل صحيح';
+
+  @override
+  String get adminAlerts => 'تنبيهات المشرف';
+
+  @override
+  String get weeklyPerformanceReport => 'تقرير الأداء الأسبوعي';
+
+  @override
+  String get weeklyPerformanceReportDesc =>
+      'استلام ملخص شامل كل يوم اثنين صباحاً';
+
+  @override
+  String get criticalIncidentAlerts => 'تنبيهات الحوادث الحرجة';
+
+  @override
+  String get emailInApp => 'بريد إلكتروني + داخل التطبيق';
+
+  @override
+  String get disputeEscalationAlerts => 'تنبيهات تصعيد النزاعات';
+
+  @override
+  String get instantPush => 'إشعار فوري';
+
+  @override
+  String get newUserRegistrations => 'تسجيلات المستخدمين الجدد';
+
+  @override
+  String get dailyDigest => 'ملخص يومي';
+
+  @override
+  String get emailConfiguration => 'إعدادات البريد الإلكتروني';
+
+  @override
+  String get smtpSettings => 'إعدادات SMTP';
+
+  @override
+  String get emailTemplates => 'قوالب البريد الإلكتروني';
+
+  @override
+  String get templates_plural => 'قوالب';
+
+  @override
+  String get senderNameAddress => 'اسم المرسل وعنوانه';
+
+  @override
+  String get platformAdmin => 'مشرف المنصة';
+
+  @override
+  String get projectsManagement => 'إدارة المشاريع';
+
+  @override
+  String get allStatus => 'جميع الحالات';
+
+  @override
+  String get cancelled => 'ملغي';
+
+  @override
+  String get projects => 'المشاريع';
+
+  @override
+  String get projects_plural => 'مشاريع';
+
+  @override
+  String get projectDeleted => 'تم حذف المشروع';
+
+  @override
+  String get deleteFailed => 'فشل الحذف';
+
+  @override
+  String get failedToLoadProjects => 'فشل في تحميل المشاريع';
+
+  @override
+  String get plansConfigured => 'باقة مهيأة';
+
+  @override
+  String get plansConfigured_plural => 'باقات مهيأة';
+
+  @override
+  String get newPlan => 'باقة جديدة';
+
+  @override
+  String get deletePlan => 'حذف الباقة';
+
+  @override
+  String deletePlanConfirmation(Object name) {
+    return 'هل أنت متأكد من حذف \"$name\"؟ لا يمكن التراجع عن هذا الإجراء.';
+  }
+
+  @override
+  String get planDeletedSuccess => 'تم حذف الباقة بنجاح';
+
+  @override
+  String get failedToDeletePlan => 'فشل حذف الباقة';
+
+  @override
+  String get failedToLoadPlans => 'فشل تحميل الباقات';
+
+  @override
+  String get noPlansConfigured => 'لا توجد باقات مهيأة';
+
+  @override
+  String get addFirstPlan => 'أضف الباقة الأولى';
+
+  @override
+  String get editPlan => 'تعديل الباقة';
+
+  @override
+  String get savePlan => 'حفظ الباقة';
+
+  @override
+  String get planName => 'اسم الباقة *';
+
+  @override
+  String get slugExample => 'المعرف (مثال: pro) *';
+
+  @override
+  String get billingPeriod => 'فترة الفوترة';
+
+  @override
+  String get price => 'السعر *';
+
+  @override
+  String get proposalLimitEmpty => 'حد العروض (فارغ = غير محدود)';
+
+  @override
+  String get projectLimitEmpty => 'حد المشاريع (فارغ = غير محدود)';
+
+  @override
+  String get trialDays => 'أيام التجربة';
+
+  @override
+  String get sortOrder => 'ترتيب الفرز';
+
+  @override
+  String get features => 'الميزات';
+
+  @override
+  String get customFeatures => 'ميزات مخصصة';
+
+  @override
+  String get addFeature => 'أضف ميزة...';
+
+  @override
+  String get planCreatedSuccess => 'تم إنشاء الباقة بنجاح';
+
+  @override
+  String get planUpdatedSuccess => 'تم تحديث الباقة بنجاح';
+
+  @override
+  String get failedToSavePlan => 'فشل حفظ الباقة';
+
+  @override
+  String get free => 'مجاني';
+
+  @override
+  String get trial => 'تجربة';
+
+  @override
+  String get proposals_plural => 'عروض';
+
+  @override
+  String get customBranding => 'علامة تجارية مخصصة';
+
+  @override
+  String get recommended => 'موصى به';
+
+  @override
+  String get prioritySupport => 'دعم';
+
+  @override
+  String get apiAccess => 'الوصول عبر API';
+
+  @override
+  String get disputesManagement => 'إدارة النزاعات';
+
+  @override
+  String get resolveDispute => 'حل النزاع';
+
+  @override
+  String get rejectDispute => 'رفض النزاع';
+
+  @override
+  String get rejectDisputeConfirmation =>
+      'هل أنت متأكد من رغبتك في رفض هذا النزاع؟';
+
+  @override
+  String get rejectionReason => 'سبب الرفض';
+
+  @override
+  String get disputeStatusOpen => 'مفتوح';
+
+  @override
+  String get disputeResolvedSuccess => 'تم حل النزاع بنجاح';
+
+  @override
+  String get failedToResolveDispute => 'فشل في حل النزاع';
+
+  @override
+  String get disputeRejectedSuccess => 'تم رفض النزاع بنجاح';
+
+  @override
+  String get failedToRejectDispute => 'فشل في رفض النزاع';
+
+  @override
+  String get initiatedBy => 'تم الإنشاء بواسطة';
+
+  @override
+  String get contract => 'عقد';
+
+  @override
+  String get fullRefundToClient => 'استرداد كامل للعميل';
+
+  @override
+  String get partialRefundToClient => 'استرداد جزئي للعميل';
+
+  @override
+  String get noRefund => 'بدون استرداد';
+
+  @override
+  String get resolution => 'القرار';
+
+  @override
+  String get adminNotesOptional => 'ملاحظات المشرف (اختياري)';
+
+  @override
+  String get noDisputesFound => 'لا توجد نزاعات';
+
+  @override
+  String get adminNotes => 'ملاحظات المشرف';
+
+  @override
+  String get resolve => 'حل';
+
+  @override
+  String get reject => 'رفض';
+
+  @override
+  String get newCoupon => 'كوبون جديد';
+
+  @override
+  String get deleteCoupon => 'حذف الكوبون';
+
+  @override
+  String deleteCouponConfirmation(Object code) {
+    return 'هل أنت متأكد من حذف الكوبون \"$code\"؟';
+  }
+
+  @override
+  String get couponDeleted => 'تم حذف الكوبون';
+
+  @override
+  String get failedToDeleteCoupon => 'فشل حذف الكوبون';
+
+  @override
+  String get failedToLoadCoupons => 'فشل تحميل الكوبونات';
+
+  @override
+  String get noCouponsYet => 'لا توجد كوبونات بعد';
+
+  @override
+  String get createFirstCoupon => 'إنشاء أول كوبون';
+
+  @override
+  String get editCoupon => 'تعديل الكوبون';
+
+  @override
+  String get saveCoupon => 'حفظ الكوبون';
+
+  @override
+  String get couponCodeRequired => 'رمز الكوبون *';
+
+  @override
+  String get discountType => 'نوع الخصم';
+
+  @override
+  String get percentage => 'نسبة مئوية';
+
+  @override
+  String get fixedAmount => 'مبلغ ثابت';
+
+  @override
+  String get appliesTo => 'ينطبق على';
+
+  @override
+  String get subscriptionOnly => 'الاشتراكات فقط';
+
+  @override
+  String get contractEscrow => 'ضمان العقد';
+
+  @override
+  String get both => 'كليهما';
+
+  @override
+  String get validFrom => 'صالح من';
+
+  @override
+  String get validUntil => 'صالح حتى';
+
+  @override
+  String get maxUsesEmpty => 'الحد الأقصى للاستخدام (فارغ = غير محدود)';
+
+  @override
+  String get applicablePlansOptional => 'الباقات المستهدفة (اختياري)';
+
+  @override
+  String get planSlugExample => 'معرف الباقة (مثال: pro)';
+
+  @override
+  String get used => 'مستخدم';
+
+  @override
+  String get percentageDiscount => 'خصم نسبة مئوية';
+
+  @override
+  String get fixedAmountOff => 'خصم مبلغ ثابت';
+
+  @override
+  String get inactive => 'غير نشط';
+
+  @override
+  String get subscriptions => 'الاشتراكات';
+
+  @override
+  String get couponCreatedSuccess => 'تم إنشاء الكوبون بنجاح';
+
+  @override
+  String get couponUpdatedSuccess => 'تم تحديث الكوبون بنجاح';
+
+  @override
+  String get failedToSaveCoupon => 'فشل حفظ الكوبون';
+
+  @override
+  String get contractsManagement => 'إدارة العقود';
+
+  @override
+  String get pendingClient => 'بانتظار العميل';
+
+  @override
+  String get pendingFreelancer => 'بانتظار المستقل';
+
+  @override
+  String get disputed => 'نزاع';
+
+  @override
+  String get failedToLoadContracts => 'فشل في تحميل العقود';
+
+  @override
+  String get resolutionNotes => 'ملاحظات الحل';
+
+  @override
+  String get resolutionHint => 'اكتب تفاصيل الحل هنا...';
+
+  @override
+  String get actionFailed => 'فشل الإجراء';
+
+  @override
+  String get noContractsFound => 'لا توجد عقود';
+
+  @override
+  String get errorLoadingCampaigns => 'خطأ في تحميل الحملات الإعلانية';
+
+  @override
+  String get adRevenueStats => 'إحصائيات إيرادات الإعلانات';
+
+  @override
+  String get totalAdRevenue => 'إجمالي إيرادات الإعلانات';
+
+  @override
+  String get totalAdSpend => 'إجمالي إنفاق الإعلانات';
+
+  @override
+  String get recentCampaigns => 'الحملات الأخيرة';
+
+  @override
+  String get noCampaignsYet => 'لا توجد حملات بعد';
+
+  @override
+  String get failedToChangeStatus => 'Failed to change status';
+
+  @override
+  String get failedToDelete => 'Failed to delete campaign';
+
+  @override
+  String get updateFailed => 'Update failed';
+
+  @override
+  String get deleteCampaign => 'Delete Campaign';
+
+  @override
+  String get editCampaign => 'Edit Campaign';
+
+  @override
+  String get campaignName => 'Campaign Name';
+
+  @override
+  String get totalBudget => 'Total Budget';
+
+  @override
+  String get dailyBudget => 'Daily Budget';
+
+  @override
+  String get costPerClick => 'Cost Per Click';
+
+  @override
+  String get costPerImpression => 'Cost Per Impression';
+
+  @override
+  String get campaignUpdated => 'Campaign updated successfully';
+
+  @override
+  String get campaignDeleted => 'Campaign deleted successfully';
+
+  @override
+  String get changeStatus => 'Change Status';
+
+  @override
+  String get adsManagement => 'Ads Management';
+
+  @override
+  String get campaigns => 'Campaigns';
+
+  @override
+  String get paused => 'Paused';
+
+  @override
+  String get pendingApproval => 'Pending Approval';
+
+  @override
+  String get searchCampaigns => 'Search campaigns...';
+
+  @override
+  String get activeCampaigns => 'Active';
+
+  @override
+  String get noCampaignsFound => 'No campaigns found';
+
+  @override
+  String get revenue => 'Revenue';
+
+  @override
+  String get totalRevenue => 'Total Revenue';
+
+  @override
+  String get platformCommission => 'Platform Commission';
+
+  @override
+  String get activeCampaignsCount => 'Active Campaigns';
+
+  @override
+  String get ctrAverage => 'Average CTR';
+
+  @override
+  String get keyPerformanceIndicators => 'Key Performance Indicators';
+
+  @override
+  String get dailyPerformanceTrends => 'Daily Performance Trends';
+
+  @override
+  String get performanceByAdType => 'Performance by Ad Type';
+
+  @override
+  String get topAdvertisers => 'Top Advertisers';
+
+  @override
+  String get additionalMetrics => 'Additional Metrics';
+
+  @override
+  String get avgCtr => 'Avg CTR';
+
+  @override
+  String get estRoi => 'Est. ROI';
+
+  @override
+  String get conversionRate => 'Conversion Rate';
+
+  @override
+  String get type => 'Type';
+
+  @override
+  String get impressions => 'Impressions';
+
+  @override
+  String get clicks => 'Clicks';
+
+  @override
+  String get ctr => 'CTR';
+
+  @override
+  String get spent => 'Spent';
+
+  @override
+  String get advertiser => 'Advertiser';
+
+  @override
+  String get campaignsCount => 'Campaigns';
+
+  @override
+  String get totalSpentCap => 'Total Spent';
+
+  @override
+  String get commission => 'Commission';
+
+  @override
+  String get edit => 'Edit';
+
+  @override
+  String get pause => 'Pause';
+
+  @override
+  String get resume => 'Resume';
+
+  @override
+  String get model => 'Model';
+
+  @override
+  String get campaign => 'Campaign';
+
+  @override
+  String get totalCampaigns => 'Total Campaigns';
+
+  @override
+  String get pausedCampaigns => 'Paused Campaigns';
+
+  @override
+  String get completedCampaigns => 'Completed Campaigns';
+
+  @override
+  String get draftCampaigns => 'Draft Campaigns';
+
+  @override
+  String get totalImpressions => 'Total Impressions';
+
+  @override
+  String get totalClicks => 'Total Clicks';
+
+  @override
+  String get clickThroughRate => 'Click-Through Rate';
+
+  @override
+  String get totalSpend => 'Total Spend';
+
+  @override
+  String get totalBudgetSum => 'Total Budget';
+
+  @override
+  String get campaignsWaitingForPayment => 'campaigns waiting for payment';
+
+  @override
+  String statusChangedTo(String status) {
+    return 'Status changed to $status';
+  }
+
+  @override
+  String deleteCampaignConfirmation(String campaignName) {
+    return 'Are you sure you want to delete \"$campaignName\"? This action cannot be undone.';
+  }
+
+  @override
+  String get errorLoadingUsers => 'خطأ في تحميل المستحدمين';
+
+  @override
+  String get adminDashboard => 'لوحة تحكم المشرف';
+
+  @override
+  String get dashboard => 'لوحة التحكم';
+
+  @override
+  String get totalUsers => 'إجمالي المستخدمين';
+
+  @override
+  String get freelancers => 'المستقلون';
+
+  @override
+  String get clients => 'العملاء';
+
+  @override
+  String get totalContracts => 'إجمالي العقود';
+
+  @override
+  String get adRevenue => 'إيرادات الإعلانات';
+
+  @override
+  String get pendingProjects => 'المشاريع المعلقة';
+
+  @override
+  String get activeContracts => 'العقود النشطة';
+
+  @override
+  String get completedContracts => 'العقود المكتملة';
+
+  @override
+  String get pendingDisputes => 'النزاعات المعلقة';
+
+  @override
+  String get admin => 'مشرف';
+
+  @override
+  String get superAdmin => 'مشرف عام';
+
+  @override
+  String get goodMorning => 'صباح الخير';
+
+  @override
+  String get goodAfternoon => 'مساء الخير';
+
+  @override
+  String get goodEvening => 'مساء الخير';
+
+  @override
+  String get heresWhatsHappening => 'إليك ما يحدث على منصتك اليوم';
+
+  @override
+  String get userGrowthAnalytics => 'تحليلات نمو المستخدمين';
+
+  @override
+  String get totalUsersLabel => 'إجمالي المستخدمين';
+
+  @override
+  String get userDistribution => 'توزيع المستخدمين';
+
+  @override
+  String balancedMarketplace(Object total) {
+    return 'سوق متوازن مع $total حساب إجمالي';
+  }
+
+  @override
+  String get operationalPerformance => 'الأداء التشغيلي';
+
+  @override
+  String get lastMonthUsers => 'مستخدمي الشهر الماضي';
+
+  @override
+  String get lastMonthRevenue => 'إيرادات الشهر الماضي';
+
+  @override
+  String get healthScore => 'درجة الصحة';
+
+  @override
+  String get loadingDashboard => 'جاري تحميل لوحة التحكم...';
+
+  @override
+  String get noChartDataAvailable => 'لا توجد بيانات رسم بياني متاحة';
+
+  @override
+  String get failedToLoadDashboardData => 'فشل في تحميل بيانات لوحة التحكم';
+
+  @override
+  String get comingSoon => 'قريباً';
+
+  @override
+  String get trends => 'الاتجاهات';
+
+  @override
+  String totalUsersCount(Object count) {
+    return '$count مستخدم';
+  }
+
+  @override
+  String totalUsersCount_plural(Object count) {
+    return '$count مستخدمين';
+  }
+
+  @override
+  String activeCount(Object count) {
+    return '$count نشط';
+  }
+
+  @override
+  String freelancersCount(Object count) {
+    return '$count مستقل';
+  }
+
+  @override
+  String freelancersCount_plural(Object count) {
+    return '$count freelancers';
+  }
+
+  @override
+  String clientsCount(Object count) {
+    return '$count عميل';
+  }
+
+  @override
+  String clientsCount_plural(Object count) {
+    return '$count clients';
+  }
 }

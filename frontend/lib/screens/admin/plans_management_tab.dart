@@ -1,14 +1,14 @@
 // screens/admin/plans_management_tab.dart
+
 import 'package:flutter/material.dart';
+import '../../l10n/app_localizations.dart';
 import '../../services/api_service.dart';
 import '../../models/subscription_plan_model.dart';
-
-const _kAccent = Color(0xFF5B58E2);
-const _kGreen = Color(0xFF14A800);
-const _kPageBg = Color(0xFFF0F2F8);
+import '../../theme/app_theme.dart' as AppTheme;
 
 class PlansManagementTab extends StatefulWidget {
   const PlansManagementTab({super.key});
+
   @override
   State<PlansManagementTab> createState() => _PlansManagementTabState();
 }
@@ -37,28 +37,29 @@ class _PlansManagementTabState extends State<PlansManagementTab> {
       });
     } catch (e) {
       setState(() {
-        _error = 'Failed to load plans: $e';
+        _error = '${AppLocalizations.of(context)?.failedToLoadPlans}: $e';
         _loading = false;
       });
     }
   }
 
   Future<void> _deletePlan(SubscriptionPlan plan) async {
+    final t = AppLocalizations.of(context);
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text(
-          'Delete Plan',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Text(
+          t?.deletePlan ?? 'Delete Plan',
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         content: Text(
-          'Are you sure you want to delete "${plan.name}"? This cannot be undone.',
+          t?.deletePlanConfirmation(plan.name) ?? 'Are you sure you want to delete "${plan.name}"? This cannot be undone.',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(t?.cancel ?? 'Cancel'),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
@@ -70,7 +71,7 @@ class _PlansManagementTabState extends State<PlansManagementTab> {
               ),
               elevation: 0,
             ),
-            child: const Text('Delete'),
+            child: Text(t?.delete ?? 'Delete'),
           ),
         ],
       ),
@@ -79,16 +80,18 @@ class _PlansManagementTabState extends State<PlansManagementTab> {
     final success = await ApiService.deletePlan(plan.id);
     if (success) {
       _loadPlans();
+      final t = AppLocalizations.of(context);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Plan deleted successfully'),
+        SnackBar(
+          content: Text(t?.planDeletedSuccess ?? 'Plan deleted successfully'),
           backgroundColor: Colors.black87,
         ),
       );
     } else {
+      final t = AppLocalizations.of(context);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Failed to delete plan'),
+        SnackBar(
+          content: Text(t?.failedToDeletePlan ?? 'Failed to delete plan'),
           backgroundColor: Colors.red,
         ),
       );
@@ -104,8 +107,18 @@ class _PlansManagementTabState extends State<PlansManagementTab> {
 
   @override
   Widget build(BuildContext context) {
-    if (_loading)
-      return const Center(child: CircularProgressIndicator(color: _kAccent));
+    final theme = Theme.of(context);
+    final t = AppLocalizations.of(context)!;
+    final isDark = theme.brightness == Brightness.dark;
+
+    if (_loading) {
+      return Center(
+        child: CircularProgressIndicator(
+          color: theme.colorScheme.primary,
+        ),
+      );
+    }
+
     if (_error != null) {
       return Center(
         child: Column(
@@ -125,14 +138,19 @@ class _PlansManagementTabState extends State<PlansManagementTab> {
               ),
             ),
             const SizedBox(height: 16),
-            Text(_error!, style: TextStyle(color: Colors.grey.shade600)),
+            Text(
+              _error!,
+              style: TextStyle(
+                color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+              ),
+            ),
             const SizedBox(height: 16),
             ElevatedButton.icon(
               onPressed: _loadPlans,
               icon: const Icon(Icons.refresh),
-              label: const Text('Retry'),
+              label: Text(t.retry),
               style: ElevatedButton.styleFrom(
-                backgroundColor: _kAccent,
+                backgroundColor: theme.colorScheme.primary,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
@@ -152,49 +170,46 @@ class _PlansManagementTabState extends State<PlansManagementTab> {
           child: Row(
             children: [
               Text(
-                '${_plans.length} plans configured',
-                style: const TextStyle(
+                '${_plans.length} ${_plans.length == 1 ? t.plansConfigured : t.plansConfigured_plural}',
+                style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
-                  color: Color(0xFF888888),
+                  color: isDark ? Colors.grey.shade500 : const Color(0xFF888888),
                 ),
               ),
               const Spacer(),
-              _buildAddButton('New Plan', () => _showPlanDialog()),
+              _buildAddButton(t.newPlan, () => _showPlanDialog(), isDark),
             ],
           ),
         ),
         Expanded(
           child: _plans.isEmpty
-              ? _buildEmpty()
+              ? _buildEmpty(t, isDark)
               : ListView.builder(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 4,
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                   itemCount: _plans.length,
-                  itemBuilder: (_, i) => _buildPlanCard(_plans[i]),
+                  itemBuilder: (_, i) => _buildPlanCard(_plans[i], t, isDark),
                 ),
         ),
       ],
     );
   }
 
-  Widget _buildAddButton(String label, VoidCallback onTap) {
+  Widget _buildAddButton(String label, VoidCallback onTap, bool isDark) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
           gradient: const LinearGradient(
-            colors: [_kGreen, Color(0xFF0A6E00)],
+            colors: [Color(0xFF14A800), Color(0xFF0A6E00)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: _kGreen.withOpacity(0.3),
+              color: const Color(0xFF14A800).withOpacity(0.3),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -219,23 +234,26 @@ class _PlansManagementTabState extends State<PlansManagementTab> {
     );
   }
 
-  Widget _buildPlanCard(SubscriptionPlan plan) {
+  Widget _buildPlanCard(SubscriptionPlan plan, AppLocalizations t, bool isDark) {
+    final theme = Theme.of(context);
     final isRecommended = plan.isRecommended;
     final isFree = plan.price == 0;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? AppTheme.AppColors.darkCard : Colors.white,
         borderRadius: BorderRadius.circular(20),
         border: isRecommended
-            ? Border.all(color: _kGreen, width: 2)
-            : Border.all(color: Colors.grey.shade100),
+            ? Border.all(color: const Color(0xFF14A800), width: 2)
+            : Border.all(
+                color: isDark ? AppTheme.AppColors.grayDark : Colors.grey.shade100,
+              ),
         boxShadow: [
           BoxShadow(
             color: isRecommended
-                ? _kGreen.withOpacity(0.12)
-                : Colors.black.withOpacity(0.03),
+                ? const Color(0xFF14A800).withOpacity(0.12)
+                : Colors.black.withOpacity(isDark ? 0.2 : 0.03),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -248,12 +266,14 @@ class _PlansManagementTabState extends State<PlansManagementTab> {
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
               color: isRecommended
-                  ? _kGreen.withOpacity(0.05)
-                  : Colors.grey.shade50,
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(18),
+                  ? const Color(0xFF14A800).withOpacity(0.05)
+                  : (isDark ? AppTheme.AppColors.darkSurface : Colors.grey.shade50),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
+              border: Border(
+                bottom: BorderSide(
+                  color: isDark ? AppTheme.AppColors.grayDark : Colors.grey.shade100,
+                ),
               ),
-              border: Border(bottom: BorderSide(color: Colors.grey.shade100)),
             ),
             child: Row(
               children: [
@@ -266,20 +286,20 @@ class _PlansManagementTabState extends State<PlansManagementTab> {
                             colors: [Color(0xFF888888), Color(0xFF555555)],
                           )
                         : isRecommended
-                        ? const LinearGradient(
-                            colors: [Color(0xFF14A800), Color(0xFF0A6E00)],
-                          )
-                        : const LinearGradient(
-                            colors: [Color(0xFF5B58E2), Color(0xFF3D35CC)],
-                          ),
+                            ? const LinearGradient(
+                                colors: [Color(0xFF14A800), Color(0xFF0A6E00)],
+                              )
+                            : const LinearGradient(
+                                colors: [Color(0xFF5B58E2), Color(0xFF3D35CC)],
+                              ),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
                     isFree
                         ? Icons.card_giftcard_rounded
                         : isRecommended
-                        ? Icons.stars_rounded
-                        : Icons.subscriptions_rounded,
+                            ? Icons.stars_rounded
+                            : Icons.subscriptions_rounded,
                     color: Colors.white,
                     size: 22,
                   ),
@@ -293,10 +313,10 @@ class _PlansManagementTabState extends State<PlansManagementTab> {
                         children: [
                           Text(
                             plan.name,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
-                              color: Color(0xFF1A1B3E),
+                              color: isDark ? Colors.white : const Color(0xFF1A1B3E),
                             ),
                           ),
                           if (isRecommended) ...[
@@ -308,16 +328,13 @@ class _PlansManagementTabState extends State<PlansManagementTab> {
                               ),
                               decoration: BoxDecoration(
                                 gradient: const LinearGradient(
-                                  colors: [
-                                    Color(0xFF14A800),
-                                    Color(0xFF0A6E00),
-                                  ],
+                                  colors: [Color(0xFF14A800), Color(0xFF0A6E00)],
                                 ),
                                 borderRadius: BorderRadius.circular(20),
                               ),
-                              child: const Text(
-                                'Recommended',
-                                style: TextStyle(
+                              child: Text(
+                                t.recommended,
+                                style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 9,
                                   fontWeight: FontWeight.bold,
@@ -330,12 +347,14 @@ class _PlansManagementTabState extends State<PlansManagementTab> {
                       const SizedBox(height: 2),
                       Text(
                         isFree
-                            ? 'Free'
-                            : '\$${plan.price.toStringAsFixed(2)} / ${plan.billingPeriod}',
+                            ? t.free
+                            : '${t.currency}${plan.price.toStringAsFixed(2)} / ${_getBillingPeriodText(plan.billingPeriod, t)}',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: isFree ? Colors.grey.shade500 : _kGreen,
+                          color: isFree
+                              ? (isDark ? Colors.grey.shade500 : Colors.grey.shade500)
+                              : const Color(0xFF14A800),
                         ),
                       ),
                     ],
@@ -345,31 +364,34 @@ class _PlansManagementTabState extends State<PlansManagementTab> {
                   children: [
                     _iconBtn(
                       Icons.edit_outlined,
-                      _kAccent,
+                      theme.colorScheme.primary,
                       () => _showPlanDialog(plan: plan),
+                      isDark,
                     ),
                     const SizedBox(width: 6),
                     _iconBtn(
                       Icons.delete_outline,
                       Colors.red.shade400,
                       () => _deletePlan(plan),
+                      isDark,
                     ),
                   ],
                 ),
               ],
             ),
           ),
-
           Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (plan.description != null &&
-                    plan.description!.isNotEmpty) ...[
+                if (plan.description != null && plan.description!.isNotEmpty) ...[
                   Text(
                     plan.description!,
-                    style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                    ),
                   ),
                   const SizedBox(height: 12),
                 ],
@@ -378,20 +400,22 @@ class _PlansManagementTabState extends State<PlansManagementTab> {
                   runSpacing: 6,
                   children: [
                     _featureChip(
-                      '${plan.proposalLimit == null ? '∞' : plan.proposalLimit} Proposals',
+                      '${plan.proposalLimit == null ? '∞' : plan.proposalLimit} ${t.proposals}',
+                      isDark,
                     ),
                     _featureChip(
-                      '${plan.activeProjectLimit == null ? '∞' : plan.activeProjectLimit} Projects',
+                      '${plan.activeProjectLimit == null ? '∞' : plan.activeProjectLimit} ${t.projects}',
+                      isDark,
                     ),
-                    _featureChip('${plan.trialDays}d Trial'),
+                    _featureChip('${plan.trialDays}d ${t.trial}', isDark),
                     if (plan.aiInsights)
-                      _featureChip('AI Insights', highlight: true),
+                      _featureChip(t.aiInsights, isDark, highlight: true),
                     if (plan.prioritySupport)
-                      _featureChip('Priority Support', highlight: true),
+                      _featureChip(t.prioritySupport, isDark, highlight: true),
                     if (plan.apiAccess)
-                      _featureChip('API Access', highlight: true),
+                      _featureChip(t.apiAccess, isDark, highlight: true),
                     if (plan.customBranding)
-                      _featureChip('Custom Brand', highlight: true),
+                      _featureChip(t.customBranding, isDark, highlight: true),
                   ],
                 ),
                 if (plan.features.isNotEmpty) ...[
@@ -399,28 +423,24 @@ class _PlansManagementTabState extends State<PlansManagementTab> {
                   Wrap(
                     spacing: 6,
                     runSpacing: 4,
-                    children: plan.features
-                        .map(
-                          (f) => Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.check_rounded,
-                                size: 12,
-                                color: _kGreen,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                f,
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: Colors.grey.shade700,
-                                ),
-                              ),
-                            ],
+                    children: plan.features.map((f) => Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.check_rounded,
+                          size: 12,
+                          color: const Color(0xFF14A800),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          f,
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: isDark ? Colors.grey.shade400 : Colors.grey.shade700,
                           ),
-                        )
-                        .toList(),
+                        ),
+                      ],
+                    )).toList(),
                   ),
                 ],
               ],
@@ -431,7 +451,18 @@ class _PlansManagementTabState extends State<PlansManagementTab> {
     );
   }
 
-  Widget _iconBtn(IconData icon, Color color, VoidCallback onTap) {
+  String _getBillingPeriodText(String period, AppLocalizations t) {
+    switch (period) {
+      case 'monthly':
+        return t.monthly;
+      case 'yearly':
+        return t.yearly;
+      default:
+        return period;
+    }
+  }
+
+  Widget _iconBtn(IconData icon, Color color, VoidCallback onTap, bool isDark) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -447,26 +478,35 @@ class _PlansManagementTabState extends State<PlansManagementTab> {
     );
   }
 
-  Widget _featureChip(String label, {bool highlight = false}) {
+  Widget _featureChip(String label, bool isDark, {bool highlight = false}) {
+    final theme = Theme.of(context);
+    final color = highlight ? theme.colorScheme.primary : null;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: highlight ? _kAccent.withOpacity(0.08) : Colors.grey.shade100,
+        color: highlight
+            ? theme.colorScheme.primary.withOpacity(0.08)
+            : (isDark ? AppTheme.AppColors.darkSurface : Colors.grey.shade100),
         borderRadius: BorderRadius.circular(8),
-        border: highlight ? Border.all(color: _kAccent.withOpacity(0.2)) : null,
+        border: highlight
+            ? Border.all(color: theme.colorScheme.primary.withOpacity(0.2))
+            : null,
       ),
       child: Text(
         label,
         style: TextStyle(
           fontSize: 11,
-          color: highlight ? _kAccent : Colors.grey.shade700,
+          color: highlight
+              ? theme.colorScheme.primary
+              : (isDark ? Colors.grey.shade400 : Colors.grey.shade700),
           fontWeight: highlight ? FontWeight.w600 : FontWeight.normal,
         ),
       ),
     );
   }
 
-  Widget _buildEmpty() {
+  Widget _buildEmpty(AppLocalizations t, bool isDark) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -474,34 +514,40 @@ class _PlansManagementTabState extends State<PlansManagementTab> {
           Container(
             width: 80,
             height: 80,
-            decoration: BoxDecoration(color: _kPageBg, shape: BoxShape.circle),
+            decoration: BoxDecoration(
+              color: isDark ? AppTheme.AppColors.darkCard : const Color(0xFFF0F2F8),
+              shape: BoxShape.circle,
+            ),
             child: Icon(
               Icons.subscriptions_outlined,
               size: 40,
-              color: Colors.grey.shade300,
+              color: isDark ? Colors.grey.shade600 : Colors.grey.shade300,
             ),
           ),
           const SizedBox(height: 16),
           Text(
-            'No plans configured',
+            t.noPlansConfigured,
             style: TextStyle(
               fontSize: 16,
-              color: Colors.grey.shade500,
               fontWeight: FontWeight.w500,
+              color: isDark ? Colors.grey.shade500 : Colors.grey.shade500,
             ),
           ),
           const SizedBox(height: 20),
-          _buildAddButton('Add First Plan', () => _showPlanDialog()),
+          _buildAddButton(t.addFirstPlan, () => _showPlanDialog(), isDark),
         ],
       ),
     );
   }
 }
 
+
 class PlanFormDialog extends StatefulWidget {
   final SubscriptionPlan? plan;
   final VoidCallback onSaved;
+
   const PlanFormDialog({super.key, this.plan, required this.onSaved});
+
   @override
   State<PlanFormDialog> createState() => _PlanFormDialogState();
 }
@@ -567,19 +613,20 @@ class _PlanFormDialogState extends State<PlanFormDialog> {
       _trialCtrl,
       _sortCtrl,
       _featureInputCtrl,
-    ])
+    ]) {
       c.dispose();
+    }
     super.dispose();
   }
 
   Future<void> _save() async {
+    final t = AppLocalizations.of(context)!;
     if (!_formKey.currentState!.validate()) return;
+
     final data = {
       'name': _nameCtrl.text.trim(),
       'slug': _slugCtrl.text.trim(),
-      'description': _descCtrl.text.trim().isEmpty
-          ? null
-          : _descCtrl.text.trim(),
+      'description': _descCtrl.text.trim().isEmpty ? null : _descCtrl.text.trim(),
       'price': double.parse(_priceCtrl.text),
       'billing_period': _billingPeriod,
       'features': _features,
@@ -626,20 +673,21 @@ class _PlanFormDialogState extends State<PlanFormDialog> {
     }
 
     if (result != null) {
+      if (!mounted) return;
       Navigator.pop(context);
       widget.onSaved();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Plan ${widget.plan != null ? 'updated' : 'created'} successfully',
+            widget.plan != null ? t.planUpdatedSuccess : t.planCreatedSuccess,
           ),
           backgroundColor: Colors.black87,
         ),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Failed to save plan'),
+        SnackBar(
+          content: Text(t.failedToSavePlan),
           backgroundColor: Colors.red,
         ),
       );
@@ -648,8 +696,13 @@ class _PlanFormDialogState extends State<PlanFormDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final t = AppLocalizations.of(context)!;
+    final isDark = theme.brightness == Brightness.dark;
+
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      backgroundColor: isDark ? AppTheme.AppColors.darkSurface : Colors.white,
       title: Row(
         children: [
           Container(
@@ -657,7 +710,7 @@ class _PlanFormDialogState extends State<PlanFormDialog> {
             height: 36,
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                colors: [Color(0xFF8B88FF), _kAccent],
+                colors: [Color(0xFF8B88FF), Color(0xFF5B58E2)],
               ),
               borderRadius: BorderRadius.circular(10),
             ),
@@ -669,7 +722,7 @@ class _PlanFormDialogState extends State<PlanFormDialog> {
           ),
           const SizedBox(width: 12),
           Text(
-            widget.plan != null ? 'Edit Plan' : 'New Plan',
+            widget.plan != null ? t.editPlan : t.newPlan,
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           ),
         ],
@@ -684,58 +737,64 @@ class _PlanFormDialogState extends State<PlanFormDialog> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _row([
-                  _field(_nameCtrl, 'Plan Name *', required: true),
-                  _field(_slugCtrl, 'Slug * (e.g. pro)', required: true),
+                  _field(_nameCtrl, t.planName, required: true, isDark: isDark),
+                  _field(_slugCtrl, t.slugExample, required: true, isDark: isDark),
                 ]),
-                _field(_descCtrl, 'Description', maxLines: 2),
+                _field(_descCtrl, t.description, maxLines: 2, isDark: isDark),
                 _row([
                   _field(
                     _priceCtrl,
-                    'Price *',
+                    t.price,
                     keyboardType: TextInputType.number,
                     required: true,
                     validator: (v) => double.tryParse(v ?? '') == null
-                        ? 'Invalid number'
+                        ? t.invalidNumber
                         : null,
+                    isDark: isDark,
                   ),
                   _dropdown(
-                    'Billing Period',
+                    t.billingPeriod,
                     _billingPeriod,
                     ['monthly', 'yearly'],
                     (v) => setState(() => _billingPeriod = v!),
+                    isDark,
                   ),
                 ]),
                 _row([
                   _field(
                     _proposalLimitCtrl,
-                    'Proposal Limit (empty=∞)',
+                    t.proposalLimitEmpty,
                     keyboardType: TextInputType.number,
+                    isDark: isDark,
                   ),
                   _field(
                     _activeProjectLimitCtrl,
-                    'Project Limit (empty=∞)',
+                    t.projectLimitEmpty,
                     keyboardType: TextInputType.number,
+                    isDark: isDark,
                   ),
                 ]),
                 _row([
                   _field(
                     _trialCtrl,
-                    'Trial Days',
+                    t.trialDays,
                     keyboardType: TextInputType.number,
+                    isDark: isDark,
                   ),
                   _field(
                     _sortCtrl,
-                    'Sort Order',
+                    t.sortOrder,
                     keyboardType: TextInputType.number,
+                    isDark: isDark,
                   ),
                 ]),
                 const SizedBox(height: 8),
-                const Text(
-                  'Features',
+                Text(
+                  t.features,
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF555555),
+                    color: isDark ? Colors.grey.shade400 : const Color(0xFF555555),
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -743,44 +802,46 @@ class _PlanFormDialogState extends State<PlanFormDialog> {
                   spacing: 6,
                   runSpacing: 4,
                   children: [
-                    ..._switches(),
+                    ..._switches(t,isDark),
                     _switchChip(
-                      'Recommended',
+                      t.recommended,
                       _isRecommended,
                       (v) => setState(() => _isRecommended = v),
+                      isDark,
                     ),
                   ],
                 ),
                 const SizedBox(height: 12),
-                const Text(
-                  'Custom Features',
+                Text(
+                  t.customFeatures,
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF555555),
+                    color: isDark ? Colors.grey.shade400 : const Color(0xFF555555),
                   ),
                 ),
                 const SizedBox(height: 4),
                 Row(
                   children: [
                     Expanded(
-                      child: _field(_featureInputCtrl, 'Add feature...'),
+                      child: _field(_featureInputCtrl, t.addFeature, isDark: isDark),
                     ),
                     const SizedBox(width: 8),
                     GestureDetector(
                       onTap: () {
                         final f = _featureInputCtrl.text.trim();
-                        if (f.isNotEmpty)
+                        if (f.isNotEmpty) {
                           setState(() {
                             _features.add(f);
                             _featureInputCtrl.clear();
                           });
+                        }
                       },
                       child: Container(
                         width: 40,
                         height: 40,
                         decoration: BoxDecoration(
-                          color: _kAccent,
+                          color: theme.colorScheme.primary,
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: const Icon(
@@ -796,23 +857,16 @@ class _PlanFormDialogState extends State<PlanFormDialog> {
                   Wrap(
                     spacing: 6,
                     runSpacing: 4,
-                    children: _features
-                        .asMap()
-                        .entries
-                        .map(
-                          (e) => Chip(
-                            label: Text(
-                              e.value,
-                              style: const TextStyle(fontSize: 11),
-                            ),
-                            onDeleted: () =>
-                                setState(() => _features.removeAt(e.key)),
-                            deleteIconColor: Colors.grey.shade500,
-                            materialTapTargetSize:
-                                MaterialTapTargetSize.shrinkWrap,
-                          ),
-                        )
-                        .toList(),
+                    children: _features.asMap().entries.map((e) => Chip(
+                      label: Text(
+                        e.value,
+                        style: const TextStyle(fontSize: 11),
+                      ),
+                      onDeleted: () => setState(() => _features.removeAt(e.key)),
+                      deleteIconColor: Colors.grey.shade500,
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      backgroundColor: isDark ? AppTheme.AppColors.darkSurface : null,
+                    )).toList(),
                   ),
               ],
             ),
@@ -822,12 +876,15 @@ class _PlanFormDialogState extends State<PlanFormDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: Text('Cancel', style: TextStyle(color: Colors.grey.shade600)),
+          child: Text(
+            t.cancel,
+            style: TextStyle(color: isDark ? Colors.grey.shade400 : Colors.grey.shade600),
+          ),
         ),
         ElevatedButton(
           onPressed: _save,
           style: ElevatedButton.styleFrom(
-            backgroundColor: _kAccent,
+            backgroundColor: theme.colorScheme.primary,
             foregroundColor: Colors.white,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
@@ -835,67 +892,52 @@ class _PlanFormDialogState extends State<PlanFormDialog> {
             elevation: 0,
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           ),
-          child: const Text(
-            'Save Plan',
-            style: TextStyle(fontWeight: FontWeight.w600),
+          child: Text(
+            t.savePlan,
+            style: const TextStyle(fontWeight: FontWeight.w600),
           ),
         ),
       ],
     );
   }
-
-  List<Widget> _switches() => [
-    _switchChip(
-      'AI Insights',
-      _aiInsights,
-      (v) => setState(() => _aiInsights = v),
-    ),
-    _switchChip(
-      'Priority Support',
-      _prioritySupport,
-      (v) => setState(() => _prioritySupport = v),
-    ),
-    _switchChip(
-      'API Access',
-      _apiAccess,
-      (v) => setState(() => _apiAccess = v),
-    ),
-    _switchChip(
-      'Custom Branding',
-      _customBranding,
-      (v) => setState(() => _customBranding = v),
-    ),
+  
+  List<Widget> _switches(AppLocalizations t, bool isDark) => [
+    _switchChip(t.aiInsights, _aiInsights, (v) => setState(() => _aiInsights = v), isDark),
+    _switchChip(t.prioritySupport, _prioritySupport, (v) => setState(() => _prioritySupport = v), isDark),
+    _switchChip(t.apiAccess, _apiAccess, (v) => setState(() => _apiAccess = v), isDark),
+    _switchChip(t.customBranding, _customBranding, (v) => setState(() => _customBranding = v), isDark),
   ];
 
-  Widget _switchChip(String label, bool value, ValueChanged<bool> onChange) {
+  Widget _switchChip(String label, bool value, ValueChanged<bool> onChange, bool isDark) {
+    final theme = Theme.of(context);
     return GestureDetector(
       onTap: () => onChange(!value),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
-          color: value ? _kAccent.withOpacity(0.1) : Colors.grey.shade100,
+          color: value
+              ? theme.colorScheme.primary.withOpacity(0.1)
+              : (isDark ? AppTheme.AppColors.darkSurface : Colors.grey.shade100),
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: value ? _kAccent.withOpacity(0.3) : Colors.transparent,
+            color: value ? theme.colorScheme.primary.withOpacity(0.3) : Colors.transparent,
           ),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
-              value
-                  ? Icons.check_box_rounded
-                  : Icons.check_box_outline_blank_rounded,
+              value ? Icons.check_box_rounded : Icons.check_box_outline_blank_rounded,
               size: 14,
-              color: value ? _kAccent : Colors.grey.shade400,
+              color: value ? theme.colorScheme.primary : Colors.grey.shade400,
             ),
             const SizedBox(width: 6),
             Text(
               label,
               style: TextStyle(
                 fontSize: 11,
-                color: value ? _kAccent : Colors.grey.shade600,
+                color: value ? theme.colorScheme.primary : (isDark ? Colors.grey.shade400 : Colors.grey.shade600),
                 fontWeight: value ? FontWeight.w600 : FontWeight.normal,
               ),
             ),
@@ -910,14 +952,10 @@ class _PlanFormDialogState extends State<PlanFormDialog> {
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
         children: children
-            .map(
-              (w) => Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: w,
-                ),
-              ),
-            )
+            .map((w) => Expanded(child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: w,
+            )))
             .toList(),
       ),
     );
@@ -930,6 +968,7 @@ class _PlanFormDialogState extends State<PlanFormDialog> {
     TextInputType? keyboardType,
     bool required = false,
     FormFieldValidator<String>? validator,
+    required bool isDark,
   }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
@@ -937,32 +976,33 @@ class _PlanFormDialogState extends State<PlanFormDialog> {
         controller: ctrl,
         maxLines: maxLines ?? 1,
         keyboardType: keyboardType,
-        validator:
-            validator ??
-            (required
-                ? (v) => v == null || v.isEmpty ? 'Required' : null
-                : null),
+        validator: validator ?? (required
+            ? (v) => v == null || v.isEmpty ? (AppLocalizations.of(context)?.requiredField ?? 'Required') : null
+            : null),
+        style: TextStyle(
+          color: isDark ? Colors.white : AppTheme.AppColors.lightTextPrimary,
+        ),
         decoration: InputDecoration(
           labelText: label,
-          labelStyle: const TextStyle(fontSize: 12),
+          labelStyle: TextStyle(
+            fontSize: 12,
+            color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+          ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide(color: Colors.grey.shade200),
+            borderSide: BorderSide(color: isDark ? AppTheme.AppColors.grayDark : Colors.grey.shade200),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide(color: Colors.grey.shade200),
+            borderSide: BorderSide(color: isDark ? AppTheme.AppColors.grayDark : Colors.grey.shade200),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: _kAccent),
+            borderSide: const BorderSide(color: Color(0xFF5B58E2)),
           ),
           filled: true,
-          fillColor: const Color(0xFFF8F8F8),
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 12,
-            vertical: 10,
-          ),
+          fillColor: isDark ? AppTheme.AppColors.darkSurface : const Color(0xFFF8F8F8),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           isDense: true,
         ),
       ),
@@ -974,45 +1014,48 @@ class _PlanFormDialogState extends State<PlanFormDialog> {
     String value,
     List<String> options,
     ValueChanged<String?> onChanged,
+    bool isDark,
   ) {
+    final t = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: DropdownButtonFormField<String>(
         value: value,
         decoration: InputDecoration(
           labelText: label,
-          labelStyle: const TextStyle(fontSize: 12),
+          labelStyle: TextStyle(
+            fontSize: 12,
+            color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+          ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide(color: Colors.grey.shade200),
+            borderSide: BorderSide(color: isDark ? AppTheme.AppColors.grayDark : Colors.grey.shade200),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide(color: Colors.grey.shade200),
+            borderSide: BorderSide(color: isDark ? AppTheme.AppColors.grayDark : Colors.grey.shade200),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: _kAccent),
+            borderSide: const BorderSide(color: Color(0xFF5B58E2)),
           ),
           filled: true,
-          fillColor: const Color(0xFFF8F8F8),
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 12,
-            vertical: 10,
-          ),
+          fillColor: isDark ? AppTheme.AppColors.darkSurface : const Color(0xFFF8F8F8),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           isDense: true,
         ),
-        items: options
-            .map(
-              (o) => DropdownMenuItem(
-                value: o,
-                child: Text(
-                  o[0].toUpperCase() + o.substring(1),
-                  style: const TextStyle(fontSize: 13),
-                ),
-              ),
-            )
-            .toList(),
+        dropdownColor: isDark ? AppTheme.AppColors.darkSurface : Colors.white,
+        style: TextStyle(
+          fontSize: 13,
+          color: isDark ? Colors.white : AppTheme.AppColors.lightTextPrimary,
+        ),
+        items: options.map((o) => DropdownMenuItem(
+          value: o,
+          child: Text(
+            o == 'monthly' ? t.monthly : t.yearly,
+            style: const TextStyle(fontSize: 13),
+          ),
+        )).toList(),
         onChanged: onChanged,
       ),
     );

@@ -1,15 +1,14 @@
 // screens/admin/subscription_stats_tab.dart
+
 import 'package:flutter/material.dart';
-import 'package:fl_chart/fl_chart.dart';
+import '../../l10n/app_localizations.dart';
 import '../../services/api_service.dart';
 import '../../models/subscription_stats_model.dart';
-
-const _kAccent = Color(0xFF5B58E2);
-const _kGreen = Color(0xFF14A800);
-const _kPageBg = Color(0xFFF0F2F8);
+import '../../theme/app_theme.dart' as AppTheme;
 
 class SubscriptionStatsTab extends StatefulWidget {
   const SubscriptionStatsTab({super.key});
+
   @override
   State<SubscriptionStatsTab> createState() => _SubscriptionStatsTabState();
 }
@@ -32,6 +31,8 @@ class _SubscriptionStatsTabState extends State<SubscriptionStatsTab> {
     });
     try {
       final response = await ApiService.getAdminSubscriptionStats();
+      if (!mounted) return;
+
       if (response['success'] == true && response['stats'] != null) {
         setState(() {
           _stats = SubscriptionStats.fromJson(response['stats']);
@@ -39,13 +40,13 @@ class _SubscriptionStatsTabState extends State<SubscriptionStatsTab> {
         });
       } else {
         setState(() {
-          _error = 'Failed to load statistics';
+          _error = AppLocalizations.of(context)?.failedToLoadStats ?? 'Failed to load statistics';
           _loading = false;
         });
       }
     } catch (e) {
       setState(() {
-        _error = 'Error: $e';
+        _error = '${AppLocalizations.of(context)?.error}: $e';
         _loading = false;
       });
     }
@@ -53,8 +54,18 @@ class _SubscriptionStatsTabState extends State<SubscriptionStatsTab> {
 
   @override
   Widget build(BuildContext context) {
-    if (_loading)
-      return const Center(child: CircularProgressIndicator(color: _kAccent));
+    final theme = Theme.of(context);
+    final t = AppLocalizations.of(context)!;
+    final isDark = theme.brightness == Brightness.dark;
+
+    if (_loading) {
+      return Center(
+        child: CircularProgressIndicator(
+          color: theme.colorScheme.primary,
+        ),
+      );
+    }
+
     if (_error != null || _stats == null) {
       return Center(
         child: Column(
@@ -75,16 +86,18 @@ class _SubscriptionStatsTabState extends State<SubscriptionStatsTab> {
             ),
             const SizedBox(height: 16),
             Text(
-              _error ?? 'No data available',
-              style: TextStyle(color: Colors.grey.shade600),
+              _error ?? t.noDataAvailable,
+              style: TextStyle(
+                color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+              ),
             ),
             const SizedBox(height: 16),
             ElevatedButton.icon(
               onPressed: _loadStats,
               icon: const Icon(Icons.refresh),
-              label: const Text('Retry'),
+              label: Text(t.retry),
               style: ElevatedButton.styleFrom(
-                backgroundColor: _kAccent,
+                backgroundColor: theme.colorScheme.primary,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
@@ -106,26 +119,30 @@ class _SubscriptionStatsTabState extends State<SubscriptionStatsTab> {
             children: [
               Expanded(
                 child: _buildRevenueCard(
-                  'Monthly Recurring',
+                  t.monthlyRecurring,
                   _stats!.monthlyRecurringRevenue,
                   Icons.trending_up_rounded,
-                  [_kAccent, const Color(0xFF3D35CC)],
+                  [theme.colorScheme.primary, const Color(0xFF3D35CC)],
+                  t,
+                  isDark,
                 ),
               ),
               const SizedBox(width: 14),
               Expanded(
                 child: _buildRevenueCard(
-                  'Yearly Recurring',
+                  t.yearlyRecurring,
                   _stats!.yearlyRecurringRevenue,
                   Icons.calendar_month_rounded,
-                  [_kGreen, const Color(0xFF0A6E00)],
+                  [const Color(0xFF14A800), const Color(0xFF0A6E00)],
+                  t,
+                  isDark,
                 ),
               ),
             ],
           ),
           const SizedBox(height: 14),
 
-          _sectionHeader('Subscription Metrics'),
+          _sectionHeader(t.subscriptionMetrics, t, isDark),
           const SizedBox(height: 12),
           LayoutBuilder(
             builder: (ctx, constraints) {
@@ -139,28 +156,32 @@ class _SubscriptionStatsTabState extends State<SubscriptionStatsTab> {
                 childAspectRatio: 1.3,
                 children: [
                   _metricCard(
-                    'Total',
+                    t.total,
                     _stats!.totalSubscriptions.toString(),
                     Icons.subscriptions_rounded,
                     [const Color(0xFF6C63FF), const Color(0xFF4B45C9)],
+                    isDark,
                   ),
                   _metricCard(
-                    'Active',
+                    t.active,
                     _stats!.activeSubscriptions.toString(),
                     Icons.check_circle_rounded,
                     [const Color(0xFF14A800), const Color(0xFF0A6E00)],
+                    isDark,
                   ),
                   _metricCard(
-                    'Trialing',
+                    t.trialing,
                     _stats!.trialingSubscriptions.toString(),
                     Icons.free_breakfast_rounded,
                     [const Color(0xFFF59E0B), const Color(0xFFB45309)],
+                    isDark,
                   ),
                   _metricCard(
-                    'Canceled',
+                    t.canceled,
                     _stats!.canceledSubscriptions.toString(),
                     Icons.cancel_rounded,
                     [const Color(0xFFEF4444), const Color(0xFFB91C1C)],
+                    isDark,
                   ),
                 ],
               );
@@ -173,28 +194,34 @@ class _SubscriptionStatsTabState extends State<SubscriptionStatsTab> {
             children: [
               Expanded(
                 child: _rateCard(
-                  'Upgrade Rate',
+                  t.upgradeRate,
                   _stats!.upgradeRate,
                   Icons.arrow_upward_rounded,
                   const Color(0xFF0EA5E9),
+                  t,
+                  isDark,
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: _rateCard(
-                  'Churn Rate',
+                  t.churnRate,
                   _stats!.churnRate,
                   Icons.arrow_downward_rounded,
                   const Color(0xFFEF4444),
+                  t,
+                  isDark,
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: _rateCard(
-                  'Expired',
+                  t.expired,
                   _stats!.expiredSubscriptions.toDouble(),
                   Icons.timer_off_rounded,
                   const Color(0xFF888888),
+                  t,
+                  isDark,
                   isCount: true,
                 ),
               ),
@@ -204,23 +231,23 @@ class _SubscriptionStatsTabState extends State<SubscriptionStatsTab> {
           const SizedBox(height: 20),
 
           if (_stats!.popularPlan != null) ...[
-            _sectionHeader('Most Popular Plan'),
+            _sectionHeader(t.mostPopularPlan, t, isDark),
             const SizedBox(height: 12),
-            _buildPopularPlanCard(),
+            _buildPopularPlanCard(t, isDark),
             const SizedBox(height: 20),
           ],
 
           if (_stats!.revenueByPlan.isNotEmpty) ...[
-            _sectionHeader('Revenue by Plan'),
+            _sectionHeader(t.revenueByPlan, t, isDark),
             const SizedBox(height: 12),
-            _buildRevenueByPlanCard(),
+            _buildRevenueByPlanCard(t, isDark),
           ],
         ],
       ),
     );
   }
 
-  Widget _sectionHeader(String title) {
+  Widget _sectionHeader(String title, AppLocalizations t, bool isDark) {
     return Row(
       children: [
         Container(
@@ -228,7 +255,7 @@ class _SubscriptionStatsTabState extends State<SubscriptionStatsTab> {
           height: 18,
           decoration: BoxDecoration(
             gradient: const LinearGradient(
-              colors: [Color(0xFF8B88FF), _kAccent],
+              colors: [Color(0xFF8B88FF), Color(0xFF5B58E2)],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
             ),
@@ -238,10 +265,10 @@ class _SubscriptionStatsTabState extends State<SubscriptionStatsTab> {
         const SizedBox(width: 10),
         Text(
           title,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF1A1B3E),
+            color: isDark ? Colors.white : const Color(0xFF1A1B3E),
           ),
         ),
       ],
@@ -253,6 +280,8 @@ class _SubscriptionStatsTabState extends State<SubscriptionStatsTab> {
     double amount,
     IconData icon,
     List<Color> gradient,
+    AppLocalizations t,
+    bool isDark,
   ) {
     return Container(
       padding: const EdgeInsets.all(20),
@@ -286,7 +315,7 @@ class _SubscriptionStatsTabState extends State<SubscriptionStatsTab> {
               ),
               const Spacer(),
               Text(
-                'MRR',
+                '${t.mrr}',
                 style: TextStyle(
                   color: Colors.white.withOpacity(0.7),
                   fontSize: 10,
@@ -322,16 +351,22 @@ class _SubscriptionStatsTabState extends State<SubscriptionStatsTab> {
     String value,
     IconData icon,
     List<Color> gradient,
+    bool isDark,
   ) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? AppTheme.AppColors.darkCard : Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 8),
+          BoxShadow(
+            color: Colors.black.withOpacity(isDark ? 0.2 : 0.03),
+            blurRadius: 8,
+          ),
         ],
-        border: Border.all(color: Colors.grey.shade100),
+        border: Border.all(
+          color: isDark ? AppTheme.AppColors.grayDark : Colors.grey.shade100,
+        ),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -352,16 +387,19 @@ class _SubscriptionStatsTabState extends State<SubscriptionStatsTab> {
           const SizedBox(height: 10),
           Text(
             value,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF1A1B3E),
+              color: isDark ? Colors.white : const Color(0xFF1A1B3E),
             ),
           ),
           const SizedBox(height: 4),
           Text(
             title,
-            style: TextStyle(fontSize: 11, color: Colors.grey.shade500),
+            style: TextStyle(
+              fontSize: 11,
+              color: isDark ? Colors.grey.shade500 : Colors.grey.shade500,
+            ),
             textAlign: TextAlign.center,
           ),
         ],
@@ -373,17 +411,22 @@ class _SubscriptionStatsTabState extends State<SubscriptionStatsTab> {
     String title,
     double value,
     IconData icon,
-    Color color, {
+    Color color,
+    AppLocalizations t,
+    bool isDark, {
     bool isCount = false,
   }) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? AppTheme.AppColors.darkCard : Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: color.withOpacity(0.15)),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 8),
+          BoxShadow(
+            color: Colors.black.withOpacity(isDark ? 0.2 : 0.03),
+            blurRadius: 8,
+          ),
         ],
       ),
       child: Column(
@@ -399,7 +442,9 @@ class _SubscriptionStatsTabState extends State<SubscriptionStatsTab> {
           ),
           const SizedBox(height: 10),
           Text(
-            isCount ? value.toInt().toString() : '${value.toStringAsFixed(1)}%',
+            isCount
+                ? value.toInt().toString()
+                : '${value.toStringAsFixed(1)}%',
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -409,19 +454,22 @@ class _SubscriptionStatsTabState extends State<SubscriptionStatsTab> {
           const SizedBox(height: 2),
           Text(
             title,
-            style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+            style: TextStyle(
+              fontSize: 11,
+              color: isDark ? Colors.grey.shade500 : Colors.grey.shade600,
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildPopularPlanCard() {
+  Widget _buildPopularPlanCard(AppLocalizations t, bool isDark) {
     final plan = _stats!.popularPlan!;
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? AppTheme.AppColors.darkCard : Colors.white,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: const Color(0xFFF59E0B).withOpacity(0.3),
@@ -459,17 +507,20 @@ class _SubscriptionStatsTabState extends State<SubscriptionStatsTab> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  plan['name']?.toString() ?? 'Unknown',
-                  style: const TextStyle(
+                  plan['name']?.toString() ?? t.unknown,
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF1A1B3E),
+                    color: isDark ? Colors.white : const Color(0xFF1A1B3E),
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Most subscribed plan',
-                  style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+                  t.mostSubscribedPlan,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: isDark ? Colors.grey.shade500 : Colors.grey.shade500,
+                  ),
                 ),
               ],
             ),
@@ -489,7 +540,7 @@ class _SubscriptionStatsTabState extends State<SubscriptionStatsTab> {
               ],
             ),
             child: Text(
-              '${plan['count']} subs',
+              '${plan['count']} ${t.subs}',
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 12,
@@ -502,7 +553,7 @@ class _SubscriptionStatsTabState extends State<SubscriptionStatsTab> {
     );
   }
 
-  Widget _buildRevenueByPlanCard() {
+  Widget _buildRevenueByPlanCard(AppLocalizations t, bool isDark) {
     final entries = _stats!.revenueByPlan.entries.toList();
     final total = entries.fold<double>(0, (sum, e) => sum + e.value);
 
@@ -518,12 +569,17 @@ class _SubscriptionStatsTabState extends State<SubscriptionStatsTab> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? AppTheme.AppColors.darkCard : Colors.white,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 12),
+          BoxShadow(
+            color: Colors.black.withOpacity(isDark ? 0.2 : 0.03),
+            blurRadius: 12,
+          ),
         ],
-        border: Border.all(color: Colors.grey.shade100),
+        border: Border.all(
+          color: isDark ? AppTheme.AppColors.grayDark : Colors.grey.shade100,
+        ),
       ),
       child: Column(
         children: entries.asMap().entries.map((e) {
@@ -549,10 +605,10 @@ class _SubscriptionStatsTabState extends State<SubscriptionStatsTab> {
                     const SizedBox(width: 8),
                     Text(
                       entry.key,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
-                        color: Color(0xFF1A1B3E),
+                        color: isDark ? Colors.white : const Color(0xFF1A1B3E),
                       ),
                     ),
                     const Spacer(),
@@ -572,7 +628,7 @@ class _SubscriptionStatsTabState extends State<SubscriptionStatsTab> {
                         '${(pct * 100).toStringAsFixed(0)}%',
                         style: TextStyle(
                           fontSize: 11,
-                          color: Colors.grey.shade500,
+                          color: isDark ? Colors.grey.shade500 : Colors.grey.shade500,
                         ),
                       ),
                     ),
@@ -583,7 +639,7 @@ class _SubscriptionStatsTabState extends State<SubscriptionStatsTab> {
                   borderRadius: BorderRadius.circular(6),
                   child: LinearProgressIndicator(
                     value: pct,
-                    backgroundColor: Colors.grey.shade100,
+                    backgroundColor: isDark ? AppTheme.AppColors.grayDark : Colors.grey.shade100,
                     valueColor: AlwaysStoppedAnimation(color),
                     minHeight: 6,
                   ),

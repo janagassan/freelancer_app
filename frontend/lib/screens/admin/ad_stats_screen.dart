@@ -1,6 +1,10 @@
+// screens/ads/ad_stats_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import '../../l10n/app_localizations.dart';
 import '../../services/api_service.dart';
+import '../../theme/app_theme.dart' as AppTheme;
 
 class AdStatsScreen extends StatefulWidget {
   const AdStatsScreen({super.key});
@@ -25,45 +29,63 @@ class _AdStatsScreenState extends State<AdStatsScreen> {
     try {
       final revenueStats = await ApiService.getAdRevenueStats();
       final campaigns = await ApiService.getMyAdCampaigns();
+      if (!mounted) return;
       setState(() {
         _stats = revenueStats['stats'] ?? {};
         _campaigns = campaigns['campaigns'] ?? [];
         _loading = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() => _loading = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final t = AppLocalizations.of(context)!;
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F6F8),
+      backgroundColor: isDark ? AppTheme.AppColors.darkBackground : const Color(0xFFF5F6F8),
       appBar: AppBar(
-        title: const Text('Ad Revenue Stats'),
-        backgroundColor: Colors.white,
+        title: Text(
+          t.adRevenueStats,
+          style: const TextStyle(fontWeight: FontWeight.w600),
+        ),
+        centerTitle: true,
+        backgroundColor: isDark ? AppTheme.AppColors.darkSurface : Colors.white,
         elevation: 0,
-        foregroundColor: Colors.black,
+        foregroundColor: isDark ? Colors.white : Colors.black,
         actions: [
-          IconButton(icon: const Icon(Icons.refresh), onPressed: _loadStats),
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: _loadStats,
+            tooltip: t.refresh,
+          ),
         ],
       ),
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(
+              child: CircularProgressIndicator(
+                color: theme.colorScheme.primary,
+              ),
+            )
           : SingleChildScrollView(
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
-                  _buildStatsGrid(),
+                  _buildStatsGrid(t, isDark),
                   const SizedBox(height: 16),
-                  _buildCampaignsList(),
+                  _buildCampaignsList(t, isDark),
                 ],
               ),
             ),
     );
   }
 
-  Widget _buildStatsGrid() {
+  Widget _buildStatsGrid(AppLocalizations t, bool isDark) {
     final totalRevenue = (_stats['total_ad_revenue'] ?? 0).toDouble();
     final activeCampaigns = _stats['active_campaigns'] ?? 0;
     final totalSpend = (_stats['total_campaign_spend'] ?? 0).toDouble();
@@ -78,41 +100,50 @@ class _AdStatsScreenState extends State<AdStatsScreen> {
       childAspectRatio: 1.5,
       children: [
         _statCard(
-          'Total Ad Revenue',
+          t.totalAdRevenue,
           '\$${totalRevenue.toStringAsFixed(2)}',
           Icons.monetization_on,
-          Colors.green,
+          const Color(0xFF14A800),
+          isDark,
         ),
         _statCard(
-          'Active Campaigns',
+          t.activeCampaigns,
           activeCampaigns.toString(),
           Icons.campaign,
           Colors.blue,
+          isDark,
         ),
         _statCard(
-          'Total Ad Spend',
+          t.totalAdSpend,
           '\$${totalSpend.toStringAsFixed(2)}',
           Icons.attach_money,
-          Colors.orange,
+          const Color(0xFFF59E0B),
+          isDark,
         ),
         _statCard(
-          'Platform Commission',
+          t.platformCommission,
           '${commissionRate.toStringAsFixed(0)}%',
           Icons.percent,
           Colors.purple,
+          isDark,
         ),
       ],
     );
   }
 
-  Widget _statCard(String title, String value, IconData icon, Color color) {
+  Widget _statCard(String title, String value, IconData icon, Color color, bool isDark) {
+    final theme = Theme.of(context);
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? AppTheme.AppColors.darkCard : Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8),
+          BoxShadow(
+            color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
+            blurRadius: 8,
+          ),
         ],
       ),
       child: Column(
@@ -122,70 +153,112 @@ class _AdStatsScreenState extends State<AdStatsScreen> {
           const Spacer(),
           Text(
             value,
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: isDark ? Colors.white : AppTheme.AppColors.lightTextPrimary,
+            ),
           ),
           const SizedBox(height: 4),
           Text(
             title,
-            style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+            style: TextStyle(
+              fontSize: 12,
+              color: isDark ? Colors.grey.shade500 : Colors.grey.shade600,
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildCampaignsList() {
+  Widget _buildCampaignsList(AppLocalizations t, bool isDark) {
+    final theme = Theme.of(context);
+
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? AppTheme.AppColors.darkCard : Colors.white,
         borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(isDark ? 0.1 : 0.03),
+            blurRadius: 8,
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
-            padding: EdgeInsets.all(16),
+          Padding(
+            padding: const EdgeInsets.all(16),
             child: Text(
-              'Recent Campaigns',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              t.recentCampaigns,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: isDark ? Colors.white : AppTheme.AppColors.lightTextPrimary,
+              ),
             ),
           ),
-          const Divider(),
+          Divider(
+            height: 1,
+            color: isDark ? AppTheme.AppColors.grayDark : Colors.grey.shade200,
+          ),
           if (_campaigns.isEmpty)
-            const Padding(
-              padding: EdgeInsets.all(32),
-              child: Center(child: Text('No campaigns yet')),
+            Padding(
+              padding: const EdgeInsets.all(32),
+              child: Center(
+                child: Text(
+                  t.noCampaignsYet,
+                  style: TextStyle(
+                    color: isDark ? Colors.grey.shade500 : Colors.grey.shade600,
+                  ),
+                ),
+              ),
             )
           else
             ListView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: _campaigns.length > 10 ? 10 : _campaigns.length,
-              itemBuilder: (_, i) => _campaignRow(_campaigns[i]),
+              itemBuilder: (_, i) => _campaignRow(_campaigns[i], t, isDark),
             ),
         ],
       ),
     );
   }
 
-  Widget _campaignRow(dynamic campaign) {
+  Widget _campaignRow(dynamic campaign, AppLocalizations t, bool isDark) {
     final revenue = (campaign['spent_amount'] ?? 0) * 0.2;
+    final status = campaign['status'] ?? 'draft';
+    final isActive = status == 'active';
+
     return ListTile(
       leading: CircleAvatar(
-        backgroundColor: campaign['status'] == 'active'
-            ? Colors.green
-            : Colors.grey,
+        backgroundColor: isActive
+            ? const Color(0xFF14A800)
+            : (isDark ? AppTheme.AppColors.grayDark : Colors.grey),
+        radius: 18,
         child: Icon(Icons.campaign, size: 16, color: Colors.white),
       ),
-      title: Text(campaign['name']),
+      title: Text(
+        campaign['name'] ?? t.untitled,
+        style: TextStyle(
+          color: isDark ? Colors.white : AppTheme.AppColors.lightTextPrimary,
+        ),
+      ),
       subtitle: Text(
-        '${campaign['clicks'] ?? 0} clicks · ${campaign['impressions'] ?? 0} impressions',
+        '${campaign['clicks'] ?? 0} ${t.clicks} · ${campaign['impressions'] ?? 0} ${t.impressions}',
+        style: TextStyle(
+          color: isDark ? Colors.grey.shade500 : Colors.grey.shade600,
+          fontSize: 12,
+        ),
       ),
       trailing: Text(
         '\$${revenue.toStringAsFixed(2)}',
-        style: const TextStyle(
+        style: TextStyle(
           fontWeight: FontWeight.bold,
-          color: Colors.green,
+          color: const Color(0xFF14A800),
         ),
       ),
     );

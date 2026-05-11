@@ -57,7 +57,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get activeProjects => 'Active Projects';
 
   @override
-  String get proposals => 'Proposals';
+  String get proposals => 'proposal';
 
   @override
   String get rating => 'Rating';
@@ -138,7 +138,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get language => 'Language';
 
   @override
-  String get currency => 'Currency';
+  String get currency => 'SAR';
 
   @override
   String get support => 'Support';
@@ -1290,7 +1290,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pool => 'Pool';
 
   @override
-  String get coupon => 'Coupon';
+  String get coupon => 'coupon';
 
   @override
   String get dollar => '\$';
@@ -1489,7 +1489,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get paymentStatus => 'Payment status';
 
   @override
-  String get pendingPayments => 'Pending payments';
+  String get pendingPayments => 'Pending Payments';
 
   @override
   String get applyBeforePaying => 'Apply before paying';
@@ -2663,7 +2663,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get postNewProject => 'Post New Project';
 
   @override
-  String get templates => 'Templates';
+  String get templates => 'template';
 
   @override
   String get projectDetailsHint =>
@@ -2827,7 +2827,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get projectsCompleted => 'Projects Completed';
 
   @override
-  String get totalProjects => 'total projects';
+  String get totalProjects => 'Total Projects';
 
   @override
   String get inTheField => 'in the field';
@@ -3308,135 +3308,1114 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get createCampaign => 'Create Campaign';
 
-  // Dispute Screen
-String get createDispute => 'Create Dispute';
-String get disputeInstruction => 'Please provide clear details about the dispute';
-String get disputeTitleHint => 'Dispute title';
-String get disputeDescriptionHint => 'Please explain the issue in detail';
-String get evidenceAttachments => 'Evidence Attachments';
-String get uploadEvidenceHint => 'Upload images, documents or screenshots (coming soon)';
-String get importantNotes => 'Important Notes';
-String get submitDispute => 'Submit Dispute';
-String get disputeSubmittedSuccess => 'Dispute submitted successfully. It will be reviewed by admin.';
+  @override
+  String get createDispute => 'Create Dispute';
 
-// Validation
-String get titleRequired => 'Please enter dispute title';
-String get titleTooShort => 'Title must be at least 5 characters';
-String get descriptionRequired => 'Please enter dispute description';
-String get descriptionTooShort => 'Description must be at least 20 characters';
+  @override
+  String get disputeInstruction =>
+      'Please provide clear details about the dispute';
 
-// Notes
-String get disputeNote1 => 'Dispute will be reviewed by admin team';
-String get disputeNote2 => 'Please provide clear and reliable evidence';
-String get disputeNote3 => 'Dispute resolution may take several days';
-String get disputeNote4 => 'All parties will be notified of final decision';
+  @override
+  String get disputeTitleHint => 'Dispute title';
 
-// Dispute Details Screen
-@override
-String get disputeDetails => 'Dispute Details';
+  @override
+  String get disputeDescriptionHint => 'Please explain the issue in detail';
 
-@override
-String get disputeInfo => 'Dispute Information';
+  @override
+  String get evidenceAttachments => 'Evidence Attachments';
 
-@override
-String get disputeId => 'Dispute ID';
+  @override
+  String get uploadEvidenceHint =>
+      'Upload images, documents or screenshots (coming soon)';
 
-@override
-String get disputeTitle => 'Title';
+  @override
+  String get importantNotes => 'Important Notes';
 
-@override
-String get disputeDescription => 'Description';
+  @override
+  String get submitDispute => 'Submit Dispute';
 
-@override
-String get createdAt => 'Created At';
+  @override
+  String get disputeSubmittedSuccess =>
+      'Dispute submitted successfully. It will be reviewed by admin.';
 
-@override
-String get lastUpdated => 'Last Updated';
+  @override
+  String get titleRequired => 'Please enter dispute title';
 
-@override
-String get disputeNotFound => 'Dispute not found';
+  @override
+  String get titleTooShort => 'Title must be at least 5 characters';
 
+  @override
+  String get descriptionRequired => 'Please enter dispute description';
 
+  @override
+  String get descriptionTooShort =>
+      'Description must be at least 20 characters';
 
-@override
-String get errorLoadingDetails => 'Error loading details';
+  @override
+  String get connectionError => 'Connection error. Please try again';
 
-// Contract Info
-@override
-String get contractInfo => 'Contract Information';
+  @override
+  String get disputeNote1 => 'Dispute will be reviewed by admin team';
 
-@override
-String get contractId => 'Contract ID';
+  @override
+  String get disputeNote2 => 'Please provide clear and reliable evidence';
 
+  @override
+  String get disputeNote3 => 'Dispute resolution may take several days';
 
+  @override
+  String get disputeNote4 => 'All parties will be notified of final decision';
 
-@override
-String get viewContractDetails => 'View Contract Details';
+  @override
+  String get disputeDetails => 'Dispute Details';
 
-@override
-String get notSpecified => 'Not specified';
+  @override
+  String get disputeInfo => 'Dispute Information';
 
-// Evidence
-@override
-String get evidenceFiles => 'Evidence Files';
+  @override
+  String get disputeId => 'Dispute ID';
 
-// Status
-@override
-String get disputeStatusPending => 'Pending';
+  @override
+  String get disputeTitle => 'Title';
 
-@override
-String get disputeStatusUnderReview => 'Under Review';
+  @override
+  String get disputeDescription => 'Description';
 
-@override
-String get disputeStatusResolved => 'Resolved';
+  @override
+  String get createdAt => 'Created At';
 
-@override
-String get disputeStatusRejected => 'Rejected';
+  @override
+  String get lastUpdated => 'Last Updated';
 
-@override
-String get disputeStatusPendingDesc => 'Dispute is pending admin review';
+  @override
+  String get disputeNotFound => 'Dispute not found';
 
-@override
-String get disputeStatusUnderReviewDesc => 'Dispute is under review and investigation';
+  @override
+  String get errorLoadingDetails => 'Error loading details';
 
-@override
-String get disputeStatusResolvedDesc => 'Dispute has been resolved with appropriate decision';
+  @override
+  String get contractInfo => 'Contract Information';
 
-@override
-String get disputeStatusRejectedDesc => 'Dispute has been rejected after review';
+  @override
+  String get contractId => 'Contract ID';
 
-// Resolution
-@override
-String get disputeResolved => 'Dispute Resolved';
+  @override
+  String get viewContractDetails => 'View Contract Details';
 
-@override
-String get disputeRejected => 'Dispute Rejected';
+  @override
+  String get notSpecified => 'Not specified';
 
-@override
-String get refundAmount => 'Refund Amount';
+  @override
+  String get evidenceFiles => 'Evidence Files';
 
+  @override
+  String get disputeStatusPending => 'Pending';
 
+  @override
+  String get disputeStatusUnderReview => 'Under Review';
 
-@override
-String get connectionError => 'Connection error. Please try again';
+  @override
+  String get disputeStatusResolved => 'Resolved';
 
-@override
-String get myDisputes => 'My Disputes';
+  @override
+  String get disputeStatusRejected => 'Rejected';
 
-@override
-String get filterByStatus => 'Filter by Status';
+  @override
+  String get disputeStatusPendingDesc => 'Dispute is pending admin review';
 
-@override
-String get allDisputes => 'All Disputes';
+  @override
+  String get disputeStatusUnderReviewDesc =>
+      'Dispute is under review and investigation';
 
-@override
-String get noDisputes => 'No disputes found';
+  @override
+  String get disputeStatusResolvedDesc =>
+      'Dispute has been resolved with appropriate decision';
 
-@override
-String get noDisputesDesc => 'You haven\'t raised any disputes yet';
+  @override
+  String get disputeStatusRejectedDesc =>
+      'Dispute has been rejected after review';
 
-@override
-String get errorLoadingDisputes => 'Error loading disputes';
+  @override
+  String get disputeResolved => 'Dispute resolved';
 
+  @override
+  String get disputeRejected => 'Dispute Rejected';
 
+  @override
+  String get refundAmount => 'Refund Amount';
+
+  @override
+  String get myDisputes => 'My Disputes';
+
+  @override
+  String get filterByStatus => 'Filter by status';
+
+  @override
+  String get allDisputes => 'All Disputes';
+
+  @override
+  String get noDisputes => 'No disputes found';
+
+  @override
+  String get noDisputesDesc => 'You haven\'t raised any disputes yet';
+
+  @override
+  String get errorLoadingDisputes => 'Error loading disputes';
+
+  @override
+  String get users => 'Users';
+
+  @override
+  String get addUser => 'Add User';
+
+  @override
+  String get searchByNameOrEmail => 'Search by name or email...';
+
+  @override
+  String get role => 'Role';
+
+  @override
+  String get status => 'Status';
+
+  @override
+  String get allUsers => 'All';
+
+  @override
+  String get suspended => 'Suspended';
+
+  @override
+  String get usersCount => 'user';
+
+  @override
+  String get usersCount_plural => 'users';
+
+  @override
+  String get noUsersFound => 'No users found';
+
+  @override
+  String get tryAdjustingFilters => 'Try adjusting your search or filter';
+
+  @override
+  String get createNewUser => 'Create new user';
+
+  @override
+  String get name => 'Name';
+
+  @override
+  String get email => 'Email';
+
+  @override
+  String get phoneOptional => 'Phone (optional)';
+
+  @override
+  String get nationalIdOptional => 'National ID (optional)';
+
+  @override
+  String get clientTypeOptional => 'Client Type (optional)';
+
+  @override
+  String get companyNameOptional => 'Company Name (optional)';
+
+  @override
+  String get commercialRegisterOptional =>
+      'Commercial Register Number (optional)';
+
+  @override
+  String get taxNumberOptional => 'Tax Number (optional)';
+
+  @override
+  String get hourlyRateOptional => 'Hourly Rate (optional)';
+
+  @override
+  String get skillsOptional => 'Skills (optional, comma separated)';
+
+  @override
+  String get nameRequired => 'Name is required';
+
+  @override
+  String get emailRequired => 'Email is required';
+
+  @override
+  String get enterValidEmail => 'Enter a valid email';
+
+  @override
+  String get userCreated => '✅ User created. Password sent by email.';
+
+  @override
+  String get failedToCreateUser => 'Failed to create user';
+
+  @override
+  String get userActivated => '✅ User activated successfully';
+
+  @override
+  String get userSuspended => '✅ User suspended successfully';
+
+  @override
+  String get userVerified => '✅ User verified successfully';
+
+  @override
+  String get verificationRemoved => '✅ Verification removed';
+
+  @override
+  String get accountEmailResent => '✅ Account email resent successfully';
+
+  @override
+  String get failedToResendEmail => 'Failed to resend email';
+
+  @override
+  String get resendAccountEmail => 'Resend Account Email';
+
+  @override
+  String get verifyUser => 'Verify User';
+
+  @override
+  String get removeVerification => 'Remove Verification';
+
+  @override
+  String get suspendUser => 'Suspend User';
+
+  @override
+  String get activateUser => 'Activate User';
+
+  @override
+  String get userDetails => 'User Details';
+
+  @override
+  String get page => 'Page';
+
+  @override
+  String get ofWord => 'of';
+
+  @override
+  String get monthlyRecurring => 'Monthly Recurring Revenue';
+
+  @override
+  String get yearlyRecurring => 'Yearly Recurring Revenue';
+
+  @override
+  String get subscriptionMetrics => 'Subscription Metrics';
+
+  @override
+  String get trialing => 'Trialing';
+
+  @override
+  String get canceled => 'Canceled';
+
+  @override
+  String get upgradeRate => 'Upgrade Rate';
+
+  @override
+  String get churnRate => 'Churn Rate';
+
+  @override
+  String get mostPopularPlan => 'Most Popular Plan';
+
+  @override
+  String get revenueByPlan => 'Revenue by Plan';
+
+  @override
+  String get failedToLoadStats => 'Failed to load statistics';
+
+  @override
+  String get noDataAvailable => 'No data available';
+
+  @override
+  String get mrr => 'MRR';
+
+  @override
+  String get mostSubscribedPlan => 'Most subscribed plan';
+
+  @override
+  String get subs => 'subs';
+
+  @override
+  String get subs_plural => 'subs';
+
+  @override
+  String get subscriptionManagement => 'Subscription Management';
+
+  @override
+  String get plans => 'Plans';
+
+  @override
+  String get coupons => 'coupons';
+
+  @override
+  String get adminSettings => 'Admin Settings';
+
+  @override
+  String get general => 'General';
+
+  @override
+  String get security => 'Security';
+
+  @override
+  String get platformControls => 'Platform Controls';
+
+  @override
+  String get maintenanceMode => 'Maintenance Mode';
+
+  @override
+  String get maintenanceModeDesc =>
+      'Temporarily disable user access to the platform';
+
+  @override
+  String get allowNewRegistrations => 'Allow New Registrations';
+
+  @override
+  String get allowNewRegistrationsDesc =>
+      'Enable signup for new users on the platform';
+
+  @override
+  String get defaultConfiguration => 'Default Configuration';
+
+  @override
+  String get defaultClientPlan => 'Default Client Plan';
+
+  @override
+  String get defaultFreelancerVisibility => 'Default Freelancer Visibility';
+
+  @override
+  String get platformCommissionRate => 'Platform Commission Rate';
+
+  @override
+  String get platformTheme => 'Platform Theme';
+
+  @override
+  String get defaultTheme => 'Default';
+
+  @override
+  String get logoBranding => 'Logo & Branding';
+
+  @override
+  String get configured => 'Configured';
+
+  @override
+  String get verification => 'Verification';
+
+  @override
+  String get autoVerifyEmail => 'Auto Verify Email Domains';
+
+  @override
+  String get autoVerifyEmailDesc =>
+      'Automatically verify trusted business email domains';
+
+  @override
+  String get flagHighRiskPayments => 'Flag High-Risk Payments';
+
+  @override
+  String get flagHighRiskPaymentsDesc =>
+      'Detect and mark suspicious payment activity';
+
+  @override
+  String get accessRules => 'Access Rules';
+
+  @override
+  String get adminSessionTimeout => 'Admin Session Timeout';
+
+  @override
+  String get twoFactorAuth => '2FA Requirement';
+
+  @override
+  String get requiredForAdmins => 'Required for admins';
+
+  @override
+  String get ipWhitelist => 'IP Whitelist';
+
+  @override
+  String get notConfigured => 'Not configured';
+
+  @override
+  String get securityStatusGood => 'Security Status: Good';
+
+  @override
+  String get securityStatusDesc =>
+      'All critical security features are configured properly';
+
+  @override
+  String get adminAlerts => 'Admin Alerts';
+
+  @override
+  String get weeklyPerformanceReport => 'Weekly Performance Report';
+
+  @override
+  String get weeklyPerformanceReportDesc =>
+      'Receive a comprehensive summary every Monday morning';
+
+  @override
+  String get criticalIncidentAlerts => 'Critical Incident Alerts';
+
+  @override
+  String get emailInApp => 'Email + in-app';
+
+  @override
+  String get disputeEscalationAlerts => 'Dispute Escalation Alerts';
+
+  @override
+  String get instantPush => 'Instant push';
+
+  @override
+  String get newUserRegistrations => 'New User Registrations';
+
+  @override
+  String get dailyDigest => 'Daily digest';
+
+  @override
+  String get emailConfiguration => 'Email Configuration';
+
+  @override
+  String get smtpSettings => 'SMTP Settings';
+
+  @override
+  String get emailTemplates => 'Email Templates';
+
+  @override
+  String get templates_plural => 'templates';
+
+  @override
+  String get senderNameAddress => 'Sender Name & Address';
+
+  @override
+  String get platformAdmin => 'Platform Admin';
+
+  @override
+  String get projectsManagement => 'Projects Management';
+
+  @override
+  String get allStatus => 'All Status';
+
+  @override
+  String get cancelled => 'Cancelled';
+
+  @override
+  String get projects => 'Projects';
+
+  @override
+  String get projects_plural => 'projects';
+
+  @override
+  String get projectDeleted => 'Project deleted';
+
+  @override
+  String get deleteFailed => 'Delete failed';
+
+  @override
+  String get failedToLoadProjects => 'Failed to load projects';
+
+  @override
+  String get plansConfigured => 'plan configured';
+
+  @override
+  String get plansConfigured_plural => 'plans configured';
+
+  @override
+  String get newPlan => 'New Plan';
+
+  @override
+  String get deletePlan => 'Delete Plan';
+
+  @override
+  String deletePlanConfirmation(Object name) {
+    return 'Are you sure you want to delete \"$name\"? This cannot be undone.';
+  }
+
+  @override
+  String get planDeletedSuccess => 'Plan deleted successfully';
+
+  @override
+  String get failedToDeletePlan => 'Failed to delete plan';
+
+  @override
+  String get failedToLoadPlans => 'Failed to load plans';
+
+  @override
+  String get noPlansConfigured => 'No plans configured';
+
+  @override
+  String get addFirstPlan => 'Add First Plan';
+
+  @override
+  String get editPlan => 'Edit Plan';
+
+  @override
+  String get savePlan => 'Save Plan';
+
+  @override
+  String get planName => 'Plan Name *';
+
+  @override
+  String get slugExample => 'Slug * (e.g. pro)';
+
+  @override
+  String get billingPeriod => 'Billing Period';
+
+  @override
+  String get price => 'Price *';
+
+  @override
+  String get proposalLimitEmpty => 'Proposal Limit (empty=∞)';
+
+  @override
+  String get projectLimitEmpty => 'Project Limit (empty=∞)';
+
+  @override
+  String get trialDays => 'Trial Days';
+
+  @override
+  String get sortOrder => 'Sort Order';
+
+  @override
+  String get features => 'Features';
+
+  @override
+  String get customFeatures => 'Custom Features';
+
+  @override
+  String get addFeature => 'Add feature...';
+
+  @override
+  String get planCreatedSuccess => 'Plan created successfully';
+
+  @override
+  String get planUpdatedSuccess => 'Plan updated successfully';
+
+  @override
+  String get failedToSavePlan => 'Failed to save plan';
+
+  @override
+  String get free => 'Free';
+
+  @override
+  String get trial => 'Trial';
+
+  @override
+  String get proposals_plural => 'proposals';
+
+  @override
+  String get customBranding => 'Custom Branding';
+
+  @override
+  String get recommended => 'Recommended';
+
+  @override
+  String get prioritySupport => 'Priority Support';
+
+  @override
+  String get apiAccess => 'API Access';
+
+  @override
+  String get disputesManagement => 'Disputes Management';
+
+  @override
+  String get resolveDispute => 'Resolve Dispute';
+
+  @override
+  String get rejectDispute => 'Reject Dispute';
+
+  @override
+  String get rejectDisputeConfirmation =>
+      'Are you sure you want to reject this dispute?';
+
+  @override
+  String get rejectionReason => 'Reason for rejection';
+
+  @override
+  String get disputeStatusOpen => 'Open';
+
+  @override
+  String get disputeResolvedSuccess => 'Dispute resolved successfully';
+
+  @override
+  String get failedToResolveDispute => 'Failed to resolve dispute';
+
+  @override
+  String get disputeRejectedSuccess => 'Dispute rejected successfully';
+
+  @override
+  String get failedToRejectDispute => 'Failed to reject dispute';
+
+  @override
+  String get initiatedBy => 'Initiated by';
+
+  @override
+  String get contract => 'Contract';
+
+  @override
+  String get fullRefundToClient => 'Full Refund to Client';
+
+  @override
+  String get partialRefundToClient => 'Partial Refund to Client';
+
+  @override
+  String get noRefund => 'No Refund';
+
+  @override
+  String get resolution => 'Resolution';
+
+  @override
+  String get adminNotesOptional => 'Admin Notes (optional)';
+
+  @override
+  String get noDisputesFound => 'No disputes found';
+
+  @override
+  String get adminNotes => 'Admin Notes';
+
+  @override
+  String get resolve => 'Resolve';
+
+  @override
+  String get reject => 'Reject';
+
+  @override
+  String get newCoupon => 'New Coupon';
+
+  @override
+  String get deleteCoupon => 'Delete Coupon';
+
+  @override
+  String deleteCouponConfirmation(Object code) {
+    return 'Are you sure you want to delete coupon \"$code\"?';
+  }
+
+  @override
+  String get couponDeleted => 'Coupon deleted';
+
+  @override
+  String get failedToDeleteCoupon => 'Failed to delete coupon';
+
+  @override
+  String get failedToLoadCoupons => 'Failed to load coupons';
+
+  @override
+  String get noCouponsYet => 'No coupons yet';
+
+  @override
+  String get createFirstCoupon => 'Create First Coupon';
+
+  @override
+  String get editCoupon => 'Edit Coupon';
+
+  @override
+  String get saveCoupon => 'Save Coupon';
+
+  @override
+  String get couponCodeRequired => 'Coupon Code *';
+
+  @override
+  String get discountType => 'Discount Type';
+
+  @override
+  String get percentage => 'Percentage';
+
+  @override
+  String get fixedAmount => 'Fixed Amount';
+
+  @override
+  String get appliesTo => 'Applies To';
+
+  @override
+  String get subscriptionOnly => 'Subscription only';
+
+  @override
+  String get contractEscrow => 'Contract escrow';
+
+  @override
+  String get both => 'Both';
+
+  @override
+  String get validFrom => 'Valid From';
+
+  @override
+  String get validUntil => 'Valid Until';
+
+  @override
+  String get maxUsesEmpty => 'Max Uses (empty = unlimited)';
+
+  @override
+  String get applicablePlansOptional => 'Applicable Plans (optional)';
+
+  @override
+  String get planSlugExample => 'Plan slug (e.g. pro)';
+
+  @override
+  String get used => 'used';
+
+  @override
+  String get percentageDiscount => 'Percentage discount';
+
+  @override
+  String get fixedAmountOff => 'Fixed amount off';
+
+  @override
+  String get inactive => 'Inactive';
+
+  @override
+  String get subscriptions => 'Subscriptions';
+
+  @override
+  String get couponCreatedSuccess => 'Coupon created successfully';
+
+  @override
+  String get couponUpdatedSuccess => 'Coupon updated successfully';
+
+  @override
+  String get failedToSaveCoupon => 'Failed to save coupon';
+
+  @override
+  String get contractsManagement => 'Contracts Management';
+
+  @override
+  String get pendingClient => 'Pending Client';
+
+  @override
+  String get pendingFreelancer => 'Pending Freelancer';
+
+  @override
+  String get disputed => 'Disputed';
+
+  @override
+  String get failedToLoadContracts => 'Failed to load contracts';
+
+  @override
+  String get resolutionNotes => 'Resolution notes';
+
+  @override
+  String get resolutionHint => 'Write your resolution details here...';
+
+  @override
+  String get actionFailed => 'Action failed';
+
+  @override
+  String get noContractsFound => 'No contracts found';
+
+  @override
+  String get errorLoadingCampaigns => 'Error loading campaigns';
+
+  @override
+  String get adRevenueStats => 'Ad Revenue Stats';
+
+  @override
+  String get totalAdRevenue => 'Total Ad Revenue';
+
+  @override
+  String get totalAdSpend => 'Total Ad Spend';
+
+  @override
+  String get recentCampaigns => 'Recent Campaigns';
+
+  @override
+  String get noCampaignsYet => 'No campaigns yet';
+
+  @override
+  String get failedToChangeStatus => 'Failed to change status';
+
+  @override
+  String get failedToDelete => 'Failed to delete campaign';
+
+  @override
+  String get updateFailed => 'Update failed';
+
+  @override
+  String get deleteCampaign => 'Delete Campaign';
+
+  @override
+  String get editCampaign => 'Edit Campaign';
+
+  @override
+  String get campaignName => 'Campaign Name';
+
+  @override
+  String get totalBudget => 'Total Budget';
+
+  @override
+  String get dailyBudget => 'Daily Budget';
+
+  @override
+  String get costPerClick => 'Cost Per Click';
+
+  @override
+  String get costPerImpression => 'Cost Per Impression';
+
+  @override
+  String get campaignUpdated => 'Campaign updated successfully';
+
+  @override
+  String get campaignDeleted => 'Campaign deleted successfully';
+
+  @override
+  String get changeStatus => 'Change Status';
+
+  @override
+  String get adsManagement => 'Ads Management';
+
+  @override
+  String get campaigns => 'Campaigns';
+
+  @override
+  String get paused => 'Paused';
+
+  @override
+  String get pendingApproval => 'Pending Approval';
+
+  @override
+  String get searchCampaigns => 'Search campaigns...';
+
+  @override
+  String get activeCampaigns => 'Active';
+
+  @override
+  String get noCampaignsFound => 'No campaigns found';
+
+  @override
+  String get revenue => 'Revenue';
+
+  @override
+  String get totalRevenue => 'Total Revenue';
+
+  @override
+  String get platformCommission => 'Platform Commission';
+
+  @override
+  String get activeCampaignsCount => 'Active Campaigns';
+
+  @override
+  String get ctrAverage => 'Average CTR';
+
+  @override
+  String get keyPerformanceIndicators => 'Key Performance Indicators';
+
+  @override
+  String get dailyPerformanceTrends => 'Daily Performance Trends';
+
+  @override
+  String get performanceByAdType => 'Performance by Ad Type';
+
+  @override
+  String get topAdvertisers => 'Top Advertisers';
+
+  @override
+  String get additionalMetrics => 'Additional Metrics';
+
+  @override
+  String get avgCtr => 'Avg CTR';
+
+  @override
+  String get estRoi => 'Est. ROI';
+
+  @override
+  String get conversionRate => 'Conversion Rate';
+
+  @override
+  String get type => 'Type';
+
+  @override
+  String get impressions => 'Impressions';
+
+  @override
+  String get clicks => 'Clicks';
+
+  @override
+  String get ctr => 'CTR';
+
+  @override
+  String get spent => 'Spent';
+
+  @override
+  String get advertiser => 'Advertiser';
+
+  @override
+  String get campaignsCount => 'Campaigns';
+
+  @override
+  String get totalSpentCap => 'Total Spent';
+
+  @override
+  String get commission => 'Commission';
+
+  @override
+  String get edit => 'Edit';
+
+  @override
+  String get pause => 'Pause';
+
+  @override
+  String get resume => 'Resume';
+
+  @override
+  String get model => 'Model';
+
+  @override
+  String get campaign => 'Campaign';
+
+  @override
+  String get totalCampaigns => 'Total Campaigns';
+
+  @override
+  String get pausedCampaigns => 'Paused Campaigns';
+
+  @override
+  String get completedCampaigns => 'Completed Campaigns';
+
+  @override
+  String get draftCampaigns => 'Draft Campaigns';
+
+  @override
+  String get totalImpressions => 'Total Impressions';
+
+  @override
+  String get totalClicks => 'Total Clicks';
+
+  @override
+  String get clickThroughRate => 'Click-Through Rate';
+
+  @override
+  String get totalSpend => 'Total Spend';
+
+  @override
+  String get totalBudgetSum => 'Total Budget';
+
+  @override
+  String get campaignsWaitingForPayment => 'campaigns waiting for payment';
+
+  @override
+  String statusChangedTo(String status) {
+    return 'Status changed to $status';
+  }
+
+  @override
+  String deleteCampaignConfirmation(String campaignName) {
+    return 'Are you sure you want to delete \"$campaignName\"? This action cannot be undone.';
+  }
+
+  @override
+  String get errorLoadingUsers => 'Error Loading Users';
+
+  @override
+  String get adminDashboard => 'Admin Dashboard';
+
+  @override
+  String get dashboard => 'Dashboard';
+
+  @override
+  String get totalUsers => 'Total Users';
+
+  @override
+  String get freelancers => 'Freelancers';
+
+  @override
+  String get clients => 'Clients';
+
+  @override
+  String get totalContracts => 'Total Contracts';
+
+  @override
+  String get adRevenue => 'Ad Revenue';
+
+  @override
+  String get pendingProjects => 'Pending Projects';
+
+  @override
+  String get activeContracts => 'Active Contracts';
+
+  @override
+  String get completedContracts => 'Completed Contracts';
+
+  @override
+  String get pendingDisputes => 'Pending Disputes';
+
+  @override
+  String get admin => 'Admin';
+
+  @override
+  String get superAdmin => 'Super Admin';
+
+  @override
+  String get goodMorning => 'Good Morning';
+
+  @override
+  String get goodAfternoon => 'Good Afternoon';
+
+  @override
+  String get goodEvening => 'Good Evening';
+
+  @override
+  String get heresWhatsHappening =>
+      'Here\'s what\'s happening on your platform today';
+
+  @override
+  String get userGrowthAnalytics => 'User Growth Analytics';
+
+  @override
+  String get totalUsersLabel => 'Total Users';
+
+  @override
+  String get userDistribution => 'User Distribution';
+
+  @override
+  String balancedMarketplace(Object total) {
+    return 'Balanced marketplace with $total total accounts';
+  }
+
+  @override
+  String get operationalPerformance => 'Operational Performance';
+
+  @override
+  String get lastMonthUsers => 'Last Month Users';
+
+  @override
+  String get lastMonthRevenue => 'Last Month Revenue';
+
+  @override
+  String get healthScore => 'Health Score';
+
+  @override
+  String get loadingDashboard => 'Loading dashboard...';
+
+  @override
+  String get noChartDataAvailable => 'No chart data available';
+
+  @override
+  String get failedToLoadDashboardData => 'Failed to load dashboard data';
+
+  @override
+  String get comingSoon => 'Coming Soon';
+
+  @override
+  String get trends => 'Trends';
+
+  @override
+  String totalUsersCount(Object count) {
+    return '$count user';
+  }
+
+  @override
+  String totalUsersCount_plural(Object count) {
+    return '$count users';
+  }
+
+  @override
+  String activeCount(Object count) {
+    return '$count active';
+  }
+
+  @override
+  String freelancersCount(Object count) {
+    return '$count freelancer';
+  }
+
+  @override
+  String freelancersCount_plural(Object count) {
+    return '$count freelancers';
+  }
+
+  @override
+  String clientsCount(Object count) {
+    return '$count client';
+  }
+
+  @override
+  String clientsCount_plural(Object count) {
+    return '$count clients';
+  }
 }

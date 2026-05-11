@@ -1,15 +1,14 @@
 // screens/admin/coupons_management_tab.dart
+
 import 'package:flutter/material.dart';
+import '../../l10n/app_localizations.dart';
 import '../../services/api_service.dart';
 import '../../models/coupon_model.dart';
-
-const _kAccent = Color(0xFF5B58E2);
-const _kGreen = Color(0xFF14A800);
-const _kAmber = Color(0xFFF59E0B);
-const _kPageBg = Color(0xFFF0F2F8);
+import '../../theme/app_theme.dart' as AppTheme;
 
 class CouponsManagementTab extends StatefulWidget {
   const CouponsManagementTab({super.key});
+
   @override
   State<CouponsManagementTab> createState() => _CouponsManagementTabState();
 }
@@ -38,28 +37,27 @@ class _CouponsManagementTabState extends State<CouponsManagementTab> {
       });
     } catch (e) {
       setState(() {
-        _error = 'Failed to load coupons: $e';
+        _error = '${AppLocalizations.of(context)?.failedToLoadCoupons}: $e';
         _loading = false;
       });
     }
   }
 
   Future<void> _deleteCoupon(Coupon coupon) async {
+    final t = AppLocalizations.of(context)!;
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text(
-          'Delete Coupon',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Text(
+          t.deleteCoupon,
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
-        content: Text(
-          'Are you sure you want to delete coupon "${coupon.code}"?',
-        ),
+        content: Text(t.deleteCouponConfirmation(coupon.code)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(t.cancel),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
@@ -71,7 +69,7 @@ class _CouponsManagementTabState extends State<CouponsManagementTab> {
               ),
               elevation: 0,
             ),
-            child: const Text('Delete'),
+            child: Text(t.delete),
           ),
         ],
       ),
@@ -81,15 +79,15 @@ class _CouponsManagementTabState extends State<CouponsManagementTab> {
     if (success) {
       _loadCoupons();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Coupon deleted'),
+        SnackBar(
+          content: Text(t.couponDeleted),
           backgroundColor: Colors.black87,
         ),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Failed to delete coupon'),
+        SnackBar(
+          content: Text(t.failedToDeleteCoupon),
           backgroundColor: Colors.red,
         ),
       );
@@ -105,8 +103,18 @@ class _CouponsManagementTabState extends State<CouponsManagementTab> {
 
   @override
   Widget build(BuildContext context) {
-    if (_loading)
-      return const Center(child: CircularProgressIndicator(color: _kAccent));
+    final theme = Theme.of(context);
+    final t = AppLocalizations.of(context)!;
+    final isDark = theme.brightness == Brightness.dark;
+
+    if (_loading) {
+      return Center(
+        child: CircularProgressIndicator(
+          color: theme.colorScheme.primary,
+        ),
+      );
+    }
+
     if (_error != null) {
       return Center(
         child: Column(
@@ -126,14 +134,19 @@ class _CouponsManagementTabState extends State<CouponsManagementTab> {
               ),
             ),
             const SizedBox(height: 16),
-            Text(_error!, style: TextStyle(color: Colors.grey.shade600)),
+            Text(
+              _error!,
+              style: TextStyle(
+                color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+              ),
+            ),
             const SizedBox(height: 16),
             ElevatedButton.icon(
               onPressed: _loadCoupons,
               icon: const Icon(Icons.refresh),
-              label: const Text('Retry'),
+              label: Text(t.retry),
               style: ElevatedButton.styleFrom(
-                backgroundColor: _kAccent,
+                backgroundColor: theme.colorScheme.primary,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
@@ -153,49 +166,46 @@ class _CouponsManagementTabState extends State<CouponsManagementTab> {
           child: Row(
             children: [
               Text(
-                '${_coupons.length} coupons',
-                style: const TextStyle(
+                '${_coupons.length} ${_coupons.length == 1 ? t.coupon : t.coupons}',
+                style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
-                  color: Color(0xFF888888),
+                  color: isDark ? Colors.grey.shade500 : const Color(0xFF888888),
                 ),
               ),
               const Spacer(),
-              _buildAddButton('New Coupon', () => _showCouponDialog()),
+              _buildAddButton(t.newCoupon, () => _showCouponDialog(), isDark),
             ],
           ),
         ),
         Expanded(
           child: _coupons.isEmpty
-              ? _buildEmpty()
+              ? _buildEmpty(t, isDark)
               : ListView.builder(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 4,
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                   itemCount: _coupons.length,
-                  itemBuilder: (_, i) => _buildCouponCard(_coupons[i]),
+                  itemBuilder: (_, i) => _buildCouponCard(_coupons[i], t, isDark),
                 ),
         ),
       ],
     );
   }
 
-  Widget _buildAddButton(String label, VoidCallback onTap) {
+  Widget _buildAddButton(String label, VoidCallback onTap, bool isDark) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
           gradient: const LinearGradient(
-            colors: [_kAmber, Color(0xFFB45309)],
+            colors: [Color(0xFFF59E0B), Color(0xFFB45309)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: _kAmber.withOpacity(0.35),
+              color: const Color(0xFFF59E0B).withOpacity(0.35),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -220,26 +230,29 @@ class _CouponsManagementTabState extends State<CouponsManagementTab> {
     );
   }
 
-  Widget _buildCouponCard(Coupon coupon) {
+  Widget _buildCouponCard(Coupon coupon, AppLocalizations t, bool isDark) {
+    final theme = Theme.of(context);
     final isExpired = coupon.validUntil.isBefore(DateTime.now());
     final isActive = coupon.isActive && !isExpired;
     final usage = coupon.maxUses != null
-        ? '${coupon.usedCount}/${coupon.maxUses} used'
-        : '${coupon.usedCount} used';
+        ? '${coupon.usedCount}/${coupon.maxUses} ${t.used}'
+        : '${coupon.usedCount} ${t.used}';
     final isPercentage = coupon.discountType == 'percentage';
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? AppTheme.AppColors.darkCard : Colors.white,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: isActive ? _kAmber.withOpacity(0.3) : Colors.grey.shade100,
+          color: isActive
+              ? const Color(0xFFF59E0B).withOpacity(0.3)
+              : (isDark ? AppTheme.AppColors.grayDark : Colors.grey.shade100),
           width: isActive ? 1.5 : 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withOpacity(isDark ? 0.2 : 0.03),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -254,44 +267,40 @@ class _CouponsManagementTabState extends State<CouponsManagementTab> {
               gradient: isActive
                   ? LinearGradient(
                       colors: [
-                        _kAmber.withOpacity(0.1),
-                        _kAmber.withOpacity(0.02),
+                        const Color(0xFFF59E0B).withOpacity(0.1),
+                        const Color(0xFFF59E0B).withOpacity(0.02),
                       ],
                     )
                   : LinearGradient(
-                      colors: [Colors.grey.shade50, Colors.grey.shade50],
+                      colors: isDark
+                          ? [AppTheme.AppColors.darkSurface, AppTheme.AppColors.darkSurface]
+                          : [Colors.grey.shade50, Colors.grey.shade50],
                     ),
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(18),
-              ),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
               border: Border(
                 bottom: BorderSide(
-                  color: Colors.grey.shade100,
-                  style: BorderStyle.solid,
+                  color: isDark ? AppTheme.AppColors.grayDark : Colors.grey.shade100,
                 ),
               ),
             ),
             child: Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 8,
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                   decoration: BoxDecoration(
                     gradient: isActive
                         ? const LinearGradient(
-                            colors: [_kAmber, Color(0xFFB45309)],
+                            colors: [Color(0xFFF59E0B), Color(0xFFB45309)],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                           )
                         : null,
-                    color: isActive ? null : Colors.grey.shade300,
+                    color: isActive ? null : (isDark ? AppTheme.AppColors.grayDark : Colors.grey.shade300),
                     borderRadius: BorderRadius.circular(10),
                     boxShadow: isActive
                         ? [
                             BoxShadow(
-                              color: _kAmber.withOpacity(0.35),
+                              color: const Color(0xFFF59E0B).withOpacity(0.35),
                               blurRadius: 8,
                               offset: const Offset(0, 3),
                             ),
@@ -330,17 +339,15 @@ class _CouponsManagementTabState extends State<CouponsManagementTab> {
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
                           color: isActive
-                              ? const Color(0xFF1A1B3E)
-                              : Colors.grey.shade400,
+                              ? (isDark ? Colors.white : const Color(0xFF1A1B3E))
+                              : (isDark ? Colors.grey.shade600 : Colors.grey.shade400),
                         ),
                       ),
                       Text(
-                        isPercentage
-                            ? 'Percentage discount'
-                            : 'Fixed amount off',
+                        isPercentage ? t.percentageDiscount : t.fixedAmountOff,
                         style: TextStyle(
                           fontSize: 11,
-                          color: Colors.grey.shade500,
+                          color: isDark ? Colors.grey.shade500 : Colors.grey.shade500,
                         ),
                       ),
                     ],
@@ -348,19 +355,16 @@ class _CouponsManagementTabState extends State<CouponsManagementTab> {
                 ),
                 if (!isActive)
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.grey.shade100,
+                      color: isDark ? AppTheme.AppColors.darkSurface : Colors.grey.shade100,
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
-                      isExpired ? 'Expired' : 'Inactive',
+                      isExpired ? t.expired : t.inactive,
                       style: TextStyle(
                         fontSize: 11,
-                        color: Colors.grey.shade500,
+                        color: isDark ? Colors.grey.shade500 : Colors.grey.shade500,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -368,64 +372,51 @@ class _CouponsManagementTabState extends State<CouponsManagementTab> {
                 const SizedBox(width: 8),
                 _iconBtn(
                   Icons.edit_outlined,
-                  _kAccent,
+                  theme.colorScheme.primary,
                   () => _showCouponDialog(coupon: coupon),
+                  isDark,
                 ),
                 const SizedBox(width: 6),
                 _iconBtn(
                   Icons.delete_outline,
                   Colors.red.shade400,
                   () => _deleteCoupon(coupon),
+                  isDark,
                 ),
               ],
             ),
           ),
-
           Padding(
             padding: const EdgeInsets.all(14),
-            child: Row(
+            child: Wrap(
+              spacing: 16,
+              runSpacing: 8,
               children: [
-                _infoItem(
-                  Icons.calendar_today_outlined,
-                  '${_fmtDate(coupon.validFrom)} – ${_fmtDate(coupon.validUntil)}',
-                ),
-                const SizedBox(width: 16),
-                _infoItem(Icons.people_outline_rounded, usage),
-                const SizedBox(width: 16),
-                _infoItem(
-                  Icons.category_outlined,
-                  _scopeLabel(coupon.applicationScope),
-                ),
-                if (coupon.applicablePlans != null &&
-                    coupon.applicablePlans!.isNotEmpty) ...[
-                  const SizedBox(width: 12),
-                  ...coupon.applicablePlans!
-                      .map(
-                        (plan) => Container(
-                          margin: const EdgeInsets.only(right: 4),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 3,
-                          ),
-                          decoration: BoxDecoration(
-                            color: _kAccent.withOpacity(0.08),
-                            borderRadius: BorderRadius.circular(6),
-                            border: Border.all(
-                              color: _kAccent.withOpacity(0.15),
-                            ),
-                          ),
-                          child: Text(
-                            plan,
-                            style: const TextStyle(
-                              fontSize: 10,
-                              color: _kAccent,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
+                _infoItem(Icons.calendar_today_outlined, '${_fmtDate(coupon.validFrom)} - ${_fmtDate(coupon.validUntil)}', isDark),
+                _infoItem(Icons.people_outline_rounded, usage, isDark),
+                _infoItem(Icons.category_outlined, _getScopeLabel(coupon.applicationScope, t), isDark),
+                if (coupon.applicablePlans != null && coupon.applicablePlans!.isNotEmpty)
+                  ...coupon.applicablePlans!.map(
+                    (plan) => Container(
+                      margin: const EdgeInsets.only(right: 4),
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primary.withOpacity(0.08),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                          color: theme.colorScheme.primary.withOpacity(0.15),
                         ),
-                      )
-                      .toList(),
-                ],
+                      ),
+                      child: Text(
+                        plan,
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: theme.colorScheme.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
               ],
             ),
           ),
@@ -434,21 +425,35 @@ class _CouponsManagementTabState extends State<CouponsManagementTab> {
     );
   }
 
-  Widget _infoItem(IconData icon, String label) {
+  String _getScopeLabel(String scope, AppLocalizations t) {
+    switch (scope) {
+      case 'contract':
+        return t.contracts;
+      case 'both':
+        return t.all;
+      default:
+        return t.subscriptions;
+    }
+  }
+
+  Widget _infoItem(IconData icon, String label, bool isDark) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 13, color: Colors.grey.shade400),
+        Icon(icon, size: 13, color: isDark ? Colors.grey.shade600 : Colors.grey.shade400),
         const SizedBox(width: 4),
         Text(
           label,
-          style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+          style: TextStyle(
+            fontSize: 11,
+            color: isDark ? Colors.grey.shade500 : Colors.grey.shade600,
+          ),
         ),
       ],
     );
   }
 
-  Widget _iconBtn(IconData icon, Color color, VoidCallback onTap) {
+  Widget _iconBtn(IconData icon, Color color, VoidCallback onTap, bool isDark) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -466,18 +471,7 @@ class _CouponsManagementTabState extends State<CouponsManagementTab> {
 
   String _fmtDate(DateTime d) => '${d.day}/${d.month}/${d.year}';
 
-  String _scopeLabel(String scope) {
-    switch (scope) {
-      case 'contract':
-        return 'Contracts';
-      case 'both':
-        return 'All';
-      default:
-        return 'Subscriptions';
-    }
-  }
-
-  Widget _buildEmpty() {
+  Widget _buildEmpty(AppLocalizations t, bool isDark) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -485,34 +479,40 @@ class _CouponsManagementTabState extends State<CouponsManagementTab> {
           Container(
             width: 80,
             height: 80,
-            decoration: BoxDecoration(color: _kPageBg, shape: BoxShape.circle),
+            decoration: BoxDecoration(
+              color: isDark ? AppTheme.AppColors.darkCard : const Color(0xFFF0F2F8),
+              shape: BoxShape.circle,
+            ),
             child: Icon(
               Icons.local_offer_outlined,
               size: 40,
-              color: Colors.grey.shade300,
+              color: isDark ? Colors.grey.shade600 : Colors.grey.shade300,
             ),
           ),
           const SizedBox(height: 16),
           Text(
-            'No coupons yet',
+            t.noCouponsYet,
             style: TextStyle(
               fontSize: 16,
-              color: Colors.grey.shade500,
               fontWeight: FontWeight.w500,
+              color: isDark ? Colors.grey.shade500 : Colors.grey.shade500,
             ),
           ),
           const SizedBox(height: 20),
-          _buildAddButton('Create First Coupon', () => _showCouponDialog()),
+          _buildAddButton(t.createFirstCoupon, () => _showCouponDialog(), isDark),
         ],
       ),
     );
   }
 }
 
+
 class CouponFormDialog extends StatefulWidget {
   final Coupon? coupon;
   final VoidCallback onSaved;
+
   const CouponFormDialog({super.key, this.coupon, required this.onSaved});
+
   @override
   State<CouponFormDialog> createState() => _CouponFormDialogState();
 }
@@ -535,9 +535,7 @@ class _CouponFormDialogState extends State<CouponFormDialog> {
       text: widget.coupon?.discountValue.toString() ?? '',
     );
     _validFrom = widget.coupon?.validFrom ?? DateTime.now();
-    _validUntil =
-        widget.coupon?.validUntil ??
-        DateTime.now().add(const Duration(days: 30));
+    _validUntil = widget.coupon?.validUntil ?? DateTime.now().add(const Duration(days: 30));
     _maxUsesCtrl = TextEditingController(
       text: widget.coupon?.maxUses?.toString() ?? '',
     );
@@ -548,67 +546,74 @@ class _CouponFormDialogState extends State<CouponFormDialog> {
 
   @override
   void dispose() {
-    for (final c in [_codeCtrl, _discountCtrl, _maxUsesCtrl, _planInputCtrl])
+    for (final c in [_codeCtrl, _discountCtrl, _maxUsesCtrl, _planInputCtrl]) {
       c.dispose();
+    }
     super.dispose();
   }
 
   Future<void> _selectDate(BuildContext context, bool isStart) async {
+    final t = AppLocalizations.of(context)!;
     final picked = await showDatePicker(
       context: context,
       initialDate: isStart ? _validFrom : _validUntil,
       firstDate: DateTime.now().subtract(const Duration(days: 365)),
       lastDate: DateTime.now().add(const Duration(days: 730)),
+      helpText: t.selectDate,
+      cancelText: t.cancel,
+      confirmText: t.ok,
     );
     if (picked != null) {
       setState(() {
         if (isStart) {
           _validFrom = picked;
-          if (_validUntil.isBefore(_validFrom))
+          if (_validUntil.isBefore(_validFrom)) {
             _validUntil = _validFrom.add(const Duration(days: 30));
-        } else
+          }
+        } else {
           _validUntil = picked;
+        }
       });
     }
   }
 
   Future<void> _save() async {
+    final t = AppLocalizations.of(context)!;
     if (!_formKey.currentState!.validate()) return;
+
     final data = {
       'code': _codeCtrl.text.trim().toUpperCase(),
       'discount_type': _discountType,
       'discount_value': double.parse(_discountCtrl.text),
       'valid_from': _validFrom.toIso8601String().split('T')[0],
       'valid_until': _validUntil.toIso8601String().split('T')[0],
-      'max_uses': _maxUsesCtrl.text.trim().isEmpty
-          ? null
-          : int.parse(_maxUsesCtrl.text),
+      'max_uses': _maxUsesCtrl.text.trim().isEmpty ? null : int.parse(_maxUsesCtrl.text),
       'applicable_plans': _applicablePlans.isEmpty ? null : _applicablePlans,
       'is_active': _isActive,
       'application_scope': _applicationScope,
     };
 
     Coupon? result;
-    if (widget.coupon != null)
+    if (widget.coupon != null) {
       result = await ApiService.updateCoupon(widget.coupon!.id, data);
-    else
+    } else {
       result = await ApiService.createCoupon(data);
+    }
 
     if (result != null) {
+      if (!mounted) return;
       Navigator.pop(context);
       widget.onSaved();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            'Coupon ${widget.coupon != null ? 'updated' : 'created'} successfully',
-          ),
+          content: Text(widget.coupon != null ? t.couponUpdatedSuccess : t.couponCreatedSuccess),
           backgroundColor: Colors.black87,
         ),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Failed to save coupon'),
+        SnackBar(
+          content: Text(t.failedToSaveCoupon),
           backgroundColor: Colors.red,
         ),
       );
@@ -617,8 +622,13 @@ class _CouponFormDialogState extends State<CouponFormDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final t = AppLocalizations.of(context)!;
+    final isDark = theme.brightness == Brightness.dark;
+
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      backgroundColor: isDark ? AppTheme.AppColors.darkSurface : Colors.white,
       title: Row(
         children: [
           Container(
@@ -626,7 +636,7 @@ class _CouponFormDialogState extends State<CouponFormDialog> {
             height: 36,
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                colors: [_kAmber, Color(0xFFB45309)],
+                colors: [Color(0xFFF59E0B), Color(0xFFB45309)],
               ),
               borderRadius: BorderRadius.circular(10),
             ),
@@ -638,7 +648,7 @@ class _CouponFormDialogState extends State<CouponFormDialog> {
           ),
           const SizedBox(width: 12),
           Text(
-            widget.coupon != null ? 'Edit Coupon' : 'New Coupon',
+            widget.coupon != null ? t.editCoupon : t.newCoupon,
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           ),
         ],
@@ -652,132 +662,134 @@ class _CouponFormDialogState extends State<CouponFormDialog> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _field(_codeCtrl, 'Coupon Code *', required: true),
+                _field(_codeCtrl, t.couponCodeRequired, required: true, isDark: isDark),
                 Row(
                   children: [
                     Expanded(
                       child: _dropdown(
-                        'Discount Type',
+                        t.discountType,
                         _discountType,
                         {
-                          'percentage': 'Percentage (%)',
-                          'fixed': 'Fixed Amount (\$)',
+                          'percentage': '${t.percentage} (%)',
+                          'fixed': '${t.fixedAmount} (\$)',
                         },
                         (v) => setState(() => _discountType = v!),
+                        isDark,
                       ),
                     ),
                     const SizedBox(width: 10),
                     Expanded(
                       child: _field(
                         _discountCtrl,
-                        'Value *',
+                        '${t.value} *',
                         keyboardType: TextInputType.number,
                         required: true,
-                        validator: (v) =>
-                            double.tryParse(v ?? '') == null ? 'Invalid' : null,
+                        validator: (v) => double.tryParse(v ?? '') == null ? t.invalidNumber : null,
+                        isDark: isDark,
                       ),
                     ),
                   ],
                 ),
                 _dropdown(
-                  'Applies To',
+                  t.appliesTo,
                   _applicationScope,
                   {
-                    'subscription': 'Subscription only',
-                    'contract': 'Contract escrow',
-                    'both': 'Both',
+                    'subscription': t.subscriptionOnly,
+                    'contract': t.contractEscrow,
+                    'both': t.both,
                   },
                   (v) => setState(() => _applicationScope = v!),
+                  isDark,
                 ),
                 Row(
                   children: [
                     Expanded(
                       child: _datePicker(
-                        'Valid From',
+                        t.validFrom,
                         _validFrom,
                         () => _selectDate(context, true),
+                        isDark,
                       ),
                     ),
                     const SizedBox(width: 10),
                     Expanded(
                       child: _datePicker(
-                        'Valid Until',
+                        t.validUntil,
                         _validUntil,
                         () => _selectDate(context, false),
+                        isDark,
                       ),
                     ),
                   ],
                 ),
                 _field(
                   _maxUsesCtrl,
-                  'Max Uses (empty = unlimited)',
+                  t.maxUsesEmpty,
                   keyboardType: TextInputType.number,
+                  isDark: isDark,
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF8F8F8),
+                    color: isDark ? AppTheme.AppColors.darkCard : const Color(0xFFF8F8F8),
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: Colors.grey.shade200),
+                    border: Border.all(
+                      color: isDark ? AppTheme.AppColors.grayDark : Colors.grey.shade200,
+                    ),
                   ),
                   child: Row(
                     children: [
-                      const Text(
-                        'Active',
+                      Text(
+                        t.active,
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w500,
+                          color: isDark ? Colors.white : Colors.black87,
                         ),
                       ),
                       const Spacer(),
                       Switch.adaptive(
                         value: _isActive,
                         onChanged: (v) => setState(() => _isActive = v),
-                        activeColor: _kGreen,
+                        activeColor: const Color(0xFF14A800),
                       ),
                     ],
                   ),
                 ),
                 const SizedBox(height: 8),
-                const Text(
-                  'Applicable Plans (optional)',
+                Text(
+                  t.applicablePlansOptional,
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF555555),
+                    color: isDark ? Colors.grey.shade400 : const Color(0xFF555555),
                   ),
                 ),
                 const SizedBox(height: 4),
                 Row(
                   children: [
                     Expanded(
-                      child: _field(_planInputCtrl, 'Plan slug (e.g. pro)'),
+                      child: _field(_planInputCtrl, t.planSlugExample, isDark: isDark),
                     ),
                     const SizedBox(width: 8),
                     GestureDetector(
                       onTap: () {
                         final p = _planInputCtrl.text.trim();
-                        if (p.isNotEmpty && !_applicablePlans.contains(p))
+                        if (p.isNotEmpty && !_applicablePlans.contains(p)) {
                           setState(() {
                             _applicablePlans.add(p);
                             _planInputCtrl.clear();
                           });
+                        }
                       },
                       child: Container(
                         width: 40,
                         height: 40,
                         decoration: BoxDecoration(
-                          color: _kAmber,
+                          color: const Color(0xFFF59E0B),
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: const Icon(
-                          Icons.add,
-                          color: Colors.white,
-                          size: 18,
-                        ),
+                        child: const Icon(Icons.add, color: Colors.white, size: 18),
                       ),
                     ),
                   ],
@@ -786,20 +798,12 @@ class _CouponFormDialogState extends State<CouponFormDialog> {
                   Wrap(
                     spacing: 6,
                     runSpacing: 4,
-                    children: _applicablePlans
-                        .map(
-                          (p) => Chip(
-                            label: Text(
-                              p,
-                              style: const TextStyle(fontSize: 11),
-                            ),
-                            onDeleted: () =>
-                                setState(() => _applicablePlans.remove(p)),
-                            materialTapTargetSize:
-                                MaterialTapTargetSize.shrinkWrap,
-                          ),
-                        )
-                        .toList(),
+                    children: _applicablePlans.map((p) => Chip(
+                      label: Text(p, style: const TextStyle(fontSize: 11)),
+                      onDeleted: () => setState(() => _applicablePlans.remove(p)),
+                      backgroundColor: isDark ? AppTheme.AppColors.darkSurface : null,
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    )).toList(),
                   ),
               ],
             ),
@@ -809,12 +813,15 @@ class _CouponFormDialogState extends State<CouponFormDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: Text('Cancel', style: TextStyle(color: Colors.grey.shade600)),
+          child: Text(
+            t.cancel,
+            style: TextStyle(color: isDark ? Colors.grey.shade400 : Colors.grey.shade600),
+          ),
         ),
         ElevatedButton(
           onPressed: _save,
           style: ElevatedButton.styleFrom(
-            backgroundColor: _kAmber,
+            backgroundColor: const Color(0xFFF59E0B),
             foregroundColor: Colors.white,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
@@ -822,9 +829,9 @@ class _CouponFormDialogState extends State<CouponFormDialog> {
             elevation: 0,
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           ),
-          child: const Text(
-            'Save Coupon',
-            style: TextStyle(fontWeight: FontWeight.w600),
+          child: Text(
+            t.saveCoupon,
+            style: const TextStyle(fontWeight: FontWeight.w600),
           ),
         ),
       ],
@@ -837,38 +844,38 @@ class _CouponFormDialogState extends State<CouponFormDialog> {
     TextInputType? keyboardType,
     bool required = false,
     FormFieldValidator<String>? validator,
+    required bool isDark,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: TextFormField(
         controller: ctrl,
         keyboardType: keyboardType,
-        validator:
-            validator ??
-            (required
-                ? (v) => v == null || v.isEmpty ? 'Required' : null
-                : null),
+        style: TextStyle(color: isDark ? Colors.white : AppTheme.AppColors.lightTextPrimary),
+        validator: validator ?? (required
+            ? (v) => v == null || v.isEmpty ? (AppLocalizations.of(context)?.requiredField ?? 'Required') : null
+            : null),
         decoration: InputDecoration(
           labelText: label,
-          labelStyle: const TextStyle(fontSize: 12),
+          labelStyle: TextStyle(
+            fontSize: 12,
+            color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+          ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide(color: Colors.grey.shade200),
+            borderSide: BorderSide(color: isDark ? AppTheme.AppColors.grayDark : Colors.grey.shade200),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide(color: Colors.grey.shade200),
+            borderSide: BorderSide(color: isDark ? AppTheme.AppColors.grayDark : Colors.grey.shade200),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: _kAmber),
+            borderSide: const BorderSide(color: Color(0xFFF59E0B)),
           ),
           filled: true,
-          fillColor: const Color(0xFFF8F8F8),
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 12,
-            vertical: 10,
-          ),
+          fillColor: isDark ? AppTheme.AppColors.darkSurface : const Color(0xFFF8F8F8),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           isDense: true,
         ),
       ),
@@ -880,57 +887,59 @@ class _CouponFormDialogState extends State<CouponFormDialog> {
     String value,
     Map<String, String> options,
     ValueChanged<String?> onChanged,
+    bool isDark,
   ) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: DropdownButtonFormField<String>(
         value: value,
+        dropdownColor: isDark ? AppTheme.AppColors.darkSurface : Colors.white,
+        style: TextStyle(
+          fontSize: 13,
+          color: isDark ? Colors.white : AppTheme.AppColors.lightTextPrimary,
+        ),
         decoration: InputDecoration(
           labelText: label,
-          labelStyle: const TextStyle(fontSize: 12),
+          labelStyle: TextStyle(
+            fontSize: 12,
+            color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+          ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide(color: Colors.grey.shade200),
+            borderSide: BorderSide(color: isDark ? AppTheme.AppColors.grayDark : Colors.grey.shade200),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide(color: Colors.grey.shade200),
+            borderSide: BorderSide(color: isDark ? AppTheme.AppColors.grayDark : Colors.grey.shade200),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: _kAmber),
+            borderSide: const BorderSide(color: Color(0xFFF59E0B)),
           ),
           filled: true,
-          fillColor: const Color(0xFFF8F8F8),
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 12,
-            vertical: 10,
-          ),
+          fillColor: isDark ? AppTheme.AppColors.darkSurface : const Color(0xFFF8F8F8),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           isDense: true,
         ),
-        items: options.entries
-            .map(
-              (e) => DropdownMenuItem(
-                value: e.key,
-                child: Text(e.value, style: const TextStyle(fontSize: 13)),
-              ),
-            )
-            .toList(),
+        items: options.entries.map((e) => DropdownMenuItem(
+          value: e.key,
+          child: Text(e.value, style: const TextStyle(fontSize: 13)),
+        )).toList(),
         onChanged: onChanged,
       ),
     );
   }
 
-  Widget _datePicker(String label, DateTime date, VoidCallback onTap) {
+  Widget _datePicker(String label, DateTime date, VoidCallback onTap, bool isDark) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
         margin: const EdgeInsets.only(bottom: 10),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
-          color: const Color(0xFFF8F8F8),
+          color: isDark ? AppTheme.AppColors.darkSurface : const Color(0xFFF8F8F8),
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: Colors.grey.shade200),
+          border: Border.all(color: isDark ? AppTheme.AppColors.grayDark : Colors.grey.shade200),
         ),
         child: Row(
           children: [
@@ -940,14 +949,18 @@ class _CouponFormDialogState extends State<CouponFormDialog> {
                 children: [
                   Text(
                     label,
-                    style: TextStyle(fontSize: 10, color: Colors.grey.shade500),
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: isDark ? Colors.grey.shade500 : Colors.grey.shade500,
+                    ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     '${date.day}/${date.month}/${date.year}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
+                      color: isDark ? Colors.white : AppTheme.AppColors.lightTextPrimary,
                     ),
                   ),
                 ],
@@ -956,7 +969,7 @@ class _CouponFormDialogState extends State<CouponFormDialog> {
             Icon(
               Icons.calendar_today_outlined,
               size: 16,
-              color: Colors.grey.shade400,
+              color: isDark ? Colors.grey.shade500 : Colors.grey.shade400,
             ),
           ],
         ),

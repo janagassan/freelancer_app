@@ -197,7 +197,7 @@ abstract class AppLocalizations {
   /// No description provided for @proposals.
   ///
   /// In en, this message translates to:
-  /// **'Proposals'**
+  /// **'proposal'**
   String get proposals;
 
   /// No description provided for @rating.
@@ -359,7 +359,7 @@ abstract class AppLocalizations {
   /// No description provided for @currency.
   ///
   /// In en, this message translates to:
-  /// **'Currency'**
+  /// **'SAR'**
   String get currency;
 
   /// No description provided for @support.
@@ -2567,7 +2567,7 @@ abstract class AppLocalizations {
   /// No description provided for @coupon.
   ///
   /// In en, this message translates to:
-  /// **'Coupon'**
+  /// **'coupon'**
   String get coupon;
 
   /// No description provided for @dollar.
@@ -2951,7 +2951,7 @@ abstract class AppLocalizations {
   /// No description provided for @pendingPayments.
   ///
   /// In en, this message translates to:
-  /// **'Pending payments'**
+  /// **'Pending Payments'**
   String get pendingPayments;
 
   /// No description provided for @applyBeforePaying.
@@ -5171,7 +5171,7 @@ abstract class AppLocalizations {
   /// No description provided for @templates.
   ///
   /// In en, this message translates to:
-  /// **'Templates'**
+  /// **'template'**
   String get templates;
 
   /// No description provided for @projectDetailsHint.
@@ -5483,7 +5483,7 @@ abstract class AppLocalizations {
   /// Subtitle for completed projects
   ///
   /// In en, this message translates to:
-  /// **'total projects'**
+  /// **'Total Projects'**
   String get totalProjects;
 
   /// Subtitle for experience years
@@ -6403,76 +6403,2148 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Create Campaign'**
   String get createCampaign;
-  // Dispute Screen
+
+  /// No description provided for @createDispute.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Dispute'**
   String get createDispute;
+
+  /// No description provided for @disputeInstruction.
+  ///
+  /// In en, this message translates to:
+  /// **'Please provide clear details about the dispute'**
   String get disputeInstruction;
+
+  /// No description provided for @disputeTitleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Dispute title'**
   String get disputeTitleHint;
+
+  /// No description provided for @disputeDescriptionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Please explain the issue in detail'**
   String get disputeDescriptionHint;
+
+  /// No description provided for @evidenceAttachments.
+  ///
+  /// In en, this message translates to:
+  /// **'Evidence Attachments'**
   String get evidenceAttachments;
+
+  /// No description provided for @uploadEvidenceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload images, documents or screenshots (coming soon)'**
   String get uploadEvidenceHint;
+
+  /// No description provided for @importantNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Important Notes'**
+  String get importantNotes;
+
+  /// No description provided for @submitDispute.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit Dispute'**
   String get submitDispute;
+
+  /// No description provided for @disputeSubmittedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Dispute submitted successfully. It will be reviewed by admin.'**
   String get disputeSubmittedSuccess;
 
-  // Validation
+  /// No description provided for @titleRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter dispute title'**
   String get titleRequired;
+
+  /// No description provided for @titleTooShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Title must be at least 5 characters'**
   String get titleTooShort;
+
+  /// No description provided for @descriptionRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter dispute description'**
   String get descriptionRequired;
+
+  /// No description provided for @descriptionTooShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Description must be at least 20 characters'**
   String get descriptionTooShort;
 
-  // Notes
-  String get disputeNote1;
-  String get disputeNote2;
-  String get disputeNote3;
-  String get disputeNote4;
-
-  String get disputeDetails;
-  String get disputeInfo;
-  String get disputeId;
-  String get disputeTitle;
-  String get disputeDescription;
-  String get createdAt;
-  String get lastUpdated;
-  String get disputeNotFound;
-  String get errorLoadingDetails;
-  String get contractInfo;
-  String get contractId;
-
-  String get notSpecified;
-  String get evidenceFiles;
-  String get disputeStatusPending;
-  String get disputeStatusUnderReview;
-
-  String get disputeStatusResolved;
-  String get viewContractDetails;
-
-  String get disputeStatusRejected;
-
-  String get disputeStatusPendingDesc;
-  String get disputeStatusUnderReviewDesc;
-  String get disputeStatusResolvedDesc;
-
-  String get disputeStatusRejectedDesc;
-
-  String get disputeResolved;
-
-  String get disputeRejected;
-
-  String get refundAmount;
-
+  /// No description provided for @connectionError.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection error. Please try again'**
   String get connectionError;
 
+  /// No description provided for @disputeNote1.
+  ///
+  /// In en, this message translates to:
+  /// **'Dispute will be reviewed by admin team'**
+  String get disputeNote1;
+
+  /// No description provided for @disputeNote2.
+  ///
+  /// In en, this message translates to:
+  /// **'Please provide clear and reliable evidence'**
+  String get disputeNote2;
+
+  /// No description provided for @disputeNote3.
+  ///
+  /// In en, this message translates to:
+  /// **'Dispute resolution may take several days'**
+  String get disputeNote3;
+
+  /// No description provided for @disputeNote4.
+  ///
+  /// In en, this message translates to:
+  /// **'All parties will be notified of final decision'**
+  String get disputeNote4;
+
+  /// No description provided for @disputeDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Dispute Details'**
+  String get disputeDetails;
+
+  /// No description provided for @disputeInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Dispute Information'**
+  String get disputeInfo;
+
+  /// No description provided for @disputeId.
+  ///
+  /// In en, this message translates to:
+  /// **'Dispute ID'**
+  String get disputeId;
+
+  /// No description provided for @disputeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get disputeTitle;
+
+  /// No description provided for @disputeDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get disputeDescription;
+
+  /// No description provided for @createdAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Created At'**
+  String get createdAt;
+
+  /// No description provided for @lastUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Last Updated'**
+  String get lastUpdated;
+
+  /// No description provided for @disputeNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Dispute not found'**
+  String get disputeNotFound;
+
+  /// No description provided for @errorLoadingDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading details'**
+  String get errorLoadingDetails;
+
+  /// No description provided for @contractInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Contract Information'**
+  String get contractInfo;
+
+  /// No description provided for @contractId.
+  ///
+  /// In en, this message translates to:
+  /// **'Contract ID'**
+  String get contractId;
+
+  /// No description provided for @viewContractDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'View Contract Details'**
+  String get viewContractDetails;
+
+  /// No description provided for @notSpecified.
+  ///
+  /// In en, this message translates to:
+  /// **'Not specified'**
+  String get notSpecified;
+
+  /// No description provided for @evidenceFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Evidence Files'**
+  String get evidenceFiles;
+
+  /// No description provided for @disputeStatusPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get disputeStatusPending;
+
+  /// No description provided for @disputeStatusUnderReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Under Review'**
+  String get disputeStatusUnderReview;
+
+  /// No description provided for @disputeStatusResolved.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolved'**
+  String get disputeStatusResolved;
+
+  /// No description provided for @disputeStatusRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected'**
+  String get disputeStatusRejected;
+
+  /// No description provided for @disputeStatusPendingDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Dispute is pending admin review'**
+  String get disputeStatusPendingDesc;
+
+  /// No description provided for @disputeStatusUnderReviewDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Dispute is under review and investigation'**
+  String get disputeStatusUnderReviewDesc;
+
+  /// No description provided for @disputeStatusResolvedDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Dispute has been resolved with appropriate decision'**
+  String get disputeStatusResolvedDesc;
+
+  /// No description provided for @disputeStatusRejectedDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Dispute has been rejected after review'**
+  String get disputeStatusRejectedDesc;
+
+  /// No description provided for @disputeResolved.
+  ///
+  /// In en, this message translates to:
+  /// **'Dispute resolved'**
+  String get disputeResolved;
+
+  /// No description provided for @disputeRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Dispute Rejected'**
+  String get disputeRejected;
+
+  /// No description provided for @refundAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Refund Amount'**
+  String get refundAmount;
+
+  /// No description provided for @myDisputes.
+  ///
+  /// In en, this message translates to:
+  /// **'My Disputes'**
   String get myDisputes;
 
+  /// No description provided for @filterByStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter by status'**
   String get filterByStatus;
 
+  /// No description provided for @allDisputes.
+  ///
+  /// In en, this message translates to:
+  /// **'All Disputes'**
   String get allDisputes;
 
+  /// No description provided for @noDisputes.
+  ///
+  /// In en, this message translates to:
+  /// **'No disputes found'**
   String get noDisputes;
 
+  /// No description provided for @noDisputesDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'You haven\'t raised any disputes yet'**
   String get noDisputesDesc;
 
+  /// No description provided for @errorLoadingDisputes.
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading disputes'**
   String get errorLoadingDisputes;
-  String get importantNotes;
+
+  /// No description provided for @users.
+  ///
+  /// In en, this message translates to:
+  /// **'Users'**
+  String get users;
+
+  /// No description provided for @addUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Add User'**
+  String get addUser;
+
+  /// No description provided for @searchByNameOrEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by name or email...'**
+  String get searchByNameOrEmail;
+
+  /// No description provided for @role.
+  ///
+  /// In en, this message translates to:
+  /// **'Role'**
+  String get role;
+
+  /// No description provided for @status.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get status;
+
+  /// No description provided for @allUsers.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get allUsers;
+
+  /// No description provided for @suspended.
+  ///
+  /// In en, this message translates to:
+  /// **'Suspended'**
+  String get suspended;
+
+  /// No description provided for @usersCount.
+  ///
+  /// In en, this message translates to:
+  /// **'user'**
+  String get usersCount;
+
+  /// No description provided for @usersCount_plural.
+  ///
+  /// In en, this message translates to:
+  /// **'users'**
+  String get usersCount_plural;
+
+  /// No description provided for @noUsersFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No users found'**
+  String get noUsersFound;
+
+  /// No description provided for @tryAdjustingFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'Try adjusting your search or filter'**
+  String get tryAdjustingFilters;
+
+  /// No description provided for @createNewUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Create new user'**
+  String get createNewUser;
+
+  /// No description provided for @name.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get name;
+
+  /// No description provided for @email.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get email;
+
+  /// No description provided for @phoneOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone (optional)'**
+  String get phoneOptional;
+
+  /// No description provided for @nationalIdOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'National ID (optional)'**
+  String get nationalIdOptional;
+
+  /// No description provided for @clientTypeOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Client Type (optional)'**
+  String get clientTypeOptional;
+
+  /// No description provided for @companyNameOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Company Name (optional)'**
+  String get companyNameOptional;
+
+  /// No description provided for @commercialRegisterOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Commercial Register Number (optional)'**
+  String get commercialRegisterOptional;
+
+  /// No description provided for @taxNumberOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Tax Number (optional)'**
+  String get taxNumberOptional;
+
+  /// No description provided for @hourlyRateOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Hourly Rate (optional)'**
+  String get hourlyRateOptional;
+
+  /// No description provided for @skillsOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Skills (optional, comma separated)'**
+  String get skillsOptional;
+
+  /// No description provided for @nameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Name is required'**
+  String get nameRequired;
+
+  /// No description provided for @emailRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Email is required'**
+  String get emailRequired;
+
+  /// No description provided for @enterValidEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid email'**
+  String get enterValidEmail;
+
+  /// No description provided for @userCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'✅ User created. Password sent by email.'**
+  String get userCreated;
+
+  /// No description provided for @failedToCreateUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to create user'**
+  String get failedToCreateUser;
+
+  /// No description provided for @userActivated.
+  ///
+  /// In en, this message translates to:
+  /// **'✅ User activated successfully'**
+  String get userActivated;
+
+  /// No description provided for @userSuspended.
+  ///
+  /// In en, this message translates to:
+  /// **'✅ User suspended successfully'**
+  String get userSuspended;
+
+  /// No description provided for @userVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'✅ User verified successfully'**
+  String get userVerified;
+
+  /// No description provided for @verificationRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'✅ Verification removed'**
+  String get verificationRemoved;
+
+  /// No description provided for @accountEmailResent.
+  ///
+  /// In en, this message translates to:
+  /// **'✅ Account email resent successfully'**
+  String get accountEmailResent;
+
+  /// No description provided for @failedToResendEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to resend email'**
+  String get failedToResendEmail;
+
+  /// No description provided for @resendAccountEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend Account Email'**
+  String get resendAccountEmail;
+
+  /// No description provided for @verifyUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify User'**
+  String get verifyUser;
+
+  /// No description provided for @removeVerification.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove Verification'**
+  String get removeVerification;
+
+  /// No description provided for @suspendUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Suspend User'**
+  String get suspendUser;
+
+  /// No description provided for @activateUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Activate User'**
+  String get activateUser;
+
+  /// No description provided for @userDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'User Details'**
+  String get userDetails;
+
+  /// No description provided for @page.
+  ///
+  /// In en, this message translates to:
+  /// **'Page'**
+  String get page;
+
+  /// No description provided for @ofWord.
+  ///
+  /// In en, this message translates to:
+  /// **'of'**
+  String get ofWord;
+
+  /// No description provided for @monthlyRecurring.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly Recurring Revenue'**
+  String get monthlyRecurring;
+
+  /// No description provided for @yearlyRecurring.
+  ///
+  /// In en, this message translates to:
+  /// **'Yearly Recurring Revenue'**
+  String get yearlyRecurring;
+
+  /// No description provided for @subscriptionMetrics.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription Metrics'**
+  String get subscriptionMetrics;
+
+  /// No description provided for @trialing.
+  ///
+  /// In en, this message translates to:
+  /// **'Trialing'**
+  String get trialing;
+
+  /// No description provided for @canceled.
+  ///
+  /// In en, this message translates to:
+  /// **'Canceled'**
+  String get canceled;
+
+  /// No description provided for @upgradeRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade Rate'**
+  String get upgradeRate;
+
+  /// No description provided for @churnRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Churn Rate'**
+  String get churnRate;
+
+  /// No description provided for @mostPopularPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Most Popular Plan'**
+  String get mostPopularPlan;
+
+  /// No description provided for @revenueByPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Revenue by Plan'**
+  String get revenueByPlan;
+
+  /// No description provided for @failedToLoadStats.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load statistics'**
+  String get failedToLoadStats;
+
+  /// No description provided for @noDataAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No data available'**
+  String get noDataAvailable;
+
+  /// No description provided for @mrr.
+  ///
+  /// In en, this message translates to:
+  /// **'MRR'**
+  String get mrr;
+
+  /// No description provided for @mostSubscribedPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Most subscribed plan'**
+  String get mostSubscribedPlan;
+
+  /// No description provided for @subs.
+  ///
+  /// In en, this message translates to:
+  /// **'subs'**
+  String get subs;
+
+  /// No description provided for @subs_plural.
+  ///
+  /// In en, this message translates to:
+  /// **'subs'**
+  String get subs_plural;
+
+  /// No description provided for @subscriptionManagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription Management'**
+  String get subscriptionManagement;
+
+  /// No description provided for @plans.
+  ///
+  /// In en, this message translates to:
+  /// **'Plans'**
+  String get plans;
+
+  /// No description provided for @coupons.
+  ///
+  /// In en, this message translates to:
+  /// **'coupons'**
+  String get coupons;
+
+  /// No description provided for @adminSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin Settings'**
+  String get adminSettings;
+
+  /// No description provided for @general.
+  ///
+  /// In en, this message translates to:
+  /// **'General'**
+  String get general;
+
+  /// No description provided for @security.
+  ///
+  /// In en, this message translates to:
+  /// **'Security'**
+  String get security;
+
+  /// No description provided for @platformControls.
+  ///
+  /// In en, this message translates to:
+  /// **'Platform Controls'**
+  String get platformControls;
+
+  /// No description provided for @maintenanceMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Maintenance Mode'**
+  String get maintenanceMode;
+
+  /// No description provided for @maintenanceModeDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Temporarily disable user access to the platform'**
+  String get maintenanceModeDesc;
+
+  /// No description provided for @allowNewRegistrations.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow New Registrations'**
+  String get allowNewRegistrations;
+
+  /// No description provided for @allowNewRegistrationsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable signup for new users on the platform'**
+  String get allowNewRegistrationsDesc;
+
+  /// No description provided for @defaultConfiguration.
+  ///
+  /// In en, this message translates to:
+  /// **'Default Configuration'**
+  String get defaultConfiguration;
+
+  /// No description provided for @defaultClientPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Default Client Plan'**
+  String get defaultClientPlan;
+
+  /// No description provided for @defaultFreelancerVisibility.
+  ///
+  /// In en, this message translates to:
+  /// **'Default Freelancer Visibility'**
+  String get defaultFreelancerVisibility;
+
+  /// No description provided for @platformCommissionRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Platform Commission Rate'**
+  String get platformCommissionRate;
+
+  /// No description provided for @platformTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Platform Theme'**
+  String get platformTheme;
+
+  /// No description provided for @defaultTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Default'**
+  String get defaultTheme;
+
+  /// No description provided for @logoBranding.
+  ///
+  /// In en, this message translates to:
+  /// **'Logo & Branding'**
+  String get logoBranding;
+
+  /// No description provided for @configured.
+  ///
+  /// In en, this message translates to:
+  /// **'Configured'**
+  String get configured;
+
+  /// No description provided for @verification.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification'**
+  String get verification;
+
+  /// No description provided for @autoVerifyEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto Verify Email Domains'**
+  String get autoVerifyEmail;
+
+  /// No description provided for @autoVerifyEmailDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatically verify trusted business email domains'**
+  String get autoVerifyEmailDesc;
+
+  /// No description provided for @flagHighRiskPayments.
+  ///
+  /// In en, this message translates to:
+  /// **'Flag High-Risk Payments'**
+  String get flagHighRiskPayments;
+
+  /// No description provided for @flagHighRiskPaymentsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Detect and mark suspicious payment activity'**
+  String get flagHighRiskPaymentsDesc;
+
+  /// No description provided for @accessRules.
+  ///
+  /// In en, this message translates to:
+  /// **'Access Rules'**
+  String get accessRules;
+
+  /// No description provided for @adminSessionTimeout.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin Session Timeout'**
+  String get adminSessionTimeout;
+
+  /// No description provided for @twoFactorAuth.
+  ///
+  /// In en, this message translates to:
+  /// **'2FA Requirement'**
+  String get twoFactorAuth;
+
+  /// No description provided for @requiredForAdmins.
+  ///
+  /// In en, this message translates to:
+  /// **'Required for admins'**
+  String get requiredForAdmins;
+
+  /// No description provided for @ipWhitelist.
+  ///
+  /// In en, this message translates to:
+  /// **'IP Whitelist'**
+  String get ipWhitelist;
+
+  /// No description provided for @notConfigured.
+  ///
+  /// In en, this message translates to:
+  /// **'Not configured'**
+  String get notConfigured;
+
+  /// No description provided for @securityStatusGood.
+  ///
+  /// In en, this message translates to:
+  /// **'Security Status: Good'**
+  String get securityStatusGood;
+
+  /// No description provided for @securityStatusDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'All critical security features are configured properly'**
+  String get securityStatusDesc;
+
+  /// No description provided for @adminAlerts.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin Alerts'**
+  String get adminAlerts;
+
+  /// No description provided for @weeklyPerformanceReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly Performance Report'**
+  String get weeklyPerformanceReport;
+
+  /// No description provided for @weeklyPerformanceReportDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Receive a comprehensive summary every Monday morning'**
+  String get weeklyPerformanceReportDesc;
+
+  /// No description provided for @criticalIncidentAlerts.
+  ///
+  /// In en, this message translates to:
+  /// **'Critical Incident Alerts'**
+  String get criticalIncidentAlerts;
+
+  /// No description provided for @emailInApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Email + in-app'**
+  String get emailInApp;
+
+  /// No description provided for @disputeEscalationAlerts.
+  ///
+  /// In en, this message translates to:
+  /// **'Dispute Escalation Alerts'**
+  String get disputeEscalationAlerts;
+
+  /// No description provided for @instantPush.
+  ///
+  /// In en, this message translates to:
+  /// **'Instant push'**
+  String get instantPush;
+
+  /// No description provided for @newUserRegistrations.
+  ///
+  /// In en, this message translates to:
+  /// **'New User Registrations'**
+  String get newUserRegistrations;
+
+  /// No description provided for @dailyDigest.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily digest'**
+  String get dailyDigest;
+
+  /// No description provided for @emailConfiguration.
+  ///
+  /// In en, this message translates to:
+  /// **'Email Configuration'**
+  String get emailConfiguration;
+
+  /// No description provided for @smtpSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'SMTP Settings'**
+  String get smtpSettings;
+
+  /// No description provided for @emailTemplates.
+  ///
+  /// In en, this message translates to:
+  /// **'Email Templates'**
+  String get emailTemplates;
+
+  /// No description provided for @templates_plural.
+  ///
+  /// In en, this message translates to:
+  /// **'templates'**
+  String get templates_plural;
+
+  /// No description provided for @senderNameAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Sender Name & Address'**
+  String get senderNameAddress;
+
+  /// No description provided for @platformAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Platform Admin'**
+  String get platformAdmin;
+
+  /// No description provided for @projectsManagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Projects Management'**
+  String get projectsManagement;
+
+  /// No description provided for @allStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'All Status'**
+  String get allStatus;
+
+  /// No description provided for @cancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get cancelled;
+
+  /// No description provided for @projects.
+  ///
+  /// In en, this message translates to:
+  /// **'Projects'**
+  String get projects;
+
+  /// No description provided for @projects_plural.
+  ///
+  /// In en, this message translates to:
+  /// **'projects'**
+  String get projects_plural;
+
+  /// No description provided for @projectDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Project deleted'**
+  String get projectDeleted;
+
+  /// No description provided for @deleteFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete failed'**
+  String get deleteFailed;
+
+  /// No description provided for @failedToLoadProjects.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load projects'**
+  String get failedToLoadProjects;
+
+  /// No description provided for @plansConfigured.
+  ///
+  /// In en, this message translates to:
+  /// **'plan configured'**
+  String get plansConfigured;
+
+  /// No description provided for @plansConfigured_plural.
+  ///
+  /// In en, this message translates to:
+  /// **'plans configured'**
+  String get plansConfigured_plural;
+
+  /// No description provided for @newPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'New Plan'**
+  String get newPlan;
+
+  /// No description provided for @deletePlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Plan'**
+  String get deletePlan;
+
+  /// No description provided for @deletePlanConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete \"{name}\"? This cannot be undone.'**
+  String deletePlanConfirmation(Object name);
+
+  /// No description provided for @planDeletedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan deleted successfully'**
+  String get planDeletedSuccess;
+
+  /// No description provided for @failedToDeletePlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete plan'**
+  String get failedToDeletePlan;
+
+  /// No description provided for @failedToLoadPlans.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load plans'**
+  String get failedToLoadPlans;
+
+  /// No description provided for @noPlansConfigured.
+  ///
+  /// In en, this message translates to:
+  /// **'No plans configured'**
+  String get noPlansConfigured;
+
+  /// No description provided for @addFirstPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Add First Plan'**
+  String get addFirstPlan;
+
+  /// No description provided for @editPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Plan'**
+  String get editPlan;
+
+  /// No description provided for @savePlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Plan'**
+  String get savePlan;
+
+  /// No description provided for @planName.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan Name *'**
+  String get planName;
+
+  /// No description provided for @slugExample.
+  ///
+  /// In en, this message translates to:
+  /// **'Slug * (e.g. pro)'**
+  String get slugExample;
+
+  /// No description provided for @billingPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'Billing Period'**
+  String get billingPeriod;
+
+  /// No description provided for @price.
+  ///
+  /// In en, this message translates to:
+  /// **'Price *'**
+  String get price;
+
+  /// No description provided for @proposalLimitEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Proposal Limit (empty=∞)'**
+  String get proposalLimitEmpty;
+
+  /// No description provided for @projectLimitEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Project Limit (empty=∞)'**
+  String get projectLimitEmpty;
+
+  /// No description provided for @trialDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Trial Days'**
+  String get trialDays;
+
+  /// No description provided for @sortOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort Order'**
+  String get sortOrder;
+
+  /// No description provided for @features.
+  ///
+  /// In en, this message translates to:
+  /// **'Features'**
+  String get features;
+
+  /// No description provided for @customFeatures.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom Features'**
+  String get customFeatures;
+
+  /// No description provided for @addFeature.
+  ///
+  /// In en, this message translates to:
+  /// **'Add feature...'**
+  String get addFeature;
+
+  /// No description provided for @planCreatedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan created successfully'**
+  String get planCreatedSuccess;
+
+  /// No description provided for @planUpdatedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan updated successfully'**
+  String get planUpdatedSuccess;
+
+  /// No description provided for @failedToSavePlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save plan'**
+  String get failedToSavePlan;
+
+  /// No description provided for @free.
+  ///
+  /// In en, this message translates to:
+  /// **'Free'**
+  String get free;
+
+  /// No description provided for @trial.
+  ///
+  /// In en, this message translates to:
+  /// **'Trial'**
+  String get trial;
+
+  /// No description provided for @proposals_plural.
+  ///
+  /// In en, this message translates to:
+  /// **'proposals'**
+  String get proposals_plural;
+
+  /// No description provided for @customBranding.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom Branding'**
+  String get customBranding;
+
+  /// No description provided for @recommended.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommended'**
+  String get recommended;
+
+  /// No description provided for @prioritySupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Priority Support'**
+  String get prioritySupport;
+
+  /// No description provided for @apiAccess.
+  ///
+  /// In en, this message translates to:
+  /// **'API Access'**
+  String get apiAccess;
+
+  /// No description provided for @disputesManagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Disputes Management'**
+  String get disputesManagement;
+
+  /// No description provided for @resolveDispute.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolve Dispute'**
+  String get resolveDispute;
+
+  /// No description provided for @rejectDispute.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject Dispute'**
+  String get rejectDispute;
+
+  /// No description provided for @rejectDisputeConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to reject this dispute?'**
+  String get rejectDisputeConfirmation;
+
+  /// No description provided for @rejectionReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason for rejection'**
+  String get rejectionReason;
+
+  /// No description provided for @disputeStatusOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get disputeStatusOpen;
+
+  /// No description provided for @disputeResolvedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Dispute resolved successfully'**
+  String get disputeResolvedSuccess;
+
+  /// No description provided for @failedToResolveDispute.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to resolve dispute'**
+  String get failedToResolveDispute;
+
+  /// No description provided for @disputeRejectedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Dispute rejected successfully'**
+  String get disputeRejectedSuccess;
+
+  /// No description provided for @failedToRejectDispute.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to reject dispute'**
+  String get failedToRejectDispute;
+
+  /// No description provided for @initiatedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Initiated by'**
+  String get initiatedBy;
+
+  /// No description provided for @contract.
+  ///
+  /// In en, this message translates to:
+  /// **'Contract'**
+  String get contract;
+
+  /// No description provided for @fullRefundToClient.
+  ///
+  /// In en, this message translates to:
+  /// **'Full Refund to Client'**
+  String get fullRefundToClient;
+
+  /// No description provided for @partialRefundToClient.
+  ///
+  /// In en, this message translates to:
+  /// **'Partial Refund to Client'**
+  String get partialRefundToClient;
+
+  /// No description provided for @noRefund.
+  ///
+  /// In en, this message translates to:
+  /// **'No Refund'**
+  String get noRefund;
+
+  /// No description provided for @resolution.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolution'**
+  String get resolution;
+
+  /// No description provided for @adminNotesOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin Notes (optional)'**
+  String get adminNotesOptional;
+
+  /// No description provided for @noDisputesFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No disputes found'**
+  String get noDisputesFound;
+
+  /// No description provided for @adminNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin Notes'**
+  String get adminNotes;
+
+  /// No description provided for @resolve.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolve'**
+  String get resolve;
+
+  /// No description provided for @reject.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject'**
+  String get reject;
+
+  /// No description provided for @newCoupon.
+  ///
+  /// In en, this message translates to:
+  /// **'New Coupon'**
+  String get newCoupon;
+
+  /// No description provided for @deleteCoupon.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Coupon'**
+  String get deleteCoupon;
+
+  /// No description provided for @deleteCouponConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete coupon \"{code}\"?'**
+  String deleteCouponConfirmation(Object code);
+
+  /// No description provided for @couponDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Coupon deleted'**
+  String get couponDeleted;
+
+  /// No description provided for @failedToDeleteCoupon.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete coupon'**
+  String get failedToDeleteCoupon;
+
+  /// No description provided for @failedToLoadCoupons.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load coupons'**
+  String get failedToLoadCoupons;
+
+  /// No description provided for @noCouponsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No coupons yet'**
+  String get noCouponsYet;
+
+  /// No description provided for @createFirstCoupon.
+  ///
+  /// In en, this message translates to:
+  /// **'Create First Coupon'**
+  String get createFirstCoupon;
+
+  /// No description provided for @editCoupon.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Coupon'**
+  String get editCoupon;
+
+  /// No description provided for @saveCoupon.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Coupon'**
+  String get saveCoupon;
+
+  /// No description provided for @couponCodeRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Coupon Code *'**
+  String get couponCodeRequired;
+
+  /// No description provided for @discountType.
+  ///
+  /// In en, this message translates to:
+  /// **'Discount Type'**
+  String get discountType;
+
+  /// No description provided for @percentage.
+  ///
+  /// In en, this message translates to:
+  /// **'Percentage'**
+  String get percentage;
+
+  /// No description provided for @fixedAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed Amount'**
+  String get fixedAmount;
+
+  /// No description provided for @appliesTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Applies To'**
+  String get appliesTo;
+
+  /// No description provided for @subscriptionOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription only'**
+  String get subscriptionOnly;
+
+  /// No description provided for @contractEscrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Contract escrow'**
+  String get contractEscrow;
+
+  /// No description provided for @both.
+  ///
+  /// In en, this message translates to:
+  /// **'Both'**
+  String get both;
+
+  /// No description provided for @validFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'Valid From'**
+  String get validFrom;
+
+  /// No description provided for @validUntil.
+  ///
+  /// In en, this message translates to:
+  /// **'Valid Until'**
+  String get validUntil;
+
+  /// No description provided for @maxUsesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Max Uses (empty = unlimited)'**
+  String get maxUsesEmpty;
+
+  /// No description provided for @applicablePlansOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Applicable Plans (optional)'**
+  String get applicablePlansOptional;
+
+  /// No description provided for @planSlugExample.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan slug (e.g. pro)'**
+  String get planSlugExample;
+
+  /// No description provided for @used.
+  ///
+  /// In en, this message translates to:
+  /// **'used'**
+  String get used;
+
+  /// No description provided for @percentageDiscount.
+  ///
+  /// In en, this message translates to:
+  /// **'Percentage discount'**
+  String get percentageDiscount;
+
+  /// No description provided for @fixedAmountOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed amount off'**
+  String get fixedAmountOff;
+
+  /// No description provided for @inactive.
+  ///
+  /// In en, this message translates to:
+  /// **'Inactive'**
+  String get inactive;
+
+  /// No description provided for @subscriptions.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscriptions'**
+  String get subscriptions;
+
+  /// No description provided for @couponCreatedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Coupon created successfully'**
+  String get couponCreatedSuccess;
+
+  /// No description provided for @couponUpdatedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Coupon updated successfully'**
+  String get couponUpdatedSuccess;
+
+  /// No description provided for @failedToSaveCoupon.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save coupon'**
+  String get failedToSaveCoupon;
+
+  /// No description provided for @contractsManagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Contracts Management'**
+  String get contractsManagement;
+
+  /// No description provided for @pendingClient.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending Client'**
+  String get pendingClient;
+
+  /// No description provided for @pendingFreelancer.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending Freelancer'**
+  String get pendingFreelancer;
+
+  /// No description provided for @disputed.
+  ///
+  /// In en, this message translates to:
+  /// **'Disputed'**
+  String get disputed;
+
+  /// No description provided for @failedToLoadContracts.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load contracts'**
+  String get failedToLoadContracts;
+
+  /// No description provided for @resolutionNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolution notes'**
+  String get resolutionNotes;
+
+  /// No description provided for @resolutionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Write your resolution details here...'**
+  String get resolutionHint;
+
+  /// No description provided for @actionFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Action failed'**
+  String get actionFailed;
+
+  /// No description provided for @noContractsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No contracts found'**
+  String get noContractsFound;
+
+  /// No description provided for @errorLoadingCampaigns.
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading campaigns'**
+  String get errorLoadingCampaigns;
+
+  /// No description provided for @adRevenueStats.
+  ///
+  /// In en, this message translates to:
+  /// **'Ad Revenue Stats'**
+  String get adRevenueStats;
+
+  /// No description provided for @totalAdRevenue.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Ad Revenue'**
+  String get totalAdRevenue;
+
+  /// No description provided for @totalAdSpend.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Ad Spend'**
+  String get totalAdSpend;
+
+  /// No description provided for @recentCampaigns.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent Campaigns'**
+  String get recentCampaigns;
+
+  /// No description provided for @noCampaignsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No campaigns yet'**
+  String get noCampaignsYet;
+
+  /// No description provided for @failedToChangeStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to change status'**
+  String get failedToChangeStatus;
+
+  /// No description provided for @failedToDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete campaign'**
+  String get failedToDelete;
+
+  /// No description provided for @updateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Update failed'**
+  String get updateFailed;
+
+  /// No description provided for @deleteCampaign.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Campaign'**
+  String get deleteCampaign;
+
+  /// No description provided for @editCampaign.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Campaign'**
+  String get editCampaign;
+
+  /// No description provided for @campaignName.
+  ///
+  /// In en, this message translates to:
+  /// **'Campaign Name'**
+  String get campaignName;
+
+  /// No description provided for @totalBudget.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Budget'**
+  String get totalBudget;
+
+  /// No description provided for @dailyBudget.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Budget'**
+  String get dailyBudget;
+
+  /// No description provided for @costPerClick.
+  ///
+  /// In en, this message translates to:
+  /// **'Cost Per Click'**
+  String get costPerClick;
+
+  /// No description provided for @costPerImpression.
+  ///
+  /// In en, this message translates to:
+  /// **'Cost Per Impression'**
+  String get costPerImpression;
+
+  /// No description provided for @campaignUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Campaign updated successfully'**
+  String get campaignUpdated;
+
+  /// No description provided for @campaignDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Campaign deleted successfully'**
+  String get campaignDeleted;
+
+  /// No description provided for @changeStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Change Status'**
+  String get changeStatus;
+
+  /// No description provided for @adsManagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Ads Management'**
+  String get adsManagement;
+
+  /// No description provided for @campaigns.
+  ///
+  /// In en, this message translates to:
+  /// **'Campaigns'**
+  String get campaigns;
+
+  /// No description provided for @paused.
+  ///
+  /// In en, this message translates to:
+  /// **'Paused'**
+  String get paused;
+
+  /// No description provided for @pendingApproval.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending Approval'**
+  String get pendingApproval;
+
+  /// No description provided for @searchCampaigns.
+  ///
+  /// In en, this message translates to:
+  /// **'Search campaigns...'**
+  String get searchCampaigns;
+
+  /// No description provided for @activeCampaigns.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get activeCampaigns;
+
+  /// No description provided for @noCampaignsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No campaigns found'**
+  String get noCampaignsFound;
+
+  /// No description provided for @revenue.
+  ///
+  /// In en, this message translates to:
+  /// **'Revenue'**
+  String get revenue;
+
+  /// No description provided for @totalRevenue.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Revenue'**
+  String get totalRevenue;
+
+  /// No description provided for @platformCommission.
+  ///
+  /// In en, this message translates to:
+  /// **'Platform Commission'**
+  String get platformCommission;
+
+  /// No description provided for @activeCampaignsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Active Campaigns'**
+  String get activeCampaignsCount;
+
+  /// No description provided for @ctrAverage.
+  ///
+  /// In en, this message translates to:
+  /// **'Average CTR'**
+  String get ctrAverage;
+
+  /// No description provided for @keyPerformanceIndicators.
+  ///
+  /// In en, this message translates to:
+  /// **'Key Performance Indicators'**
+  String get keyPerformanceIndicators;
+
+  /// No description provided for @dailyPerformanceTrends.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Performance Trends'**
+  String get dailyPerformanceTrends;
+
+  /// No description provided for @performanceByAdType.
+  ///
+  /// In en, this message translates to:
+  /// **'Performance by Ad Type'**
+  String get performanceByAdType;
+
+  /// No description provided for @topAdvertisers.
+  ///
+  /// In en, this message translates to:
+  /// **'Top Advertisers'**
+  String get topAdvertisers;
+
+  /// No description provided for @additionalMetrics.
+  ///
+  /// In en, this message translates to:
+  /// **'Additional Metrics'**
+  String get additionalMetrics;
+
+  /// No description provided for @avgCtr.
+  ///
+  /// In en, this message translates to:
+  /// **'Avg CTR'**
+  String get avgCtr;
+
+  /// No description provided for @estRoi.
+  ///
+  /// In en, this message translates to:
+  /// **'Est. ROI'**
+  String get estRoi;
+
+  /// No description provided for @conversionRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Conversion Rate'**
+  String get conversionRate;
+
+  /// No description provided for @type.
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get type;
+
+  /// No description provided for @impressions.
+  ///
+  /// In en, this message translates to:
+  /// **'Impressions'**
+  String get impressions;
+
+  /// No description provided for @clicks.
+  ///
+  /// In en, this message translates to:
+  /// **'Clicks'**
+  String get clicks;
+
+  /// No description provided for @ctr.
+  ///
+  /// In en, this message translates to:
+  /// **'CTR'**
+  String get ctr;
+
+  /// No description provided for @spent.
+  ///
+  /// In en, this message translates to:
+  /// **'Spent'**
+  String get spent;
+
+  /// No description provided for @advertiser.
+  ///
+  /// In en, this message translates to:
+  /// **'Advertiser'**
+  String get advertiser;
+
+  /// No description provided for @campaignsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Campaigns'**
+  String get campaignsCount;
+
+  /// No description provided for @totalSpentCap.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Spent'**
+  String get totalSpentCap;
+
+  /// No description provided for @commission.
+  ///
+  /// In en, this message translates to:
+  /// **'Commission'**
+  String get commission;
+
+  /// No description provided for @edit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get edit;
+
+  /// No description provided for @pause.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause'**
+  String get pause;
+
+  /// No description provided for @resume.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume'**
+  String get resume;
+
+  /// No description provided for @model.
+  ///
+  /// In en, this message translates to:
+  /// **'Model'**
+  String get model;
+
+  /// No description provided for @campaign.
+  ///
+  /// In en, this message translates to:
+  /// **'Campaign'**
+  String get campaign;
+
+  /// No description provided for @totalCampaigns.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Campaigns'**
+  String get totalCampaigns;
+
+  /// No description provided for @pausedCampaigns.
+  ///
+  /// In en, this message translates to:
+  /// **'Paused Campaigns'**
+  String get pausedCampaigns;
+
+  /// No description provided for @completedCampaigns.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed Campaigns'**
+  String get completedCampaigns;
+
+  /// No description provided for @draftCampaigns.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft Campaigns'**
+  String get draftCampaigns;
+
+  /// No description provided for @totalImpressions.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Impressions'**
+  String get totalImpressions;
+
+  /// No description provided for @totalClicks.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Clicks'**
+  String get totalClicks;
+
+  /// No description provided for @clickThroughRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Click-Through Rate'**
+  String get clickThroughRate;
+
+  /// No description provided for @totalSpend.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Spend'**
+  String get totalSpend;
+
+  /// No description provided for @totalBudgetSum.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Budget'**
+  String get totalBudgetSum;
+
+  /// No description provided for @campaignsWaitingForPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'campaigns waiting for payment'**
+  String get campaignsWaitingForPayment;
+
+  /// Status changed message
+  ///
+  /// In en, this message translates to:
+  /// **'Status changed to {status}'**
+  String statusChangedTo(String status);
+
+  /// Delete campaign confirmation message
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete \"{campaignName}\"? This action cannot be undone.'**
+  String deleteCampaignConfirmation(String campaignName);
+
+  /// No description provided for @errorLoadingUsers.
+  ///
+  /// In en, this message translates to:
+  /// **'Error Loading Users'**
+  String get errorLoadingUsers;
+
+  /// No description provided for @adminDashboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin Dashboard'**
+  String get adminDashboard;
+
+  /// No description provided for @dashboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Dashboard'**
+  String get dashboard;
+
+  /// No description provided for @totalUsers.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Users'**
+  String get totalUsers;
+
+  /// No description provided for @freelancers.
+  ///
+  /// In en, this message translates to:
+  /// **'Freelancers'**
+  String get freelancers;
+
+  /// No description provided for @clients.
+  ///
+  /// In en, this message translates to:
+  /// **'Clients'**
+  String get clients;
+
+  /// No description provided for @totalContracts.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Contracts'**
+  String get totalContracts;
+
+  /// No description provided for @adRevenue.
+  ///
+  /// In en, this message translates to:
+  /// **'Ad Revenue'**
+  String get adRevenue;
+
+  /// No description provided for @pendingProjects.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending Projects'**
+  String get pendingProjects;
+
+  /// No description provided for @activeContracts.
+  ///
+  /// In en, this message translates to:
+  /// **'Active Contracts'**
+  String get activeContracts;
+
+  /// No description provided for @completedContracts.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed Contracts'**
+  String get completedContracts;
+
+  /// No description provided for @pendingDisputes.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending Disputes'**
+  String get pendingDisputes;
+
+  /// No description provided for @admin.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin'**
+  String get admin;
+
+  /// No description provided for @superAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Super Admin'**
+  String get superAdmin;
+
+  /// No description provided for @goodMorning.
+  ///
+  /// In en, this message translates to:
+  /// **'Good Morning'**
+  String get goodMorning;
+
+  /// No description provided for @goodAfternoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Good Afternoon'**
+  String get goodAfternoon;
+
+  /// No description provided for @goodEvening.
+  ///
+  /// In en, this message translates to:
+  /// **'Good Evening'**
+  String get goodEvening;
+
+  /// No description provided for @heresWhatsHappening.
+  ///
+  /// In en, this message translates to:
+  /// **'Here\'s what\'s happening on your platform today'**
+  String get heresWhatsHappening;
+
+  /// No description provided for @userGrowthAnalytics.
+  ///
+  /// In en, this message translates to:
+  /// **'User Growth Analytics'**
+  String get userGrowthAnalytics;
+
+  /// No description provided for @totalUsersLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Users'**
+  String get totalUsersLabel;
+
+  /// No description provided for @userDistribution.
+  ///
+  /// In en, this message translates to:
+  /// **'User Distribution'**
+  String get userDistribution;
+
+  /// No description provided for @balancedMarketplace.
+  ///
+  /// In en, this message translates to:
+  /// **'Balanced marketplace with {total} total accounts'**
+  String balancedMarketplace(Object total);
+
+  /// No description provided for @operationalPerformance.
+  ///
+  /// In en, this message translates to:
+  /// **'Operational Performance'**
+  String get operationalPerformance;
+
+  /// No description provided for @lastMonthUsers.
+  ///
+  /// In en, this message translates to:
+  /// **'Last Month Users'**
+  String get lastMonthUsers;
+
+  /// No description provided for @lastMonthRevenue.
+  ///
+  /// In en, this message translates to:
+  /// **'Last Month Revenue'**
+  String get lastMonthRevenue;
+
+  /// No description provided for @healthScore.
+  ///
+  /// In en, this message translates to:
+  /// **'Health Score'**
+  String get healthScore;
+
+  /// No description provided for @loadingDashboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading dashboard...'**
+  String get loadingDashboard;
+
+  /// No description provided for @noChartDataAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No chart data available'**
+  String get noChartDataAvailable;
+
+  /// No description provided for @failedToLoadDashboardData.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load dashboard data'**
+  String get failedToLoadDashboardData;
+
+  /// No description provided for @comingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Coming Soon'**
+  String get comingSoon;
+
+  /// No description provided for @trends.
+  ///
+  /// In en, this message translates to:
+  /// **'Trends'**
+  String get trends;
+
+  /// No description provided for @totalUsersCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} user'**
+  String totalUsersCount(Object count);
+
+  /// No description provided for @totalUsersCount_plural.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} users'**
+  String totalUsersCount_plural(Object count);
+
+  /// No description provided for @activeCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} active'**
+  String activeCount(Object count);
+
+  /// No description provided for @freelancersCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} freelancer'**
+  String freelancersCount(Object count);
+
+  /// No description provided for @freelancersCount_plural.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} freelancers'**
+  String freelancersCount_plural(Object count);
+
+  /// No description provided for @clientsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} client'**
+  String clientsCount(Object count);
+
+  /// No description provided for @clientsCount_plural.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} clients'**
+  String clientsCount_plural(Object count);
 }
 
 class _AppLocalizationsDelegate

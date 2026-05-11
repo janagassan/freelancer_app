@@ -1,26 +1,20 @@
+// lib/screens/admin/admin_dashboard_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:freelancer_platform/screens/admin/admin_ads_management_screen.dart';
+import 'package:freelancer_platform/l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
 import 'package:freelancer_platform/screens/admin/disputes_management_screen.dart';
 import 'package:freelancer_platform/screens/admin/subscription_management_screen.dart';
-import 'package:freelancer_platform/screens/ads/ads_management_screen.dart';
-import '../../models/admin_stats.dart';
-import '../../services/api_service.dart';
-import 'contracts_management_screen.dart';
-import 'projects_management_screen.dart';
-import 'users_management_screen.dart';
-import 'settings_screen.dart';
-
-class AppColors {
-  static const sidebarBg = Color(0xFF2D2B55);
-  static const sidebarText = Color(0xFFC8C6E8);
-  static const sidebarActive = Color(0xFF5B58E2);
-  static const accent = Color(0xFF6C63FF);
-  static const accentLight = Color(0xFFA78BFA);
-  static const green = Color(0xFF14A800);
-  static const pageBg = Color(0xFFF5F6F8);
-  static const cardBg = Colors.white;
-}
+import 'package:freelancer_platform/screens/admin/users_management_screen.dart';
+import 'package:freelancer_platform/screens/admin/contracts_management_screen.dart';
+import 'package:freelancer_platform/screens/admin/projects_management_screen.dart';
+import 'package:freelancer_platform/screens/admin/admin_ads_management_screen.dart';
+import 'package:freelancer_platform/screens/admin/settings_screen.dart';
+import 'package:freelancer_platform/theme/app_theme.dart' as AppTheme;
+import '../../../models/admin_stats.dart';
+import '../../../services/api_service.dart';
+import 'package:freelancer_platform/widgets/ad_banner.dart';
 
 class _NavItem {
   final IconData icon;
@@ -85,42 +79,36 @@ class _AdminSidebar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    final sidebarColor = isDark
+        ? AppTheme.AppColors.darkSidebar
+        : AppTheme.AppColors.lightSidebar;
+
+    final sidebarTextColor = isDark
+        ? AppTheme.AppColors.darkTextSecondary
+        : Colors.white70;
+
+    final sidebarTextColorActive = Colors.white;
+    final accentColor = isDark ? AppTheme.AppColors.accentLight : AppTheme.AppColors.accent;
+
     return Container(
       width: 220,
-      color: AppColors.sidebarBg,
+      color: sidebarColor,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 28, 20, 20),
+            padding: const EdgeInsets.fromLTRB(27, 15, 20, 2),
             child: Row(
               children: [
-                Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    color: AppColors.accent,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: const Icon(
-                    Icons.admin_panel_settings,
-                    color: Colors.white,
-                    size: 20,
-                  ),
-                ),
-                const SizedBox(width: 10),
-                const Text(
-                  'ADMIN',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.5,
-                  ),
-                ),
+                Image.asset('assets/images/logoo.png', height: 50, width: 50),
               ],
             ),
           ),
+
+          const SizedBox(height: 8),
 
           Divider(
             color: Colors.white.withOpacity(0.1),
@@ -149,13 +137,13 @@ class _AdminSidebar extends StatelessWidget {
                     ),
                     decoration: BoxDecoration(
                       color: isActive
-                          ? AppColors.accent.withOpacity(0.25)
+                          ? accentColor.withOpacity(0.25)
                           : Colors.transparent,
                       borderRadius: BorderRadius.circular(12),
                       border: isActive
                           ? Border(
-                              left: const BorderSide(
-                                color: AppColors.accentLight,
+                              left: BorderSide(
+                                color: accentColor,
                                 width: 3,
                               ),
                             )
@@ -167,8 +155,8 @@ class _AdminSidebar extends StatelessWidget {
                           isActive ? item.selectedIcon : item.icon,
                           size: 19,
                           color: isActive
-                              ? Colors.white
-                              : AppColors.sidebarText,
+                              ? sidebarTextColorActive
+                              : sidebarTextColor,
                         ),
                         const SizedBox(width: 12),
                         Text(
@@ -176,8 +164,8 @@ class _AdminSidebar extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 13,
                             color: isActive
-                                ? Colors.white
-                                : AppColors.sidebarText,
+                                ? sidebarTextColorActive
+                                : sidebarTextColor,
                             fontWeight: isActive
                                 ? FontWeight.w600
                                 : FontWeight.normal,
@@ -191,59 +179,111 @@ class _AdminSidebar extends StatelessWidget {
             ),
           ),
 
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            child: AdBanner(
+              placement: 'sidebar_bottom',
+              height: 200,
+              margin: EdgeInsets.zero,
+            ),
+          ),
+
           Divider(
             color: Colors.white.withOpacity(0.1),
             height: 1,
             indent: 20,
             endIndent: 20,
           ),
+          
           Padding(
             padding: const EdgeInsets.all(16),
-            child: Row(
+            child: Column(
               children: [
-                Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    color: AppColors.accentLight.withOpacity(0.2),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.person,
-                    color: AppColors.accentLight,
-                    size: 18,
-                  ),
+                _sidebarActionBtn(
+                  context,
+                  Icons.settings_outlined,
+                  'settings',
+                  onTap: () => Navigator.pushNamed(context, '/settings'),
                 ),
-                const SizedBox(width: 10),
-                const Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Admin',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      Text(
-                        'Super Admin',
-                        style: TextStyle(
-                          color: AppColors.sidebarText,
-                          fontSize: 11,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Icon(
+                const SizedBox(height: 8),
+                _sidebarActionBtn(
+                  context,
                   Icons.logout,
-                  color: AppColors.sidebarText.withOpacity(0.6),
-                  size: 18,
+                  'logout',
+                  color: Colors.red.shade300,
+                  onTap: () => _showLogoutDialog(context),
                 ),
               ],
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _getLabel(String key) {
+    switch (key) {
+      case 'settings':
+        return 'Settings';
+      case 'logout':
+        return 'Logout';
+      default:
+        return key;
+    }
+  }
+
+  Widget _sidebarActionBtn(
+    BuildContext context,
+    IconData icon,
+    String labelKey, {
+    Color? color,
+    VoidCallback? onTap,
+  }) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    final defaultColor = isDark
+        ? AppTheme.AppColors.darkTextSecondary
+        : Colors.white70;
+
+    final label = _getLabel(labelKey);
+    final finalColor = color ?? defaultColor;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Row(
+        children: [
+          Icon(icon, size: 16, color: finalColor),
+          const SizedBox(width: 8),
+          Text(label, style: TextStyle(fontSize: 12, color: finalColor)),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showLogoutDialog(BuildContext context) async {
+    final theme = Theme.of(context);
+    final t = AppLocalizations.of(context);
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(t?.logout ?? 'Logout'),
+        content: Text(t?.logoutConfirmation ?? 'Are you sure you want to logout?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(t?.cancel ?? 'Cancel'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            onPressed: () async {
+              await ApiService.logout();
+              if (context.mounted) {
+                Navigator.pushReplacementNamed(context, '/login');
+              }
+            },
+            child: Text(t?.logout ?? 'Logout'),
           ),
         ],
       ),
@@ -370,19 +410,26 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     IconData icon,
     Color color,
   ) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: AppColors.cardBg,
-        borderRadius: BorderRadius.circular(20),
+        color: isDark ? AppTheme.AppColors.darkCard : AppTheme.AppColors.lightCard,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: isDark ? AppTheme.AppColors.primaryDark : AppTheme.AppColors.borderLight,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+            color: isDark
+                ? Colors.black.withOpacity(0.2)
+                : const Color(0x0A000000),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
         ],
-        border: Border.all(color: Colors.grey.shade100),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -404,10 +451,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           const Spacer(),
           Text(
             value,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 26,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF2D2B55),
+              color: isDark
+                  ? AppTheme.AppColors.darkTextPrimary
+                  : const Color(0xFF2D2B55),
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -416,7 +465,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           Text(
             title,
             style: TextStyle(
-              color: Colors.grey.shade500,
+              color: isDark ? AppTheme.AppColors.darkTextSecondary : Colors.grey.shade500,
               fontSize: 12,
               fontWeight: FontWeight.w500,
             ),
@@ -427,6 +476,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   }
 
   Widget _buildTopBar() {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final accentColor = isDark ? AppTheme.AppColors.accentLight : AppTheme.AppColors.accent;
+
     final titles = [
       'Dashboard',
       'Users',
@@ -440,43 +493,48 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-      decoration: const BoxDecoration(
-        color: AppColors.cardBg,
+      decoration: BoxDecoration(
+        color: isDark ? AppTheme.AppColors.darkSurface : AppTheme.AppColors.lightCard,
         border: Border(
-          bottom: BorderSide(color: Color(0xFFEEEEEE), width: 0.8),
+          bottom: BorderSide(
+            color: isDark ? AppTheme.AppColors.grayDark : const Color(0xFFEEEEEE),
+            width: 0.8,
+          ),
         ),
       ),
       child: Row(
         children: [
           Text(
             titles[_selectedIndex],
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF2D2B55),
+              color: isDark
+                  ? AppTheme.AppColors.darkTextPrimary
+                  : const Color(0xFF2D2B55),
             ),
           ),
           const Spacer(),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: AppColors.accent.withOpacity(0.08),
+              color: accentColor.withOpacity(0.08),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(
+                Icon(
                   Icons.calendar_today_outlined,
                   size: 13,
-                  color: AppColors.accent,
+                  color: accentColor,
                 ),
                 const SizedBox(width: 6),
                 Text(
                   _getCurrentDate(),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
-                    color: AppColors.accent,
+                    color: accentColor,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -486,9 +544,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           const SizedBox(width: 10),
           IconButton(
             onPressed: _loadStats,
-            icon: const Icon(
+            icon: Icon(
               Icons.refresh_rounded,
-              color: AppColors.accent,
+              color: accentColor,
               size: 22,
             ),
             tooltip: 'Refresh',
@@ -496,9 +554,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           Stack(
             children: [
               IconButton(
-                icon: const Icon(
+                icon: Icon(
                   Icons.notifications_none_rounded,
-                  color: Color(0xFF2D2B55),
+                  color: isDark
+                      ? AppTheme.AppColors.darkTextPrimary
+                      : const Color(0xFF2D2B55),
                 ),
                 onPressed: () {},
               ),
@@ -521,7 +581,129 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     );
   }
 
+  Widget _buildWelcomeBanner() {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final greeting = _getGreeting();
+    
+    final totalUsers = stats?.totalUsers ?? 0;
+    final activeContracts = stats?.activeContracts ?? 0;
+    final pendingDisputes = stats?.pendingDisputes ?? 0;
+
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        gradient: AppTheme.AppColors.primaryGradient,
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Stack(
+        children: [
+          Positioned(
+            right: -16,
+            top: -20,
+            child: Container(
+              width: 130,
+              height: 130,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withOpacity(0.06),
+              ),
+            ),
+          ),
+          Positioned(
+            right: 40,
+            bottom: -28,
+            child: Container(
+              width: 85,
+              height: 85,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withOpacity(0.04),
+              ),
+            ),
+          ),
+          Row(
+            children: [
+              Container(
+                width: 52,
+                height: 52,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  color: Colors.white.withOpacity(0.18),
+                ),
+                child: const Center(
+                  child: Icon(
+                    Icons.admin_panel_settings,
+                    color: Colors.white,
+                    size: 28,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '$greeting, Admin! 👋',
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      '$totalUsers total users · $activeContracts active contracts · $pendingDisputes pending disputes',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Colors.white.withOpacity(0.78),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              Column(
+                children: [
+                  _bannerBtn('Manage Users', () => setState(() => _selectedIndex = 1)),
+                  const SizedBox(height: 6),
+                  _bannerBtn('View Reports', () {}),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _bannerBtn(String label, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.16),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: Colors.white.withOpacity(0.28)),
+        ),
+        child: Text(
+          label,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildErrorWidget() {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -542,7 +724,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           const SizedBox(height: 20),
           Text(
             errorMessage ?? 'Failed to load dashboard data',
-            style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
+            style: TextStyle(
+              color: isDark ? AppTheme.AppColors.darkTextSecondary : Colors.grey.shade600,
+              fontSize: 14,
+            ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 24),
@@ -551,8 +736,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             icon: const Icon(Icons.refresh, size: 18),
             label: const Text('Retry'),
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.accent,
-              foregroundColor: Colors.white,
+              backgroundColor: AppTheme.AppColors.accent,
+              foregroundColor: AppTheme.AppColors.primaryDark,
               padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(30),
@@ -565,44 +750,14 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     );
   }
 
-  Widget _buildComingSoon(String title) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            width: 100,
-            height: 100,
-            decoration: BoxDecoration(
-              color: AppColors.accent.withOpacity(0.08),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.construction_outlined,
-              size: 50,
-              color: AppColors.accent.withOpacity(0.5),
-            ),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF2D2B55),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Coming Soon',
-            style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildDashboardContent() {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final accentColor = isDark ? AppTheme.AppColors.accentLight : AppTheme.AppColors.accent;
+    final textPrimaryColor = isDark
+        ? AppTheme.AppColors.darkTextPrimary
+        : const Color(0xFF2D2B55);
+
     final totalUsers = (stats?.totalUsers ?? 0).toDouble();
     final freelancers = (stats?.totalFreelancers ?? 0).toDouble();
     final clients = (stats?.totalClients ?? 0).toDouble();
@@ -611,81 +766,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     final pendingProjects = (stats?.pendingProjects ?? 0).toDouble();
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [AppColors.accent, AppColors.sidebarBg],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(24),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.accent.withOpacity(0.3),
-                  blurRadius: 20,
-                  offset: const Offset(0, 8),
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: const Icon(
-                    Icons.admin_panel_settings_rounded,
-                    size: 28,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '${_getGreeting()}, Admin! 👋',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      const Text(
-                        "Here's what's happening on your platform today",
-                        style: TextStyle(color: Colors.white70, fontSize: 13),
-                      ),
-                    ],
-                  ),
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    _bannerChip(
-                      Icons.people_alt_outlined,
-                      '${stats?.totalUsers ?? 0} Users',
-                    ),
-                    const SizedBox(height: 6),
-                    _bannerChip(
-                      Icons.play_circle_outline,
-                      '${stats?.activeContracts ?? 0} Active',
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 24),
+          _buildWelcomeBanner(),
+          const SizedBox(height: 20),
 
           Row(
             children: [
@@ -693,17 +779,17 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 width: 4,
                 height: 20,
                 decoration: BoxDecoration(
-                  color: AppColors.accent,
+                  color: accentColor,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
               const SizedBox(width: 10),
-              const Text(
+              Text(
                 'Overview',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF2D2B55),
+                  color: textPrimaryColor,
                 ),
               ),
             ],
@@ -729,7 +815,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 'Freelancers',
                 stats!.totalFreelancers.toString(),
                 Icons.work,
-                AppColors.green,
+                AppTheme.AppColors.success,
               ),
               _buildStatCard(
                 'Clients',
@@ -741,7 +827,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 'Projects',
                 stats!.totalProjects.toString(),
                 Icons.folder_open,
-                AppColors.accent,
+                accentColor,
               ),
               _buildStatCard(
                 'Contracts',
@@ -753,7 +839,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 'Earnings',
                 '\$${stats!.totalEarnings.toStringAsFixed(0)}',
                 Icons.attach_money,
-                AppColors.green,
+                AppTheme.AppColors.success,
               ),
               _buildStatCard(
                 'Ad Revenue',
@@ -777,7 +863,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 'Completed',
                 stats!.completedContracts.toString(),
                 Icons.check_circle,
-                AppColors.green,
+                AppTheme.AppColors.success,
               ),
               _buildStatCard(
                 'Disputes',
@@ -822,17 +908,17 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   width: 4,
                   height: 20,
                   decoration: BoxDecoration(
-                    color: AppColors.accent,
+                    color: accentColor,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
                 const SizedBox(width: 10),
-                const Text(
+                Text(
                   'User Growth Analytics',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF2D2B55),
+                    color: textPrimaryColor,
                   ),
                 ),
                 const Spacer(),
@@ -842,7 +928,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     vertical: 5,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.accent.withOpacity(0.1),
+                    color: accentColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Row(
@@ -851,18 +937,18 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       Container(
                         width: 8,
                         height: 8,
-                        decoration: const BoxDecoration(
-                          color: AppColors.accent,
+                        decoration: BoxDecoration(
+                          color: accentColor,
                           shape: BoxShape.circle,
                         ),
                       ),
                       const SizedBox(width: 6),
-                      const Text(
+                      Text(
                         'Total Users',
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w500,
-                          color: AppColors.accent,
+                          color: accentColor,
                         ),
                       ),
                     ],
@@ -874,16 +960,20 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: AppColors.cardBg,
-                borderRadius: BorderRadius.circular(20),
+                color: isDark ? AppTheme.AppColors.darkCard : AppTheme.AppColors.lightCard,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: isDark ? AppTheme.AppColors.primaryDark : AppTheme.AppColors.borderLight,
+                ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.04),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
+                    color: isDark
+                        ? Colors.black.withOpacity(0.2)
+                        : const Color(0x0A000000),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
                   ),
                 ],
-                border: Border.all(color: Colors.grey.shade100),
               ),
               child: SizedBox(
                 height: 300,
@@ -910,7 +1000,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                                   monthlyStats[value.toInt()]['month'] ?? '',
                                   style: TextStyle(
                                     fontSize: 10,
-                                    color: Colors.grey.shade500,
+                                    color: isDark
+                                        ? AppTheme.AppColors.darkTextSecondary
+                                        : Colors.grey.shade500,
                                   ),
                                 ),
                               );
@@ -927,7 +1019,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                             value.toInt().toString(),
                             style: TextStyle(
                               fontSize: 10,
-                              color: Colors.grey.shade500,
+                              color: isDark
+                                  ? AppTheme.AppColors.darkTextSecondary
+                                  : Colors.grey.shade500,
                             ),
                           ),
                         ),
@@ -953,7 +1047,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                           return FlSpot(entry.key.toDouble(), users.toDouble());
                         }).toList(),
                         isCurved: true,
-                        color: AppColors.accent,
+                        color: accentColor,
                         barWidth: 3,
                         isStrokeCapRound: true,
                         dotData: FlDotData(
@@ -963,15 +1057,15 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                                 radius: 4,
                                 color: Colors.white,
                                 strokeWidth: 2,
-                                strokeColor: AppColors.accent,
+                                strokeColor: accentColor,
                               ),
                         ),
                         belowBarData: BarAreaData(
                           show: true,
                           gradient: LinearGradient(
                             colors: [
-                              AppColors.accent.withOpacity(0.15),
-                              AppColors.accent.withOpacity(0.0),
+                              accentColor.withOpacity(0.15),
+                              accentColor.withOpacity(0.0),
                             ],
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
@@ -987,9 +1081,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             Container(
               padding: const EdgeInsets.all(40),
               decoration: BoxDecoration(
-                color: AppColors.cardBg,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: Colors.grey.shade100),
+                color: isDark ? AppTheme.AppColors.darkCard : AppTheme.AppColors.lightCard,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: isDark ? AppTheme.AppColors.primaryDark : AppTheme.AppColors.borderLight,
+                ),
               ),
               child: Center(
                 child: Column(
@@ -997,13 +1093,17 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     Icon(
                       Icons.show_chart,
                       size: 48,
-                      color: Colors.grey.shade300,
+                      color: isDark
+                          ? AppTheme.AppColors.darkTextSecondary
+                          : Colors.grey.shade300,
                     ),
                     const SizedBox(height: 12),
                     Text(
                       'No chart data available',
                       style: TextStyle(
-                        color: Colors.grey.shade500,
+                        color: isDark
+                            ? AppTheme.AppColors.darkTextSecondary
+                            : Colors.grey.shade500,
                         fontSize: 14,
                       ),
                     ),
@@ -1011,13 +1111,21 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 ),
               ),
             ),
+          
+          const SizedBox(height: 20),
+          AdBanner(placement: 'home_bottom', height: 100),
+          const SizedBox(height: 20),
         ],
       ),
     );
   }
 
   Widget _insightTabChip(String label, int index) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final accentColor = isDark ? AppTheme.AppColors.accentLight : AppTheme.AppColors.accent;
     final selected = _dashboardTab == index;
+    
     return InkWell(
       onTap: () => setState(() => _dashboardTab = index),
       borderRadius: BorderRadius.circular(20),
@@ -1025,10 +1133,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         duration: const Duration(milliseconds: 180),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
-          color: selected ? AppColors.accent.withOpacity(0.14) : Colors.white,
+          color: selected ? accentColor.withOpacity(0.14) : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: selected ? AppColors.accent : Colors.grey.shade200,
+            color: selected ? accentColor : (isDark ? AppTheme.AppColors.grayDark : Colors.grey.shade200),
           ),
         ),
         child: Text(
@@ -1036,7 +1144,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w600,
-            color: selected ? AppColors.accent : Colors.grey.shade700,
+            color: selected ? accentColor : (isDark ? AppTheme.AppColors.darkTextSecondary : Colors.grey.shade700),
           ),
         ),
       ),
@@ -1075,6 +1183,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     required double freelancers,
     required double clients,
   }) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final accentColor = isDark ? AppTheme.AppColors.accentLight : AppTheme.AppColors.accent;
+    
     final freelancerPct = totalUsers > 0 ? (freelancers / totalUsers) * 100 : 0;
     final clientPct = totalUsers > 0 ? (clients / totalUsers) * 100 : 0;
 
@@ -1082,9 +1194,20 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       key: const ValueKey('overview'),
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey.shade100),
+        color: isDark ? AppTheme.AppColors.darkCard : AppTheme.AppColors.lightCard,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDark ? AppTheme.AppColors.primaryDark : AppTheme.AppColors.borderLight,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: isDark
+                ? Colors.black.withOpacity(0.2)
+                : const Color(0x0A000000),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Row(
         children: [
@@ -1098,7 +1221,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 sections: [
                   PieChartSectionData(
                     value: freelancers <= 0 ? 0.01 : freelancers,
-                    color: AppColors.green,
+                    color: AppTheme.AppColors.success,
                     title: '${freelancerPct.toStringAsFixed(0)}%',
                     radius: 50,
                     titleStyle: const TextStyle(
@@ -1109,7 +1232,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   ),
                   PieChartSectionData(
                     value: clients <= 0 ? 0.01 : clients,
-                    color: AppColors.accent,
+                    color: accentColor,
                     title: '${clientPct.toStringAsFixed(0)}%',
                     radius: 50,
                     titleStyle: const TextStyle(
@@ -1127,18 +1250,28 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'User Distribution',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: isDark
+                        ? AppTheme.AppColors.darkTextPrimary
+                        : const Color(0xFF2D2B55),
+                  ),
                 ),
                 const SizedBox(height: 10),
-                _legendRow('Freelancers', AppColors.green, freelancers.toInt()),
+                _legendRow('Freelancers', AppTheme.AppColors.success, freelancers.toInt()),
                 const SizedBox(height: 8),
-                _legendRow('Clients', AppColors.accent, clients.toInt()),
+                _legendRow('Clients', accentColor, clients.toInt()),
                 const SizedBox(height: 12),
                 Text(
                   'Balanced marketplace with ${totalUsers.toInt()} total accounts.',
-                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: isDark
+                        ? AppTheme.AppColors.darkTextSecondary                        : Colors.grey.shade600,
+                  ),
                 ),
               ],
             ),
@@ -1153,6 +1286,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     required double activeContracts,
     required double pendingProjects,
   }) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final maxY =
         [
           completedContracts,
@@ -1165,16 +1300,33 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       key: const ValueKey('performance'),
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey.shade100),
+        color: isDark ? AppTheme.AppColors.darkCard : AppTheme.AppColors.lightCard,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDark ? AppTheme.AppColors.primaryDark : AppTheme.AppColors.borderLight,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: isDark
+                ? Colors.black.withOpacity(0.2)
+                : const Color(0x0A000000),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Operational Performance',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: isDark
+                  ? AppTheme.AppColors.darkTextPrimary
+                  : const Color(0xFF2D2B55),
+            ),
           ),
           const SizedBox(height: 16),
           SizedBox(
@@ -1203,7 +1355,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                         value.toInt().toString(),
                         style: TextStyle(
                           fontSize: 10,
-                          color: Colors.grey.shade500,
+                          color: isDark
+                              ? AppTheme.AppColors.darkTextSecondary
+                              : Colors.grey.shade500,
                         ),
                       ),
                     ),
@@ -1220,7 +1374,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                             i >= 0 && i < labels.length ? labels[i] : '',
                             style: TextStyle(
                               fontSize: 10,
-                              color: Colors.grey.shade600,
+                              color: isDark
+                                  ? AppTheme.AppColors.darkTextSecondary
+                                  : Colors.grey.shade600,
                             ),
                           ),
                         );
@@ -1235,7 +1391,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     barRods: [
                       BarChartRodData(
                         toY: completedContracts,
-                        color: AppColors.green,
+                        color: AppTheme.AppColors.success,
                         width: 24,
                         borderRadius: BorderRadius.circular(6),
                       ),
@@ -1246,7 +1402,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     barRods: [
                       BarChartRodData(
                         toY: activeContracts,
-                        color: AppColors.accent,
+                        color: AppTheme.AppColors.accent,
                         width: 24,
                         borderRadius: BorderRadius.circular(6),
                       ),
@@ -1273,6 +1429,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   }
 
   Widget _buildTrendPanel() {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final accentColor = isDark ? AppTheme.AppColors.accentLight : AppTheme.AppColors.accent;
+    
     final lastMonth = monthlyStats.isNotEmpty ? monthlyStats.last : {};
     final monthUsers = (lastMonth['users'] ?? lastMonth['freelancers'] ?? 0)
         .toInt();
@@ -1282,9 +1442,20 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       key: const ValueKey('trend'),
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey.shade100),
+        color: isDark ? AppTheme.AppColors.darkCard : AppTheme.AppColors.lightCard,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDark ? AppTheme.AppColors.primaryDark : AppTheme.AppColors.borderLight,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: isDark
+                ? Colors.black.withOpacity(0.2)
+                : const Color(0x0A000000),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Row(
         children: [
@@ -1293,7 +1464,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               title: 'Last Month Users',
               value: monthUsers.toString(),
               icon: Icons.person_add_alt_1,
-              color: AppColors.accent,
+              color: accentColor,
             ),
           ),
           const SizedBox(width: 12),
@@ -1302,7 +1473,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               title: 'Last Month Revenue',
               value: '\$${monthRevenue.toStringAsFixed(0)}',
               icon: Icons.payments_outlined,
-              color: AppColors.green,
+              color: AppTheme.AppColors.success,
             ),
           ),
           const SizedBox(width: 12),
@@ -1325,6 +1496,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     required IconData icon,
     required Color color,
   }) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -1347,7 +1521,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           const SizedBox(height: 4),
           Text(
             title,
-            style: TextStyle(fontSize: 11, color: Colors.grey.shade700),
+            style: TextStyle(
+              fontSize: 11,
+              color: isDark ? AppTheme.AppColors.darkTextSecondary : Colors.grey.shade700,
+            ),
           ),
         ],
       ),
@@ -1355,6 +1532,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   }
 
   Widget _legendRow(String label, Color color, int value) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    
     return Row(
       children: [
         Container(
@@ -1366,12 +1546,19 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         Expanded(
           child: Text(
             label,
-            style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
+            style: TextStyle(
+              fontSize: 12,
+              color: isDark ? AppTheme.AppColors.darkTextSecondary : Colors.grey.shade700,
+            ),
           ),
         ),
         Text(
           '$value',
-          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+            color: isDark ? AppTheme.AppColors.darkTextPrimary : const Color(0xFF2D2B55),
+          ),
         ),
       ],
     );
@@ -1383,27 +1570,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     if (total <= 0) return 'N/A';
     final pct = ((completed / total) * 100).round();
     return '$pct%';
-  }
-
-  Widget _bannerChip(IconData icon, String label) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, color: Colors.white, size: 13),
-          const SizedBox(width: 5),
-          Text(
-            label,
-            style: const TextStyle(color: Colors.white, fontSize: 11),
-          ),
-        ],
-      ),
-    );
   }
 
   int _getCrossAxisCount(BuildContext context) {
@@ -1425,7 +1591,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               height: 40,
               child: CircularProgressIndicator(
                 strokeWidth: 3,
-                color: AppColors.accent,
+                color: AppTheme.AppColors.accent,
               ),
             ),
             SizedBox(height: 16),
@@ -1439,10 +1605,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       case 0:
         return _buildDashboardContent();
       case 1:
-        return const Scaffold(
-          backgroundColor: AppColors.pageBg,
-          body: UsersManagementScreen(),
-        );
+        return const UsersManagementScreen();
       case 2:
         return const ProjectsManagementScreen();
       case 3:
@@ -1462,15 +1625,17 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     if (errorMessage != null && stats?.totalUsers == 0 && !loading) {
       return Scaffold(
-        backgroundColor: AppColors.pageBg,
+        backgroundColor: isDark ? AppTheme.AppColors.darkBackground : AppTheme.AppColors.lightBackground,
         body: _buildErrorWidget(),
       );
     }
 
     return Scaffold(
-      backgroundColor: AppColors.pageBg,
+      backgroundColor: isDark ? AppTheme.AppColors.darkBackground : AppTheme.AppColors.lightBackground,
       body: Row(
         children: [
           _AdminSidebar(

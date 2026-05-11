@@ -1,11 +1,11 @@
+// screens/admin/subscription_management_screen.dart
+
 import 'package:flutter/material.dart';
-import 'package:freelancer_platform/screens/admin/coupons_management_tab.dart';
-import 'package:freelancer_platform/screens/admin/plans_management_tab.dart';
-import 'package:freelancer_platform/screens/admin/subscription_stats_tab.dart';
-import '../../services/api_service.dart';
-import '../../models/subscription_plan_model.dart';
-import '../../models/coupon_model.dart';
-import '../../models/subscription_stats_model.dart';
+import '../../l10n/app_localizations.dart';
+import '../../theme/app_theme.dart' as AppTheme;
+import 'subscription_stats_tab.dart';
+import 'plans_management_tab.dart';
+import 'coupons_management_tab.dart';
 
 class SubscriptionManagementScreen extends StatefulWidget {
   const SubscriptionManagementScreen({super.key});
@@ -40,22 +40,42 @@ class _SubscriptionManagementScreenState
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final t = AppLocalizations.of(context)!;
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F6F8),
+      backgroundColor: isDark
+          ? AppTheme.AppColors.darkBackground
+          : const Color(0xFFF5F6F8),
       appBar: AppBar(
-        title: const Text('Subscription Management'),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        title: Text(
+          t.subscriptionManagement,
+          style: const TextStyle(fontWeight: FontWeight.w600),
+        ),
+        backgroundColor: isDark ? AppTheme.AppColors.darkSurface : Colors.white,
+        foregroundColor: isDark ? Colors.white : Colors.black,
         elevation: 0,
+        centerTitle: true,
         bottom: TabBar(
           controller: _tabController,
-          indicatorColor: const Color(0xff14A800),
-          labelColor: Colors.black,
-          unselectedLabelColor: Colors.grey,
-          tabs: const [
-            Tab(text: 'Statistics', icon: Icon(Icons.analytics)),
-            Tab(text: 'Plans', icon: Icon(Icons.subscriptions)),
-            Tab(text: 'Coupons', icon: Icon(Icons.local_offer)),
+          indicatorColor: AppTheme.AppColors.secondary,
+          labelColor: isDark ? Colors.white : Colors.black,
+          unselectedLabelColor: isDark ? Colors.grey.shade500 : Colors.grey,
+          indicatorSize: TabBarIndicatorSize.tab,
+          tabs: [
+            Tab(
+              text: t.statistics,
+              icon: const Icon(Icons.analytics),
+            ),
+            Tab(
+              text: t.plans,
+              icon: const Icon(Icons.subscriptions),
+            ),
+            Tab(
+              text: t.coupons,
+              icon: const Icon(Icons.local_offer),
+            ),
           ],
         ),
       ),
