@@ -26,6 +26,7 @@ const UserSubscription = sequelize.define(
         "past_due",
         "canceled",
         "incomplete",
+        "expired",
       ),
       defaultValue: "active",
     },

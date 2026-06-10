@@ -198,7 +198,8 @@ export const getChatMessages = async (req, res) => {
 
 export const sendMessage = async (req, res) => {
   try {
-    const { chatId, content, type, mediaUrl } = req.body;
+    const { chatId, content, type, mediaUrl, sender_name, sender_avatar } =
+      req.body;
     const senderId = req.user.id;
 
     if (!chatId || !content) {
@@ -254,12 +255,15 @@ export const sendMessage = async (req, res) => {
       },
     });
 
+    const finalSenderName = sender_name || sender?.name;
+    const finalSenderAvatar = sender_avatar || sender?.avatar;
+
     res.status(201).json({
       success: true,
       message: {
         ...message.toJSON(),
-        sender_name: sender?.name,
-        sender_avatar: sender?.avatar,
+        sender_name: finalSenderName,
+        sender_avatar: finalSenderAvatar,
         is_read_by_me: false,
       },
     });

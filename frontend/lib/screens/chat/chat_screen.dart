@@ -1165,6 +1165,9 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   Widget _buildMessageBubble(Message message, bool isMe) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    print(
+      '🫧 Building bubble: messageId=${message.id}, senderName=${message.senderName}, isMe=$isMe',
+    );
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 3),

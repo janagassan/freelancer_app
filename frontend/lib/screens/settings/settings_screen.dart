@@ -1,12 +1,20 @@
-// lib/screens/settings/settings_screen.dart
+// lib/screens/settings/settings_screen.dart 
+
 import 'package:flutter/material.dart';
+import 'package:freelancer_platform/models/freelancer_model.dart';
 import 'package:freelancer_platform/services/api_service.dart';
 import 'package:freelancer_platform/services/language_service.dart';
 import 'package:provider/provider.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../providers/theme_provider.dart';
 import '../../theme/app_theme.dart';
 import '../../l10n/app_localizations.dart';
+import '../freelancer/edit_profile_screen.dart';
+import '../client/edit_client_profile_screen.dart';
+import '../auth/login_screen.dart';
+import 'package:share_plus/share_plus.dart';
+import '../../utils/token_storage.dart';
 
 class SettingsScreen extends StatefulWidget {
   final Function(Locale)? onLocaleChange;
@@ -21,11 +29,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
   String _selectedLanguage = 'en';
   String _selectedCurrency = 'USD';
   bool _isLoading = false;
+  String? _userRole;
+  Map<String, dynamic>? _currentUser;
 
   @override
   void initState() {
     super.initState();
     _loadSavedSettings();
+    _loadUserFromStorage();
+  }
+
+  Future<void> _loadUserFromStorage() async {
+    try {
+      final user = await TokenStorage.getUser();
+      final role = await TokenStorage.getUserRole();
+      setState(() {
+        _currentUser = user;
+        _userRole = role;
+      });
+      print('✅ User loaded from storage: ${user?['name']}, Role: $role');
+    } catch (e) {
+      print('Error loading user from storage: $e');
+    }
   }
 
   Future<void> _loadSavedSettings() async {
@@ -55,6 +80,227 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ? 'تم تغيير اللغة إلى العربية'
           : 'Language changed to English',
       gravity: ToastGravity.BOTTOM,
+    );
+  }
+
+  void _navigateToEditProfile() {
+    if (_userRole == 'freelancer') {
+      final profile = FreelancerProfile(
+        id: _currentUser?['id'] ?? 0,
+        name: _currentUser?['name'] ?? '',
+        email: _currentUser?['email'] ?? '',
+        avatar: _currentUser?['avatar'],
+        title: _currentUser?['title'],
+        bio: _currentUser?['bio'],
+        location: _currentUser?['location'],
+        hourlyRate: _currentUser?['hourly_rate']?.toDouble(),
+        skills: _currentUser?['skills'] is List 
+            ? List<String>.from(_currentUser!['skills']) 
+            : [],
+        languages: _currentUser?['languages'] is List 
+            ? List<String>.from(_currentUser!['languages']) 
+            : [],
+        education: _currentUser?['education'] is List 
+            ? List<Map<String, dynamic>>.from(_currentUser!['education']) 
+            : [],
+        certifications: _currentUser?['certifications'] is List 
+            ? List<Map<String, dynamic>>.from(_currentUser!['certifications']) 
+            : [],
+        cvUrl: _currentUser?['cv_url'],
+        experienceYears: _currentUser?['experience_years'],
+        weeklyHours: _currentUser?['weekly_hours'],
+        availability: _currentUser?['availability'],
+        rating: _currentUser?['rating']?.toDouble(),
+        totalEarnings: _currentUser?['total_earnings']?.toDouble(),
+        completedProjectsCount: _currentUser?['completed_projects_count'],
+        jobSuccessScore: _currentUser?['job_success_score'],
+        responseTime: _currentUser?['response_time'],
+        website: _currentUser?['website'],
+        github: _currentUser?['github'],
+        linkedin: _currentUser?['linkedin'],
+        behance: _currentUser?['behance'],
+        locationCoordinates: _currentUser?['location_coordinates'],
+        tagline: _currentUser?['tagline'],
+      );
+      
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => EditProfileScreen(profile: profile),
+        ),
+      ).then((_) => _loadUserFromStorage()); 
+      
+    } else if (_userRole == 'client') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const EditClientProfileScreen(),
+        ),
+      );
+    } else {
+      Fluttertoast.showToast(msg: 'Unable to determine user type');
+    }
+  }
+
+  Future<void> _openUrl(String url) async {
+    final Uri uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      Fluttertoast.showToast(msg: 'Could not open link');
+    }
+  }
+
+  void _shareApp() {
+    Share.share(
+      'Check out Freelancer Platform - Connect with freelancers and clients worldwide!',
+    );
+  }
+
+  void _sendEmail() async {
+    final emailUri = Uri(
+      scheme: 'mailto',
+      path: 'support@freelancerplatform.com',
+      query: 'subject=Support Request',
+    );
+    if (await canLaunchUrl(emailUri)) {
+      await launchUrl(emailUri);
+    } else {
+      Fluttertoast.showToast(msg: 'Could not open email client');
+    }
+  }
+
+  void _openWhatsApp() async {
+    final whatsappUri = Uri.parse('https://wa.me/1234567890');
+    if (await canLaunchUrl(whatsappUri)) {
+      await launchUrl(whatsappUri, mode: LaunchMode.externalApplication);
+    } else {
+      Fluttertoast.showToast(msg: 'WhatsApp is not installed');
+    }
+  }
+
+  void _showRateDialog(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(t.rateUs),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('If you enjoy using our app, please take a moment to rate it.'),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.star_border, size: 32),
+                  onPressed: () => _rateApp(1),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.star_border, size: 32),
+                  onPressed: () => _rateApp(2),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.star_border, size: 32),
+                  onPressed: () => _rateApp(3),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.star_border, size: 32),
+                  onPressed: () => _rateApp(4),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.star_border, size: 32),
+                  onPressed: () => _rateApp(5),
+                ),
+              ],
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(t.cancel),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _rateApp(int rating) {
+    Navigator.pop(context);
+    Fluttertoast.showToast(msg: 'Thank you for rating $rating stars!');
+    _openUrl('https://play.google.com/store/apps/details?id=com.freelancer.platform');
+  }
+
+  void _showAboutDialog(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
+    showAboutDialog(
+      context: context,
+      applicationName: 'Freelancer Platform',
+      applicationVersion: 'Version 1.0.0',
+      applicationLegalese: '© 2024 Freelancer Platform',
+      children: [
+        const SizedBox(height: 16),
+        Text(t.about),
+        const SizedBox(height: 8),
+        const Text('Connect freelancers with clients around the world.'),
+        const SizedBox(height: 16),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            IconButton(
+              icon: Icon(Icons.web, color: AppColors.primary),
+              onPressed: () => _openUrl('https://freelancerplatform.com'),
+            ),
+            IconButton(
+              icon: Icon(Icons.facebook, color: Colors.blue.shade700),
+              onPressed: () => _openUrl('https://facebook.com/freelancerplatform'),
+            ),
+            IconButton(
+              icon: Icon(Icons.chat, color: Colors.green),
+              onPressed: () => _openUrl('https://twitter.com/freelancerplatform'),
+            ),
+            IconButton(
+              icon: Icon(Icons.camera_alt, color: Colors.purple),
+              onPressed: () => _openUrl('https://instagram.com/freelancerplatform'),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  void _showLogoutDialog(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(t.logout),
+        content: Text(t.logoutConfirmation),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(t.cancel),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              await ApiService.logout();
+              await TokenStorage.clearAll();
+              if (context.mounted) {
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (_) => const LoginScreen()),
+                  (route) => false,
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: Text(t.logout),
+          ),
+        ],
+      ),
     );
   }
 
@@ -114,25 +360,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   icon: Icons.edit_outlined,
                   title: t.editProfile,
                   subtitle: t.updatePersonalInfo,
-                  onTap: () => Navigator.pushNamed(context, '/edit-profile'),
+                  onTap: _navigateToEditProfile,
                 ),
 
                 _buildSettingsTile(
-                  context,
-                  icon: Icons.lock_outline,
-                  title: t.changePassword,
-                  subtitle: t.updatePassword,
-                  onTap: () => Navigator.pushNamed(context, '/change-password'),
-                ),
+  context,
+  icon: Icons.lock_outline,
+  title: t.changePassword,
+  subtitle: t.updatePassword,
+  onTap: () => Navigator.pushNamed(context, '/change-password'),
+),
 
-                _buildSettingsTile(
-                  context,
-                  icon: Icons.notifications_outlined,
-                  title: t.notifications,
-                  subtitle: t.manageNotifications,
-                  onTap: () =>
-                      Navigator.pushNamed(context, '/notification-settings'),
-                ),
+               
 
                 const Divider(),
 
@@ -175,7 +414,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   icon: Icons.help_outline,
                   title: t.helpCenter,
                   subtitle: t.getHelpSupport,
-                  onTap: () => Navigator.pushNamed(context, '/help'),
+                  onTap: () => _showHelpDialog(context),
                 ),
 
                 _buildSettingsTile(
@@ -183,7 +422,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   icon: Icons.description_outlined,
                   title: t.termsOfService,
                   subtitle: t.readTerms,
-                  onTap: () => Navigator.pushNamed(context, '/terms'),
+                  onTap: () => _showTermsDialog(context),
                 ),
 
                 _buildSettingsTile(
@@ -191,16 +430,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   icon: Icons.privacy_tip_outlined,
                   title: t.privacyPolicy,
                   subtitle: t.readPrivacy,
-                  onTap: () => Navigator.pushNamed(context, '/privacy'),
+                  onTap: () => _showPrivacyDialog(context),
                 ),
 
                 _buildSettingsTile(
                   context,
-                  icon: Icons.star_outline,
-                  title: t.rateUs,
-                  subtitle: t.rateApp,
-                  onTap: () => _showRateDialog(context),
+                  icon: Icons.email_outlined,
+                  title: 'Contact Support',
+                  subtitle: 'support@freelancerplatform.com',
+                  onTap: _sendEmail,
                 ),
+
+                _buildSettingsTile(
+                  context,
+                  icon: Icons.share_outlined,
+                  title: 'Share App',
+                  subtitle: 'Share with friends',
+                  onTap: _shareApp,
+                ),
+
 
                 const Divider(),
 
@@ -212,6 +460,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   title: t.about,
                   subtitle: 'Version 1.0.0',
                   onTap: () => _showAboutDialog(context),
+                ),
+
+                _buildSettingsTile(
+                  context,
+                  icon: Icons.web,
+                  title: 'Website',
+                  subtitle: 'www.freelancerplatform.com',
+                  onTap: () => _openUrl('https://freelancerplatform.com'),
                 ),
 
                 const SizedBox(height: 24),
@@ -303,7 +559,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
       ),
       title: Text(title),
-      subtitle: subtitle != null ? Text(subtitle) : null,
+      subtitle: subtitle != null ? Text(subtitle, style: TextStyle(fontSize: 12)) : null,
       trailing:
           trailing ??
           (onTap != null ? const Icon(Icons.chevron_right, size: 20) : null),
@@ -350,10 +606,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _showCurrencyDialog(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Select Currency'),
+        title: Text('Select Currency'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -365,6 +622,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onTap: () {
                 setState(() => _selectedCurrency = 'USD');
                 Navigator.pop(context);
+                Fluttertoast.showToast(msg: 'Currency changed to USD');
               },
             ),
             ListTile(
@@ -375,6 +633,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onTap: () {
                 setState(() => _selectedCurrency = 'EUR');
                 Navigator.pop(context);
+                Fluttertoast.showToast(msg: 'Currency changed to EUR');
               },
             ),
             ListTile(
@@ -385,6 +644,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onTap: () {
                 setState(() => _selectedCurrency = 'GBP');
                 Navigator.pop(context);
+                Fluttertoast.showToast(msg: 'Currency changed to GBP');
               },
             ),
           ],
@@ -393,64 +653,163 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  void _showRateDialog(BuildContext context) {
+  void _showHelpDialog(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Rate Us'),
-        content: const Text(
-          'If you enjoy using our app, please take a moment to rate it.',
+        title: Text(t.helpCenter),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: Icon(Icons.help_outline, color: AppColors.primary),
+              title: const Text('FAQs'),
+              onTap: () {
+                Navigator.pop(context);
+                _openUrl('https://freelancerplatform.com/faq');
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.video_library, color: AppColors.primary),
+              title: const Text('Video Tutorials'),
+              onTap: () {
+                Navigator.pop(context);
+                _openUrl('https://youtube.com/freelancerplatform');
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.forum, color: AppColors.primary),
+              title: const Text('Community Forum'),
+              onTap: () {
+                Navigator.pop(context);
+                _openUrl('https://forum.freelancerplatform.com');
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.email, color: AppColors.primary),
+              title: const Text('Email Support'),
+              subtitle: const Text('support@freelancerplatform.com'),
+              onTap: () {
+                Navigator.pop(context);
+                _sendEmail();
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.chat, color: Colors.green),
+              title: const Text('WhatsApp Support'),
+              subtitle: const Text('+1 234 567 890'),
+              onTap: () {
+                Navigator.pop(context);
+                _openWhatsApp();
+              },
+            ),
+          ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Not Now'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context),
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
-            child: const Text('Rate Now'),
+            child: Text(t.close),
           ),
         ],
       ),
     );
   }
 
-  void _showAboutDialog(BuildContext context) {
-    showAboutDialog(
-      context: context,
-      applicationName: 'Freelancer Platform',
-      applicationVersion: 'Version 1.0.0',
-      applicationLegalese: '© 2024 Freelancer Platform',
-      children: const [
-        SizedBox(height: 16),
-        Text('Connect freelancers with clients around the world.'),
-      ],
-    );
-  }
-
-  void _showLogoutDialog(BuildContext context) {
-    final t = AppLocalizations.of(context)!;
-
+  void _showTermsDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(t.logout),
-        content: Text(t.logoutConfirmation),
+        title: const Text('Terms of Service'),
+        content: const SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('1. Acceptance of Terms', style: TextStyle(fontWeight: FontWeight.bold)),
+              SizedBox(height: 4),
+              Text('By using Freelancer Platform, you agree to these terms.'),
+              SizedBox(height: 12),
+              Text('2. User Responsibilities', style: TextStyle(fontWeight: FontWeight.bold)),
+              SizedBox(height: 4),
+              Text('Users must provide accurate information and comply with all applicable laws.'),
+              SizedBox(height: 12),
+              Text('3. Payments', style: TextStyle(fontWeight: FontWeight.bold)),
+              SizedBox(height: 4),
+              Text('All payments are processed securely. Platform fees apply.'),
+              SizedBox(height: 12),
+              Text('4. Disputes', style: TextStyle(fontWeight: FontWeight.bold)),
+              SizedBox(height: 4),
+              Text('Disputes will be resolved through our dispute resolution process.'),
+              SizedBox(height: 12),
+              Text('5. Termination', style: TextStyle(fontWeight: FontWeight.bold)),
+              SizedBox(height: 4),
+              Text('We reserve the right to terminate accounts that violate these terms.'),
+              SizedBox(height: 12),
+              Text('For full terms, visit our website.'),
+            ],
+          ),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text(t.cancel),
+            child: const Text('Close'),
           ),
           ElevatedButton(
-            onPressed: () async {
-              await ApiService.logout();
-              if (context.mounted) {
-                Navigator.pushReplacementNamed(context, '/login');
-              }
+            onPressed: () {
+              Navigator.pop(context);
+              _openUrl('https://freelancerplatform.com/terms');
             },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: Text(t.logout),
+            child: const Text('Read Full Terms'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showPrivacyDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Privacy Policy'),
+        content: const SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('1. Information Collection', style: TextStyle(fontWeight: FontWeight.bold)),
+              SizedBox(height: 4),
+              Text('We collect personal information to provide our services.'),
+              SizedBox(height: 12),
+              Text('2. Data Usage', style: TextStyle(fontWeight: FontWeight.bold)),
+              SizedBox(height: 4),
+              Text('Your data is used to improve your experience and process transactions.'),
+              SizedBox(height: 12),
+              Text('3. Data Protection', style: TextStyle(fontWeight: FontWeight.bold)),
+              SizedBox(height: 4),
+              Text('We implement security measures to protect your information.'),
+              SizedBox(height: 12),
+              Text('4. Third Parties', style: TextStyle(fontWeight: FontWeight.bold)),
+              SizedBox(height: 4),
+              Text('We do not sell your personal information to third parties.'),
+              SizedBox(height: 12),
+              Text('5. Your Rights', style: TextStyle(fontWeight: FontWeight.bold)),
+              SizedBox(height: 4),
+              Text('You have the right to access and delete your data.'),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _openUrl('https://freelancerplatform.com/privacy');
+            },
+            child: const Text('Read Full Policy'),
           ),
         ],
       ),

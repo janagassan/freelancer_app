@@ -10,6 +10,18 @@ const Transaction = sequelize.define(
       autoIncrement: true,
       primaryKey: true,
     },
+    user_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: 'Users',
+        key: 'id',
+      },
+    },
+    user_role: {
+      type: DataTypes.ENUM('freelancer', 'client', 'admin'),
+      allowNull: false,
+    },
     wallet_id: {
       type: DataTypes.INTEGER,
       allowNull: true,
@@ -28,6 +40,10 @@ const Transaction = sequelize.define(
         "subscription",
         "feature",
         "commission",
+        "payment_received",  
+        "payment_sent",     
+        "platform_fee",     
+        "withdrawal",       
       ),
       allowNull: false,
     },
@@ -55,8 +71,18 @@ const Transaction = sequelize.define(
       type: DataTypes.STRING,
       allowNull: true,
     },
+    // ✅ إضافة transaction_date بدلاً من الاعتماد على timestamps فقط
+    transaction_date: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
     completed_at: {
       type: DataTypes.DATE,
+      allowNull: true,
+    },
+    metadata: {
+      type: DataTypes.JSON,
       allowNull: true,
     },
   },

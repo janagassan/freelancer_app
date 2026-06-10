@@ -6,7 +6,6 @@ class UsageLimits {
   final int? activeProjectsLimit;
   final int? interviewsUsed;
   final int? interviewsLimit;
-  final int? interviewsRemaining;
   final String? planSlug;
   final String? planName;
 
@@ -17,7 +16,6 @@ class UsageLimits {
     this.activeProjectsLimit,
     this.interviewsUsed,
     this.interviewsLimit,
-    this.interviewsRemaining,
     this.planSlug,
     this.planName,
   });
@@ -30,20 +28,23 @@ class UsageLimits {
       activeProjectsLimit: json['active_projects_limit'],
       interviewsUsed: json['interviews_used'],
       interviewsLimit: json['interviews_limit'],
-      interviewsRemaining: json['interviews_remaining'],
       planSlug: json['plan_slug']?.toString(),
       planName: json['plan_name']?.toString(),
     );
   }
 
   double get proposalsProgress {
-    if (proposalsLimit == null || proposalsLimit == 0) return 0;
-    return proposalsUsed / proposalsLimit!;
+    if (proposalsLimit == null || proposalsLimit == 0) return 0.0;
+    final used = proposalsUsed.toDouble();
+    final limit = proposalsLimit!.toDouble();
+    return (used / limit).clamp(0.0, 1.0);
   }
 
   double get activeProjectsProgress {
-    if (activeProjectsLimit == null || activeProjectsLimit == 0) return 0;
-    return activeProjectsUsed / activeProjectsLimit!;
+    if (activeProjectsLimit == null || activeProjectsLimit == 0) return 0.0;
+    final used = activeProjectsUsed.toDouble();
+    final limit = activeProjectsLimit!.toDouble();
+    return (used / limit).clamp(0.0, 1.0);
   }
 
   int get remainingProposals {
@@ -56,6 +57,11 @@ class UsageLimits {
     return activeProjectsLimit! - activeProjectsUsed;
   }
 
+  int? get interviewsRemaining {
+    if (interviewsUsed == null || interviewsLimit == null) return null;
+    return interviewsLimit! - interviewsUsed!;
+  }
+
   bool get canSubmitProposal {
     if (proposalsLimit == null) return true;
     return proposalsUsed < proposalsLimit!;
@@ -66,9 +72,13 @@ class UsageLimits {
     return activeProjectsUsed < activeProjectsLimit!;
   }
 
-  bool get hasInterviewLimit => interviewsLimit != null;
+  bool get hasInterviewLimit {
+    return interviewsLimit != null && interviewsLimit! > 0;
+  }
 
-  bool get hasProposalLimit => proposalsLimit != null;
+  bool get hasProposalLimit {
+    return proposalsLimit != null && proposalsLimit! > 0;
+  }
 
   bool get canScheduleInterview {
     if (interviewsLimit == null) return true;

@@ -197,7 +197,7 @@ abstract class AppLocalizations {
   /// No description provided for @proposals.
   ///
   /// In en, this message translates to:
-  /// **'proposal'**
+  /// **'Proposals'**
   String get proposals;
 
   /// No description provided for @rating.
@@ -215,25 +215,25 @@ abstract class AppLocalizations {
   /// No description provided for @trendingSkills.
   ///
   /// In en, this message translates to:
-  /// **'Trending Skills 🔥'**
+  /// **'Trending Skills'**
   String get trendingSkills;
 
   /// No description provided for @myPortfolio.
   ///
   /// In en, this message translates to:
-  /// **'My Portfolio 🎨'**
+  /// **'My Portfolio'**
   String get myPortfolio;
 
   /// No description provided for @skillTests.
   ///
   /// In en, this message translates to:
-  /// **'Skill Tests 🏆'**
+  /// **'Skill Tests'**
   String get skillTests;
 
   /// No description provided for @premium.
   ///
   /// In en, this message translates to:
-  /// **'Freelancer Premium'**
+  /// **'Premium'**
   String get premium;
 
   /// No description provided for @subscribe.
@@ -245,13 +245,13 @@ abstract class AppLocalizations {
   /// No description provided for @schedule.
   ///
   /// In en, this message translates to:
-  /// **'Your schedule'**
+  /// **'Schedule'**
   String get schedule;
 
   /// No description provided for @fullCalendar.
   ///
   /// In en, this message translates to:
-  /// **'Full calendar'**
+  /// **'Full Calendar'**
   String get fullCalendar;
 
   /// No description provided for @bestMatches.
@@ -443,7 +443,7 @@ abstract class AppLocalizations {
   /// No description provided for @upgrade.
   ///
   /// In en, this message translates to:
-  /// **'Upgrade Plan'**
+  /// **'Upgrade'**
   String get upgrade;
 
   /// No description provided for @noImage.
@@ -1811,7 +1811,7 @@ abstract class AppLocalizations {
   /// No description provided for @proposalLimitReached.
   ///
   /// In en, this message translates to:
-  /// **'You have reached your proposal limit. Upgrade to submit more.'**
+  /// **'Proposal limit reached'**
   String get proposalLimitReached;
 
   /// No description provided for @proposalsRemaining.
@@ -2513,7 +2513,7 @@ abstract class AppLocalizations {
   /// No description provided for @revisionRequested.
   ///
   /// In en, this message translates to:
-  /// **'Revision requested'**
+  /// **'Revision Requested'**
   String get revisionRequested;
 
   /// No description provided for @requestFailed.
@@ -2789,7 +2789,7 @@ abstract class AppLocalizations {
   /// No description provided for @enterCouponCode.
   ///
   /// In en, this message translates to:
-  /// **'Enter a coupon code'**
+  /// **'Please enter a coupon code'**
   String get enterCouponCode;
 
   /// No description provided for @couponApplied.
@@ -4451,7 +4451,7 @@ abstract class AppLocalizations {
   /// No description provided for @aiInsights.
   ///
   /// In en, this message translates to:
-  /// **'AI Insights'**
+  /// **'AI insights'**
   String get aiInsights;
 
   /// No description provided for @bestTimeToInterview.
@@ -7457,7 +7457,7 @@ abstract class AppLocalizations {
   /// No description provided for @price.
   ///
   /// In en, this message translates to:
-  /// **'Price *'**
+  /// **'Price'**
   String get price;
 
   /// No description provided for @proposalLimitEmpty.
@@ -7541,7 +7541,7 @@ abstract class AppLocalizations {
   /// No description provided for @customBranding.
   ///
   /// In en, this message translates to:
-  /// **'Custom Branding'**
+  /// **'Custom branding'**
   String get customBranding;
 
   /// No description provided for @recommended.
@@ -7553,13 +7553,13 @@ abstract class AppLocalizations {
   /// No description provided for @prioritySupport.
   ///
   /// In en, this message translates to:
-  /// **'Priority Support'**
+  /// **'Priority support'**
   String get prioritySupport;
 
   /// No description provided for @apiAccess.
   ///
   /// In en, this message translates to:
-  /// **'API Access'**
+  /// **'API access'**
   String get apiAccess;
 
   /// No description provided for @disputesManagement.
@@ -8617,6 +8617,906 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Actions'**
   String get actions;
+
+  /// No description provided for @browse.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse'**
+  String get browse;
+
+  /// No description provided for @raiseDispute.
+  ///
+  /// In en, this message translates to:
+  /// **'Raise Dispute'**
+  String get raiseDispute;
+
+  /// No description provided for @limitReached.
+  ///
+  /// In en, this message translates to:
+  /// **'LIMIT'**
+  String get limitReached;
+
+  /// No description provided for @projectLimitMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You have reached the maximum of {limit} active projects on your current plan.\n\nUpgrade your plan to create more projects or wait for existing projects to complete.'**
+  String projectLimitMessage(Object limit);
+
+  /// No description provided for @noContract.
+  ///
+  /// In en, this message translates to:
+  /// **'No Contract'**
+  String get noContract;
+
+  /// No description provided for @createContractFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Please create a contract first before submitting work.'**
+  String get createContractFirst;
+
+  /// No description provided for @milestoneAlreadyCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'This milestone has already been completed.'**
+  String get milestoneAlreadyCompleted;
+
+  /// No description provided for @workSubmissions.
+  ///
+  /// In en, this message translates to:
+  /// **'Work Submissions'**
+  String get workSubmissions;
+
+  /// No description provided for @viewAllSubmissions.
+  ///
+  /// In en, this message translates to:
+  /// **'View All Submissions'**
+  String get viewAllSubmissions;
+
+  /// No description provided for @escrowSecuredForFreelancer.
+  ///
+  /// In en, this message translates to:
+  /// **'Escrow Secured'**
+  String get escrowSecuredForFreelancer;
+
+  /// No description provided for @waitingForClientPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for Client Payment'**
+  String get waitingForClientPayment;
+
+  /// No description provided for @fundsAreProtected.
+  ///
+  /// In en, this message translates to:
+  /// **'Funds are protected:'**
+  String get fundsAreProtected;
+
+  /// No description provided for @clientWillFundEscrowBeforeWork.
+  ///
+  /// In en, this message translates to:
+  /// **'Client will fund escrow before work begins'**
+  String get clientWillFundEscrowBeforeWork;
+
+  /// No description provided for @errorSendingRevision.
+  ///
+  /// In en, this message translates to:
+  /// **'Error sending revision request'**
+  String get errorSendingRevision;
+
+  /// No description provided for @cannotSubmitWorkEscrowNotFunded.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot submit work before client funds the escrow'**
+  String get cannotSubmitWorkEscrowNotFunded;
+
+  /// No description provided for @waitingForClientPaymentBeforeWork.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for client payment before starting work'**
+  String get waitingForClientPaymentBeforeWork;
+
+  /// No description provided for @submissionDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Submission Details'**
+  String get submissionDetails;
+
+  /// No description provided for @noSubmissionsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No submissions yet'**
+  String get noSubmissionsYet;
+
+  /// No description provided for @waitingForFreelancerToSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for freelancer to submit work'**
+  String get waitingForFreelancerToSubmit;
+
+  /// No description provided for @youHaventSubmittedAnyWorkYet.
+  ///
+  /// In en, this message translates to:
+  /// **'You haven\'t submitted any work yet'**
+  String get youHaventSubmittedAnyWorkYet;
+
+  /// No description provided for @attachments.
+  ///
+  /// In en, this message translates to:
+  /// **'Attachments'**
+  String get attachments;
+
+  /// No description provided for @submittedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitted on'**
+  String get submittedOn;
+
+  /// No description provided for @untitledSubmission.
+  ///
+  /// In en, this message translates to:
+  /// **'Untitled Submission'**
+  String get untitledSubmission;
+
+  /// No description provided for @approved.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved'**
+  String get approved;
+
+  /// No description provided for @pendingReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending Review'**
+  String get pendingReview;
+
+  /// No description provided for @revisionFeedback.
+  ///
+  /// In en, this message translates to:
+  /// **'Revision Feedback'**
+  String get revisionFeedback;
+
+  /// No description provided for @resubmitWork.
+  ///
+  /// In en, this message translates to:
+  /// **'Resubmit Work'**
+  String get resubmitWork;
+
+  /// No description provided for @workApprovedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Work approved successfully'**
+  String get workApprovedSuccess;
+
+  /// No description provided for @errorApprovingWork.
+  ///
+  /// In en, this message translates to:
+  /// **'Error approving work'**
+  String get errorApprovingWork;
+
+  /// No description provided for @viewMySubmissions.
+  ///
+  /// In en, this message translates to:
+  /// **'View My Submissions'**
+  String get viewMySubmissions;
+
+  /// No description provided for @tapToSeeAllReviews.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to see all reviews'**
+  String get tapToSeeAllReviews;
+
+  /// No description provided for @proposalsRunningLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Proposals running low'**
+  String get proposalsRunningLow;
+
+  /// No description provided for @proposalsPerMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Proposals per month'**
+  String get proposalsPerMonth;
+
+  /// No description provided for @proposalsLeftThisMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'proposals left this month.'**
+  String get proposalsLeftThisMonth;
+
+  /// No description provided for @activeProjectsFire.
+  ///
+  /// In en, this message translates to:
+  /// **'Active Projects 🔥'**
+  String get activeProjectsFire;
+
+  /// No description provided for @pendingYourSignature.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending Your Signature'**
+  String get pendingYourSignature;
+
+  /// No description provided for @recentlyDeliveredProjects.
+  ///
+  /// In en, this message translates to:
+  /// **'Recently Delivered Projects'**
+  String get recentlyDeliveredProjects;
+
+  /// No description provided for @individualSubscription.
+  ///
+  /// In en, this message translates to:
+  /// **'Individual subscription'**
+  String get individualSubscription;
+
+  /// No description provided for @oneMonthFree.
+  ///
+  /// In en, this message translates to:
+  /// **'1 month Premium free'**
+  String get oneMonthFree;
+
+  /// No description provided for @twoMonthsStudentDiscount.
+  ///
+  /// In en, this message translates to:
+  /// **'2 months for students discount'**
+  String get twoMonthsStudentDiscount;
+
+  /// No description provided for @cancelAnytime.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel anytime'**
+  String get cancelAnytime;
+
+  /// No description provided for @bestDealsMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Best deals & offers monthly'**
+  String get bestDealsMonthly;
+
+  /// No description provided for @noSavedJobsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No saved jobs yet'**
+  String get noSavedJobsYet;
+
+  /// No description provided for @noAISuggestionsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No AI suggestions yet'**
+  String get noAISuggestionsYet;
+
+  /// No description provided for @refreshSuggestions.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh suggestions'**
+  String get refreshSuggestions;
+
+  /// No description provided for @viewAllTests.
+  ///
+  /// In en, this message translates to:
+  /// **'View All Tests'**
+  String get viewAllTests;
+
+  /// No description provided for @nothingOnThisDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing on this day'**
+  String get nothingOnThisDay;
+
+  /// No description provided for @more.
+  ///
+  /// In en, this message translates to:
+  /// **'more'**
+  String get more;
+
+  /// No description provided for @milestonesRemindersInterviews.
+  ///
+  /// In en, this message translates to:
+  /// **'Milestones, reminders & interviews'**
+  String get milestonesRemindersInterviews;
+
+  /// No description provided for @wallet.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet'**
+  String get wallet;
+
+  /// No description provided for @shop.
+  ///
+  /// In en, this message translates to:
+  /// **'Shop'**
+  String get shop;
+
+  /// No description provided for @shareProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Share Profile'**
+  String get shareProfile;
+
+  /// No description provided for @shareProfileText.
+  ///
+  /// In en, this message translates to:
+  /// **'Check out my profile: '**
+  String get shareProfileText;
+
+  /// No description provided for @loadingSubscription.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading your subscription...'**
+  String get loadingSubscription;
+
+  /// No description provided for @cancelSubscription.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel Subscription'**
+  String get cancelSubscription;
+
+  /// No description provided for @cancelSubscriptionConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to cancel your subscription? You will continue to have access until the end of your billing period.'**
+  String get cancelSubscriptionConfirmation;
+
+  /// No description provided for @noKeepIt.
+  ///
+  /// In en, this message translates to:
+  /// **'No, Keep It'**
+  String get noKeepIt;
+
+  /// No description provided for @yesCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, Cancel'**
+  String get yesCancel;
+
+  /// No description provided for @subscriptionCanceledSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription canceled successfully'**
+  String get subscriptionCanceledSuccess;
+
+  /// No description provided for @errorCanceling.
+  ///
+  /// In en, this message translates to:
+  /// **'Error canceling'**
+  String get errorCanceling;
+
+  /// No description provided for @tryAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Try Again'**
+  String get tryAgain;
+
+  /// No description provided for @noActiveSubscription.
+  ///
+  /// In en, this message translates to:
+  /// **'No Active Subscription'**
+  String get noActiveSubscription;
+
+  /// No description provided for @freePlanMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You are currently on the Free plan'**
+  String get freePlanMessage;
+
+  /// No description provided for @viewPlans.
+  ///
+  /// In en, this message translates to:
+  /// **'View Plans'**
+  String get viewPlans;
+
+  /// No description provided for @daysRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'days remaining'**
+  String get daysRemaining;
+
+  /// No description provided for @billingCycle.
+  ///
+  /// In en, this message translates to:
+  /// **'Billing Cycle'**
+  String get billingCycle;
+
+  /// No description provided for @usageOverview.
+  ///
+  /// In en, this message translates to:
+  /// **'Usage Overview'**
+  String get usageOverview;
+
+  /// No description provided for @remaining.
+  ///
+  /// In en, this message translates to:
+  /// **'remaining'**
+  String get remaining;
+
+  /// No description provided for @includedFeatures.
+  ///
+  /// In en, this message translates to:
+  /// **'Included Features'**
+  String get includedFeatures;
+
+  /// No description provided for @unlimited.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited'**
+  String get unlimited;
+
+  /// No description provided for @billingInformation.
+  ///
+  /// In en, this message translates to:
+  /// **'Billing Information'**
+  String get billingInformation;
+
+  /// No description provided for @currentPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'✨ Current Plan'**
+  String get currentPlan;
+
+  /// No description provided for @nextBillingDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Next Billing Date'**
+  String get nextBillingDate;
+
+  /// No description provided for @subscriptionEndNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Your subscription will end on the next billing date.'**
+  String get subscriptionEndNotice;
+
+  /// No description provided for @readyForMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready for more?'**
+  String get readyForMore;
+
+  /// No description provided for @upgradeMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade to unlock unlimited proposals, AI insights, and priority support!'**
+  String get upgradeMessage;
+
+  /// No description provided for @upgradeNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade Now'**
+  String get upgradeNow;
+
+  /// No description provided for @upgradeToPro.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade to Pro to get'**
+  String get upgradeToPro;
+
+  /// No description provided for @businessPlanUnlimited.
+  ///
+  /// In en, this message translates to:
+  /// **'Business plan gives you unlimited proposals'**
+  String get businessPlanUnlimited;
+
+  /// No description provided for @yearlyBillingSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save 20% with yearly billing'**
+  String get yearlyBillingSave;
+
+  /// No description provided for @contactSales.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact sales for custom enterprise plans'**
+  String get contactSales;
+
+  /// No description provided for @viewUpgradeOptions.
+  ///
+  /// In en, this message translates to:
+  /// **'View Upgrade Options'**
+  String get viewUpgradeOptions;
+
+  /// No description provided for @noUsageData.
+  ///
+  /// In en, this message translates to:
+  /// **'No usage data available yet'**
+  String get noUsageData;
+
+  /// No description provided for @noUsageDataSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Start using the platform to see your statistics'**
+  String get noUsageDataSubtitle;
+
+  /// No description provided for @monthlyActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly Activity'**
+  String get monthlyActivity;
+
+  /// No description provided for @quickStats.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick Stats'**
+  String get quickStats;
+
+  /// No description provided for @proposalsUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Proposals Used'**
+  String get proposalsUsed;
+
+  /// No description provided for @activeProjectsUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Active Projects Used'**
+  String get activeProjectsUsed;
+
+  /// No description provided for @remainingProposals.
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining Proposals'**
+  String get remainingProposals;
+
+  /// No description provided for @remainingProjects.
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining Projects'**
+  String get remainingProjects;
+
+  /// No description provided for @interviewsUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Interviews Used'**
+  String get interviewsUsed;
+
+  /// No description provided for @interviewsLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'Interviews Left'**
+  String get interviewsLeft;
+
+  /// No description provided for @off.
+  ///
+  /// In en, this message translates to:
+  /// **'of'**
+  String get off;
+
+  /// No description provided for @leftThisMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'left this month'**
+  String get leftThisMonth;
+
+  /// No description provided for @canStart.
+  ///
+  /// In en, this message translates to:
+  /// **'can start'**
+  String get canStart;
+
+  /// No description provided for @noLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'No limit'**
+  String get noLimit;
+
+  /// No description provided for @thisMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'this month'**
+  String get thisMonth;
+
+  /// No description provided for @basicFeatures.
+  ///
+  /// In en, this message translates to:
+  /// **'Basic features'**
+  String get basicFeatures;
+
+  /// No description provided for @limitedProposals.
+  ///
+  /// In en, this message translates to:
+  /// **'Limited proposals'**
+  String get limitedProposals;
+
+  /// No description provided for @oneActiveProject.
+  ///
+  /// In en, this message translates to:
+  /// **'1 active project'**
+  String get oneActiveProject;
+
+  /// No description provided for @unlimitedProposals.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited proposals'**
+  String get unlimitedProposals;
+
+  /// No description provided for @tenActiveProjects.
+  ///
+  /// In en, this message translates to:
+  /// **'10 active projects'**
+  String get tenActiveProjects;
+
+  /// No description provided for @advancedAnalytics.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced analytics'**
+  String get advancedAnalytics;
+
+  /// No description provided for @teamManagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Team management'**
+  String get teamManagement;
+
+  /// No description provided for @jan.
+  ///
+  /// In en, this message translates to:
+  /// **'Jan'**
+  String get jan;
+
+  /// No description provided for @feb.
+  ///
+  /// In en, this message translates to:
+  /// **'Feb'**
+  String get feb;
+
+  /// No description provided for @mar.
+  ///
+  /// In en, this message translates to:
+  /// **'Mar'**
+  String get mar;
+
+  /// No description provided for @apr.
+  ///
+  /// In en, this message translates to:
+  /// **'Apr'**
+  String get apr;
+
+  /// No description provided for @may.
+  ///
+  /// In en, this message translates to:
+  /// **'May'**
+  String get may;
+
+  /// No description provided for @jun.
+  ///
+  /// In en, this message translates to:
+  /// **'Jun'**
+  String get jun;
+
+  /// No description provided for @jul.
+  ///
+  /// In en, this message translates to:
+  /// **'Jul'**
+  String get jul;
+
+  /// No description provided for @aug.
+  ///
+  /// In en, this message translates to:
+  /// **'Aug'**
+  String get aug;
+
+  /// No description provided for @sep.
+  ///
+  /// In en, this message translates to:
+  /// **'Sep'**
+  String get sep;
+
+  /// No description provided for @oct.
+  ///
+  /// In en, this message translates to:
+  /// **'Oct'**
+  String get oct;
+
+  /// No description provided for @nov.
+  ///
+  /// In en, this message translates to:
+  /// **'Nov'**
+  String get nov;
+
+  /// No description provided for @dec.
+  ///
+  /// In en, this message translates to:
+  /// **'Dec'**
+  String get dec;
+
+  /// No description provided for @errorLoadingPlans.
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading plans'**
+  String get errorLoadingPlans;
+
+  /// No description provided for @couponAppliedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Coupon applied!'**
+  String get couponAppliedSuccess;
+
+  /// No description provided for @offf.
+  ///
+  /// In en, this message translates to:
+  /// **'off'**
+  String get offf;
+
+  /// No description provided for @invalidCoupon.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid coupon'**
+  String get invalidCoupon;
+
+  /// No description provided for @errorValidatingCoupon.
+  ///
+  /// In en, this message translates to:
+  /// **'Error validating coupon'**
+  String get errorValidatingCoupon;
+
+  /// No description provided for @alreadyOnFreePlan.
+  ///
+  /// In en, this message translates to:
+  /// **'You are already on the Free plan'**
+  String get alreadyOnFreePlan;
+
+  /// No description provided for @couldNotLaunchCheckout.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not launch checkout URL'**
+  String get couldNotLaunchCheckout;
+
+  /// No description provided for @subscriptionFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription failed'**
+  String get subscriptionFailed;
+
+  /// No description provided for @errorActivating.
+  ///
+  /// In en, this message translates to:
+  /// **'Error activating'**
+  String get errorActivating;
+
+  /// No description provided for @yourPlanYourChoice.
+  ///
+  /// In en, this message translates to:
+  /// **'✨ Your Plan, Your Choice ✨'**
+  String get yourPlanYourChoice;
+
+  /// No description provided for @chooseWhatFitsYou.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose what fits you best • Cancel anytime'**
+  String get chooseWhatFitsYou;
+
+  /// No description provided for @mostPopular.
+  ///
+  /// In en, this message translates to:
+  /// **'MOST POPULAR'**
+  String get mostPopular;
+
+  /// No description provided for @freePlan.
+  ///
+  /// In en, this message translates to:
+  /// **'FREE PLAN'**
+  String get freePlan;
+
+  /// No description provided for @perMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'/ month'**
+  String get perMonth;
+
+  /// No description provided for @whatsIncluded.
+  ///
+  /// In en, this message translates to:
+  /// **'What\'s included:'**
+  String get whatsIncluded;
+
+  /// No description provided for @freeTrialMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'14-day free trial! Cancel anytime.'**
+  String get freeTrialMessage;
+
+  /// No description provided for @couponCodeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'🎟️ Coupon code'**
+  String get couponCodeHint;
+
+  /// No description provided for @couponAppliedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Coupon applied:'**
+  String get couponAppliedLabel;
+
+  /// No description provided for @startFreeTrial.
+  ///
+  /// In en, this message translates to:
+  /// **'🚀 Start Free Trial'**
+  String get startFreeTrial;
+
+  /// No description provided for @devActivateManually.
+  ///
+  /// In en, this message translates to:
+  /// **'DEV: Activate Manually'**
+  String get devActivateManually;
+
+  /// No description provided for @invoices.
+  ///
+  /// In en, this message translates to:
+  /// **'Invoices'**
+  String get invoices;
+
+  /// No description provided for @comparePlans.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare Plans'**
+  String get comparePlans;
+
+  /// No description provided for @currentPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Password'**
+  String get currentPassword;
+
+  /// No description provided for @newPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'New Password'**
+  String get newPassword;
+
+  /// No description provided for @confirmNewPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm New Password'**
+  String get confirmNewPassword;
+
+  /// No description provided for @pleaseEnterCurrentPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your current password'**
+  String get pleaseEnterCurrentPassword;
+
+  /// No description provided for @pleaseEnterNewPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your new password'**
+  String get pleaseEnterNewPassword;
+
+  /// No description provided for @pleaseConfirmNewPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Please confirm your new password'**
+  String get pleaseConfirmNewPassword;
+
+  /// No description provided for @passwordMinLength.
+  ///
+  /// In en, this message translates to:
+  /// **'Password must be at least 6 characters'**
+  String get passwordMinLength;
+
+  /// No description provided for @passwordsDoNotMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords do not match'**
+  String get passwordsDoNotMatch;
+
+  /// No description provided for @passwordChangedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Password changed successfully'**
+  String get passwordChangedSuccess;
+
+  /// No description provided for @errorChangingPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Error changing password'**
+  String get errorChangingPassword;
+
+  /// No description provided for @completePaymentInBrowser.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete payment in the browser to activate your subscription.'**
+  String get completePaymentInBrowser;
+
+  /// No description provided for @failedToCreateCheckout.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to create checkout session'**
+  String get failedToCreateCheckout;
 }
 
 class _AppLocalizationsDelegate

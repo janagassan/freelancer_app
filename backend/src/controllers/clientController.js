@@ -199,6 +199,8 @@ export const createProject = async (req, res) => {
       UserId: req.user.id,
     });
 
+    await SubscriptionService.incrementActiveProjectsCount(req.user.id);
+    
     res.status(201).json({
       message: "✅ Project created successfully",
       project,

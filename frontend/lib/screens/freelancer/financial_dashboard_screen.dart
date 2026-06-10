@@ -45,32 +45,39 @@ class _FinancialDashboardScreenState extends State<FinancialDashboardScreen>
   }
 
   Future<void> _loadData(BuildContext context) async {
-    final t = AppLocalizations.of(context)!;
+  final t = AppLocalizations.of(context)!;
+  if (!mounted) return;
+
+  setState(() => _loading = true);
+
+  try {
+    final response = await ApiService.getFinancialStats(
+      period: _selectedPeriod,
+    );
+
     if (!mounted) return;
 
-    setState(() => _loading = true);
+    print('📊 Stats: ${response.stats}');
+    print('📊 PeriodStats: ${response.periodStats}');
+    print('📊 Transactions: ${response.recentTransactions.length}');
 
-    try {
-      final response = await ApiService.getFinancialStats(
-        period: _selectedPeriod,
-      );
+    setState(() {
+      _stats = response.stats;
+      _periodStats = response.periodStats;
+      _recentTransactions = response.recentTransactions;
+        print('🔍 SetState: _recentTransactions now has ${_recentTransactions.length} items'); 
 
-      if (!mounted) return;
+      _loading = false;
+    });
 
-      setState(() {
-        _stats = response.stats;
-        _periodStats = response.periodStats;
-        _recentTransactions = response.recentTransactions;
-        _loading = false;
-      });
-
-      _loadAnalytics();
-    } catch (e) {
-      if (!mounted) return;
-      setState(() => _loading = false);
-      Fluttertoast.showToast(msg: '${t.errorLoadingFinancialData}: $e');
-    }
+    _loadAnalytics();
+  } catch (e) {
+    if (!mounted) return;
+    setState(() => _loading = false);
+    print('❌ Error loading financial data: $e');
+    Fluttertoast.showToast(msg: '${t.errorLoadingFinancialData}: $e');
   }
+}
 
   Future<void> _loadAnalytics() async {
     try {
@@ -504,10 +511,18 @@ class _FinancialDashboardScreenState extends State<FinancialDashboardScreen>
     final t = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    print('🔍 _buildRecentTransactions called');
+  print('🔍 _recentTransactions length: ${_recentTransactions.length}');
+  print('🔍 _recentTransactions: ${_recentTransactions.map((t) => t.type).toList()}');
 
-    if (_recentTransactions.isEmpty) {
-      return const SizedBox.shrink();
-    }
+  if (_recentTransactions.isEmpty) {
+    print('🔍 Transactions is empty, returning SizedBox.shrink()');
+    return const SizedBox.shrink();
+  }
+
+  print('🔍 Building transactions list...');
+
+   
 
     return Container(
       decoration: BoxDecoration(
@@ -618,178 +633,200 @@ class _FinancialDashboardScreenState extends State<FinancialDashboardScreen>
   }
 
   Widget _buildAnalyticsTab() {
-    final t = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+  final t = AppLocalizations.of(context)!;
+  final theme = Theme.of(context);
+  final isDark = theme.brightness == Brightness.dark;
 
-    if (_analytics == null) {
-      return Center(
-        child: Text(
-          t.noAnalyticsData,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.colorScheme.onSurface.withOpacity(0.6),
-          ),
+  print('🔍 _analytics: $_analytics'); 
+
+  if (_analytics == null) {
+    print('🔍 _analytics is null');
+    return Center(
+      child: Text(
+        t.noAnalyticsData,
+        style: theme.textTheme.bodyMedium?.copyWith(
+          color: theme.colorScheme.onSurface.withOpacity(0.6),
         ),
-      );
-    }
-
-    final topProjects = _analytics?['topProjects'] ?? [];
-    final categoryDistribution = _analytics?['categoryDistribution'] ?? [];
-    final projectedEarnings = _analytics?['projectedEarnings'] ?? 0;
-
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          _buildTopProjectsCard(topProjects),
-          const SizedBox(height: 16),
-          if (categoryDistribution.isNotEmpty)
-            _buildCategoryDistributionCard(categoryDistribution),
-          const SizedBox(height: 16),
-          _buildProjectedEarningsCard(projectedEarnings),
-        ],
       ),
     );
   }
+
+  final analyticsData = _analytics?['analytics'] ?? _analytics;
+  final topProjects = analyticsData?['topProjects'] ?? [];
+  final categoryDistribution = analyticsData?['categoryDistribution'] ?? [];
+  final projectedEarnings = analyticsData?['projectedEarnings'] ?? 0;
+
+  print('🔍 topProjects length: ${topProjects.length}');
+  print('🔍 categoryDistribution length: ${categoryDistribution.length}');
+  print('🔍 projectedEarnings: $projectedEarnings');
+
+  return SingleChildScrollView(
+    padding: const EdgeInsets.all(16),
+    child: Column(
+      children: [
+        _buildTopProjectsCard(topProjects),
+        const SizedBox(height: 16),
+        if (categoryDistribution.isNotEmpty)
+          _buildCategoryDistributionCard(categoryDistribution),
+        const SizedBox(height: 16),
+        _buildProjectedEarningsCard(projectedEarnings),
+      ],
+    ),
+  );
+}
 
   Widget _buildTopProjectsCard(List<dynamic> topProjects) {
-    final t = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+  final t = AppLocalizations.of(context)!;
+  final theme = Theme.of(context);
+  final isDark = theme.brightness == Brightness.dark;
 
-    if (topProjects.isEmpty) return const SizedBox.shrink();
+  print('🔍 Building Top Projects Card with ${topProjects.length} projects');
+  print('🔍 TopProjects data: $topProjects');
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            t.topProjects,
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 12),
-          ...topProjects.map(
-            (project) => Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: Row(
-                children: [
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: AppColors.info.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Icon(Icons.work, color: AppColors.info),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          project['Project']?['title'] ?? t.untitled,
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            color: theme.colorScheme.onSurface,
-                          ),
-                        ),
-                        Text(
-                          _formatDate(DateTime.parse(project['createdAt'])),
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            fontSize: 11,
-                            color: theme.colorScheme.onSurface.withOpacity(0.5),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Text(
-                    '\$${project['agreed_amount']}',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.secondary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+  if (topProjects.isEmpty) {
+    print('🔍 TopProjects is empty, returning SizedBox.shrink()');
+    return const SizedBox.shrink();
   }
 
-  Widget _buildCategoryDistributionCard(List<dynamic> categories) {
-    final t = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            t.earningsByCategory,
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+  return Container(
+    padding: const EdgeInsets.all(16),
+    decoration: BoxDecoration(
+      color: theme.cardColor,
+      borderRadius: BorderRadius.circular(16),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          t.topProjects,
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
           ),
-          const SizedBox(height: 16),
-          ...categories.map(
-            (cat) => Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        ),
+        const SizedBox(height: 12),
+        ...topProjects.map(
+          (project) => Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: AppColors.info.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(Icons.work, color: AppColors.info),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        cat['category'] ?? t.other,
-                        style: TextStyle(color: theme.colorScheme.onSurface),
+                        project['Project']?['title'] ?? t.untitled,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          color: theme.colorScheme.onSurface,
+                        ),
                       ),
                       Text(
-                        '\$${cat['total']}',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.secondary,
+                        _formatDate(DateTime.parse(project['createdAt'])),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontSize: 11,
+                          color: theme.colorScheme.onSurface.withOpacity(0.5),
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 4),
-                  LinearProgressIndicator(
-                    value: (cat['total'] / _stats!.totalEarnings).clamp(
-                      0.0,
-                      1.0,
-                    ),
-                    backgroundColor: isDark
-                        ? Colors.grey.shade800
-                        : Colors.grey.shade200,
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      AppColors.secondary,
-                    ),
+                ),
+                Text(
+                  '\$${_parseAmount(project['agreed_amount'])}',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.secondary,
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
-        ],
-      ),
-    );
+        ),
+      ],
+    ),
+  );
+}
+
+double _parseAmount(dynamic value) {
+  if (value == null) return 0.0;
+  if (value is double) return value;
+  if (value is int) return value.toDouble();
+  if (value is String) {
+    try {
+      return double.parse(value);
+    } catch (e) {
+      return 0.0;
+    }
   }
+  return 0.0;
+}
+
+  Widget _buildCategoryDistributionCard(List<dynamic> categories) {
+  final t = AppLocalizations.of(context)!;
+  final theme = Theme.of(context);
+  final isDark = theme.brightness == Brightness.dark;
+
+  return Container(
+    padding: const EdgeInsets.all(16),
+    decoration: BoxDecoration(
+      color: theme.cardColor,
+      borderRadius: BorderRadius.circular(16),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          t.earningsByCategory,
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 16),
+        ...categories.map(
+          (cat) => Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      cat['category'] ?? t.other,
+                      style: TextStyle(color: theme.colorScheme.onSurface),
+                    ),
+                    Text(
+                      '\$${_parseAmount(cat['total'])}',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.secondary,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                LinearProgressIndicator(
+                  value: (_parseAmount(cat['total']) / _stats!.totalEarnings).clamp(0.0, 1.0),
+                  backgroundColor: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
+                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.secondary),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
 
   Widget _buildProjectedEarningsCard(double projected) {
     final t = AppLocalizations.of(context)!;

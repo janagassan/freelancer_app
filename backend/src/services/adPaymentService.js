@@ -217,9 +217,9 @@ class AdPaymentService {
       const platformCommission = parseFloat(amount) * 0.2;
       const advertiserNet = parseFloat(amount) * 0.8;
 
-      const { FinancialTransaction } = await import("../models/index.js");
+      const { Transaction } = await import("../models/index.js");
 
-      await FinancialTransaction.create({
+      await Transaction.create({
         user_id: 0,
         user_role: "system",
         amount: platformCommission,
@@ -251,14 +251,14 @@ class AdPaymentService {
 
   static async getAdminStats() {
     try {
-      const { FinancialTransaction } = await import("../models/index.js");
+      const { Transaction } = await import("../models/index.js");
 
       const totalAdRevenue =
-        (await FinancialTransaction.sum("amount", {
+        (await Transaction.sum("amount", {
           where: { type: "ad_revenue", status: "completed" },
         })) || 0;
 
-      const monthlyAdRevenue = await FinancialTransaction.findAll({
+      const monthlyAdRevenue = await Transaction.findAll({
         attributes: [
           [
             sequelize.fn(

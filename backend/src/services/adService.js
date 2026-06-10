@@ -113,13 +113,13 @@ class AdService {
 
   static async recordAdRevenue(campaignId, amount, type) {
     try {
-      const { FinancialTransaction } = await import("../models/index.js");
+      const { Transaction } = await import("../models/index.js");
       const campaign = await AdCampaign.findByPk(campaignId);
       if (!campaign) return;
 
       const platformCommission = parseFloat(amount) * 0.2;
 
-      await FinancialTransaction.create({
+      await Transaction.create({
         user_id: 0,
         user_role: "system",
         amount: platformCommission,

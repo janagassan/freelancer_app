@@ -87,7 +87,6 @@ class ProjectWorkspaceScreen extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    // TODO: إضافة شاشة المحادثة المخصصة للمشروع
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,

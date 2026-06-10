@@ -18,6 +18,7 @@ import 'package:freelancer_platform/screens/freelancer/offers_screen.dart';
 import 'package:freelancer_platform/screens/notifications/notifications_screen.dart';
 import 'package:freelancer_platform/screens/rating/reviews_screen.dart';
 import 'package:freelancer_platform/screens/skill_tests/skill_tests_screen.dart';
+import 'package:freelancer_platform/services/socket_service.dart';
 import 'package:freelancer_platform/widgets/ad_banner.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:intl/intl.dart';
@@ -186,7 +187,7 @@ class PortfolioCard extends StatelessWidget {
                             fit: BoxFit.cover,
                           ),
                         ),
-                      ),
+                      )
               )
             else
               Container(
@@ -314,9 +315,7 @@ class _Sidebar extends StatelessWidget {
       badgeGreen: true,
     ),
     _SidebarItem(icon: Icons.gavel_outlined, labelKey: 'disputes'),
-    _SidebarItem(icon: Icons.favorite_border, labelKey: 'favorites'),
     _SidebarItem(icon: Icons.attach_money, labelKey: 'financial'),
-    _SidebarItem(icon: Icons.filter_alt, labelKey: 'advancedSearch'),
     _SidebarItem(icon: Icons.mail_outline, labelKey: 'offers', badge: 0),
   ];
 
@@ -515,8 +514,6 @@ class _Sidebar extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
-                _sidebarActionBtn(context, Icons.settings_outlined, 'settings'),
-                const SizedBox(height: 6),
                 _sidebarActionBtn(
                   context,
                   Icons.logout,
@@ -827,9 +824,9 @@ class _FreelancerHomeScheduleCardState
           ),
           const SizedBox(height: 4),
           Text(
-            'Milestones, reminders & interviews',
-            style: TextStyle(fontSize: 10, color: Colors.grey.shade600),
-          ),
+  t.milestonesRemindersInterviews,
+  style: TextStyle(fontSize: 10, color: Colors.grey.shade600),
+),
           const SizedBox(height: 8),
           TableCalendar<dynamic>(
             firstDay: DateTime.utc(2020, 1, 1),
@@ -908,7 +905,7 @@ class _FreelancerHomeScheduleCardState
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8),
               child: Text(
-                'Nothing on this day',
+                t.nothingOnThisDay,
                 style: TextStyle(fontSize: 11, color: Colors.grey.shade500),
               ),
             )
@@ -963,7 +960,7 @@ class _FreelancerHomeScheduleCardState
                 ),
           if (dayItems.length > 4)
             Text(
-              '+${dayItems.length - 4} more',
+              '+${dayItems.length - 4} ${t.more}',
               style: TextStyle(fontSize: 10, color: Colors.grey.shade500),
             ),
           const SizedBox(height: 8),
@@ -1047,15 +1044,15 @@ class _PremiumCard extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            'Individual subscription',
+            t.individualSubscription,
             style: TextStyle(color: theme.colorScheme.primary, fontSize: 11),
           ),
           const SizedBox(height: 12),
           ...[
-            '1 month Premium free',
-            '2 months for students discount',
-            'Cancel anytime',
-            'Best deals & offers monthly',
+            t.oneMonthFree,
+            t.twoMonthsStudentDiscount,
+            t.cancelAnytime,
+            t.bestDealsMonthly,
           ].map(
             (item) => Padding(
               padding: const EdgeInsets.only(bottom: 6),
@@ -1145,7 +1142,7 @@ class _FreelancerProposalUsageBanner extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  isMax ? 'Proposal limit reached' : 'Proposals running low',
+                  isMax ? t!.proposalLimitReached : t!.proposalsRunningLow,
                   style: TextStyle(
                     fontWeight: FontWeight.w800,
                     fontSize: 13,
@@ -1155,8 +1152,8 @@ class _FreelancerProposalUsageBanner extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   isMax
-                      ? '$lim proposals per month on your plan.'
-                      : '$rem of $lim proposals left this month.',
+                      ? '$lim ${t.proposalsPerMonth}'
+                      : '$rem ${t.proposalsLeftThisMonth}',
                   style: TextStyle(fontSize: 11, color: fg.withOpacity(0.9)),
                 ),
               ],
@@ -1387,7 +1384,7 @@ class _FreelancerHomeScreenState extends State<FreelancerHomeScreen> {
               ),
               const SizedBox(height: 12),
               Text(
-                'No saved jobs yet',
+                t!.noSavedJobsYet,
                 style: TextStyle(color: Colors.grey.shade600),
               ),
               const SizedBox(height: 8),
@@ -1413,14 +1410,14 @@ class _FreelancerHomeScreenState extends State<FreelancerHomeScreen> {
               Icon(Icons.auto_awesome, size: 48, color: Colors.grey.shade400),
               const SizedBox(height: 12),
               Text(
-                'No AI suggestions yet',
+                t!.noAISuggestionsYet,
                 style: TextStyle(color: Colors.grey.shade600),
               ),
               const SizedBox(height: 8),
               TextButton(
                 onPressed: fetchAISuggestions,
                 child: Text(
-                  'Refresh suggestions',
+                  t!.refreshSuggestions,
                   style: TextStyle(color: theme.colorScheme.primary),
                 ),
               ),
@@ -1450,7 +1447,7 @@ class _FreelancerHomeScreenState extends State<FreelancerHomeScreen> {
                 TextButton(
                   onPressed: () => setState(() => _selectedNavIndex = 1),
                   child: Text(
-                    'View All',
+                    t.viewAll,
                     style: TextStyle(color: theme.colorScheme.primary),
                   ),
                 ),
@@ -1685,16 +1682,16 @@ class _FreelancerHomeScreenState extends State<FreelancerHomeScreen> {
     }
   }
 
-  String _getStatusText(String? status) {
+  String _getStatusText(String? status, AppLocalizations t) {
     switch (status) {
       case 'active':
-        return 'In Progress';
+        return t.inProgress;
       case 'pending_freelancer':
-        return 'Pending Your Signature';
+        return t.pendingYourSignature;
       case 'pending_client':
-        return 'Pending Client';
+        return t.pendingClient;
       case 'completed':
-        return 'Completed';
+        return t.completed;
       default:
         return status ?? 'Unknown';
     }
@@ -1716,8 +1713,23 @@ class _FreelancerHomeScreenState extends State<FreelancerHomeScreen> {
               ElevatedButton(
                 style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
                 onPressed: () async {
-                  await ApiService.logout();
+                  print('🚪 Logging out, cleaning up socket...');
+                  try {
+                    await SocketService.instance.logoutAndClear();
+                    print('✅ Socket cleaned up');
+                  } catch (e) {
+                    print('⚠️ Error cleaning socket: $e');
+                  }
+
+                  try {
+                    await ApiService.logout();
+                    print('✅ API logout completed');
+                  } catch (e) {
+                    print('⚠️ Error in API logout: $e');
+                  }
+
                   Navigator.pop(context);
+
                   if (mounted) {
                     Navigator.pushReplacementNamed(context, '/login');
                   }
@@ -1731,244 +1743,219 @@ class _FreelancerHomeScreenState extends State<FreelancerHomeScreen> {
   }
 
   Widget _buildTopBar() {
-    final theme = Theme.of(context);
-    final t = AppLocalizations.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+  final theme = Theme.of(context);
+  final t = AppLocalizations.of(context);
+  final isDark = theme.brightness == Brightness.dark;
 
-    final topBarColor = isDark
-        ? AppTheme.AppColors.darkBackground
-        : AppTheme.AppColors.lightSidebar;
+  final topBarColor = isDark
+      ? AppTheme.AppColors.darkBackground
+      : AppTheme.AppColors.lightSidebar;
 
-    final textColor = Colors.white;
-    final iconColor = Colors.white70;
+  final textColor = Colors.white;
+  final iconColor = Colors.white70;
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-      decoration: BoxDecoration(
-        color: topBarColor,
-        border: Border(
-          bottom: BorderSide(color: theme.dividerColor, width: 0.5),
+  return Container(
+    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+    decoration: BoxDecoration(
+      color: topBarColor,
+      border: Border(
+        bottom: BorderSide(color: theme.dividerColor, width: 0.5),
+      ),
+    ),
+    child: Row(
+      children: [
+        Text(
+          t!.profile,
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: textColor,
+          ),
         ),
-      ),
-      child: Row(
-        children: [
-          Text(
-            t!.profile,
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: textColor,
+        const Spacer(),
+        IconButton(
+          icon: Icon(Icons.search, color: iconColor),
+          onPressed: () => setState(() => _selectedNavIndex = 1),
+        ),
+        IconButton(
+          icon: Icon(Icons.star_border, color: iconColor),
+          tooltip: t.upgrade,
+          onPressed: () => Navigator.pushNamed(context, '/subscription/my'),
+        ),
+        Stack(
+          children: [
+            IconButton(
+              icon: Icon(Icons.chat_bubble_outline, color: iconColor),
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ChatsListScreen()),
+              ),
             ),
-          ),
-          const Spacer(),
-          IconButton(
-            icon: Icon(Icons.search, color: iconColor),
-            onPressed: () => setState(() => _selectedNavIndex = 1),
-          ),
-          IconButton(
-            icon: Icon(Icons.star_border, color: iconColor),
-            tooltip: t.upgrade,
-            onPressed: () => Navigator.pushNamed(context, '/subscription/my'),
-          ),
-          Stack(
-            children: [
-              IconButton(
-                icon: Icon(Icons.chat_bubble_outline, color: iconColor),
-                onPressed: () => Navigator.push(
+            if (_unreadMessages > 0)
+              Positioned(
+                right: 6,
+                top: 6,
+                child: Container(
+                  padding: const EdgeInsets.all(2),
+                  decoration: const BoxDecoration(
+                    color: AppTheme.AppColors.secondary,
+                    shape: BoxShape.circle,
+                  ),
+                  constraints: const BoxConstraints(
+                    minWidth: 15,
+                    minHeight: 15,
+                  ),
+                  child: Text(
+                    '$_unreadMessages',
+                    style: const TextStyle(color: Colors.white, fontSize: 9),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+          ],
+        ),
+        Stack(
+          children: [
+            IconButton(
+              icon: Icon(Icons.notifications_none, color: iconColor),
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const NotificationsScreen(),
+                ),
+              ).then((_) => _loadUnreadNotificationsCount()),
+            ),
+            if (_unreadNotificationsCount > 0)
+              Positioned(
+                right: 6,
+                top: 6,
+                child: Container(
+                  padding: const EdgeInsets.all(2),
+                  decoration: BoxDecoration(
+                    color: Colors.red,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  constraints: const BoxConstraints(
+                    minWidth: 15,
+                    minHeight: 15,
+                  ),
+                  child: Text(
+                    _unreadNotificationsCount > 99
+                        ? '99+'
+                        : '$_unreadNotificationsCount',
+                    style: const TextStyle(color: Colors.white, fontSize: 9),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+          ],
+        ),
+        PopupMenuButton<String>(
+          icon: Icon(Icons.more_vert, color: iconColor),
+          onSelected: (value) {
+            switch (value) {
+              case 'wallet':
+                Navigator.pushNamed(
                   context,
-                  MaterialPageRoute(builder: (_) => const ChatsListScreen()),
-                ),
-              ),
-              if (_unreadMessages > 0)
-                Positioned(
-                  right: 6,
-                  top: 6,
-                  child: Container(
-                    padding: const EdgeInsets.all(2),
-                    decoration: const BoxDecoration(
-                      color: AppTheme.AppColors.secondary,
-                      shape: BoxShape.circle,
-                    ),
-                    constraints: const BoxConstraints(
-                      minWidth: 15,
-                      minHeight: 15,
-                    ),
-                    child: Text(
-                      '$_unreadMessages',
-                      style: const TextStyle(color: Colors.white, fontSize: 9),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ),
-            ],
-          ),
-          Stack(
-            children: [
-              IconButton(
-                icon: Icon(Icons.notifications_none, color: iconColor),
-                onPressed: () => Navigator.push(
+                  '/wallet',
+                  arguments: 'freelancer',
+                );
+                break;
+             
+              case 'interviews':
+                Navigator.pushNamed(context, '/interviews');
+                break;
+              case 'share':
+                final shareUrl =
+                    '${dotenv.env['FRONTEND_URL']}/freelancer/${profile?.id}';
+                Share.share('${t.shareProfileText} $shareUrl');
+                break;
+              case 'affiliate':
+                Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (_) => const NotificationsScreen(),
-                  ),
-                ).then((_) => _loadUnreadNotificationsCount()),
+                  MaterialPageRoute(builder: (_) => const AffiliateScreen()),
+                );
+                break;
+              case 'settings':
+                Navigator.pushNamed(context, '/settings');
+                break;
+              case 'subscription':
+                Navigator.pushNamed(context, '/subscription/plans');
+                break;
+              case 'logout':
+                _showLogoutDialog();
+                break;
+            }
+          },
+          itemBuilder: (_) => [
+            PopupMenuItem(
+              value: 'wallet',
+              child: Row(
+                children: [
+                  const Icon(Icons.account_balance_wallet),
+                  const SizedBox(width: 12),
+                  Text(t.wallet),
+                ],
               ),
-              if (_unreadNotificationsCount > 0)
-                Positioned(
-                  right: 6,
-                  top: 6,
-                  child: Container(
-                    padding: const EdgeInsets.all(2),
-                    decoration: BoxDecoration(
-                      color: Colors.red,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    constraints: const BoxConstraints(
-                      minWidth: 15,
-                      minHeight: 15,
-                    ),
-                    child: Text(
-                      _unreadNotificationsCount > 99
-                          ? '99+'
-                          : '$_unreadNotificationsCount',
-                      style: const TextStyle(color: Colors.white, fontSize: 9),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ),
-            ],
-          ),
-          PopupMenuButton<String>(
-            icon: Icon(Icons.more_vert, color: iconColor),
-            onSelected: (value) {
-              switch (value) {
-                case 'wallet':
-                  Navigator.pushNamed(
-                    context,
-                    '/wallet',
-                    arguments: 'freelancer',
-                  );
-                  break;
-                case 'shop':
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const FeaturesShopScreen(),
-                    ),
-                  );
-                  break;
-                case 'interviews':
-                  Navigator.pushNamed(context, '/interviews');
-                  break;
-                case 'share':
-                  final shareUrl =
-                      '${dotenv.env['FRONTEND_URL']}/freelancer/${profile?.id}';
-                  Share.share('Check out my profile: $shareUrl');
-                  break;
-                case 'affiliate':
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const AffiliateScreen()),
-                  );
-                  break;
-                case 'settings':
-                  Navigator.pushNamed(context, '/settings');
-                  break;
-                case 'subscription':
-                  Navigator.pushNamed(context, '/subscription/plans');
-                  break;
-                case 'logout':
-                  _showLogoutDialog();
-                  break;
-              }
-            },
-            itemBuilder: (_) => [
-              const PopupMenuItem(
-                value: 'wallet',
-                child: Row(
-                  children: [
-                    Icon(Icons.account_balance_wallet),
-                    SizedBox(width: 12),
-                    Text('Wallet'),
-                  ],
-                ),
+            ),
+           
+            PopupMenuItem(
+              value: 'interviews',
+              child: Row(
+                children: [
+                  const Icon(Icons.interpreter_mode),
+                  const SizedBox(width: 12),
+                  Text(t.interviews),
+                ],
               ),
-              const PopupMenuItem(
-                value: 'shop',
-                child: Row(
-                  children: [
-                    Icon(Icons.shopping_bag),
-                    SizedBox(width: 12),
-                    Text('Shop'),
-                  ],
-                ),
+            ),
+            PopupMenuItem(
+              value: 'share',
+              child: Row(
+                children: [
+                  const Icon(Icons.share),
+                  const SizedBox(width: 12),
+                  Text(t.shareProfile),
+                ],
               ),
-              const PopupMenuItem(
-                value: 'interviews',
-                child: Row(
-                  children: [
-                    Icon(Icons.interpreter_mode),
-                    SizedBox(width: 12),
-                    Text('Interviews'),
-                  ],
-                ),
+            ),
+            PopupMenuItem(
+              value: 'settings',
+              child: Row(
+                children: [
+                  const Icon(Icons.settings),
+                  const SizedBox(width: 12),
+                  Text(t.settings),
+                ],
               ),
-              const PopupMenuItem(
-                value: 'share',
-                child: Row(
-                  children: [
-                    Icon(Icons.share),
-                    SizedBox(width: 12),
-                    Text('Share Profile'),
-                  ],
-                ),
+            ),
+            PopupMenuItem(
+              value: 'subscription',
+              child: Row(
+                children: [
+                  const Icon(Icons.subscriptions),
+                  const SizedBox(width: 12),
+                  Text(t.plans),
+                ],
               ),
-              const PopupMenuItem(
-                value: 'affiliate',
-                child: Row(
-                  children: [
-                    Icon(Icons.people),
-                    SizedBox(width: 12),
-                    Text('Refer & Earn'),
-                  ],
-                ),
+            ),
+            PopupMenuItem(
+              value: 'logout',
+              child: Row(
+                children: [
+                  const Icon(Icons.logout, color: Colors.red),
+                  const SizedBox(width: 12),
+                  Text(t.logout, style: const TextStyle(color: Colors.red)),
+                ],
               ),
-              const PopupMenuItem(
-                value: 'settings',
-                child: Row(
-                  children: [
-                    Icon(Icons.settings),
-                    SizedBox(width: 12),
-                    Text('Settings'),
-                  ],
-                ),
-              ),
-              const PopupMenuItem(
-                value: 'subscription',
-                child: Row(
-                  children: [
-                    Icon(Icons.subscriptions),
-                    SizedBox(width: 12),
-                    Text('Plans'),
-                  ],
-                ),
-              ),
-              const PopupMenuItem(
-                value: 'logout',
-                child: Row(
-                  children: [
-                    Icon(Icons.logout, color: Colors.red),
-                    SizedBox(width: 12),
-                    Text('Logout', style: TextStyle(color: Colors.red)),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
+            ),
+          ],
+        ),
+      ],
+    ),
+  );
+}
+
 
   Widget _buildProfileHeaderCard() {
     final theme = Theme.of(context);
@@ -2066,7 +2053,7 @@ class _FreelancerHomeScreenState extends State<FreelancerHomeScreen> {
             ],
           ),
 
-          _buildRatingSection(),
+          _buildRatingSection(t!),
 
           const SizedBox(height: 16),
 
@@ -2147,7 +2134,7 @@ class _FreelancerHomeScreenState extends State<FreelancerHomeScreen> {
     );
   }
 
-  Widget _buildRatingSection() {
+  Widget _buildRatingSection(AppLocalizations t) {
     final theme = Theme.of(context);
     if (profile == null) {
       return const SizedBox.shrink();
@@ -2200,7 +2187,7 @@ class _FreelancerHomeScreenState extends State<FreelancerHomeScreen> {
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   Text(
-                    'Tap to see all reviews',
+                    t.tapToSeeAllReviews,
                     style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
                   ),
                 ],
@@ -2265,7 +2252,7 @@ class _FreelancerHomeScreenState extends State<FreelancerHomeScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Active Projects 🔥',
+                t!.activeProjectsFire,
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
@@ -2274,7 +2261,7 @@ class _FreelancerHomeScreenState extends State<FreelancerHomeScreen> {
               TextButton(
                 onPressed: () => setState(() => _selectedNavIndex = 4),
                 child: Text(
-                  'View All',
+                  t.viewAll,
                   style: TextStyle(
                     color: theme.colorScheme.primary,
                     fontSize: 12,
@@ -2284,13 +2271,13 @@ class _FreelancerHomeScreenState extends State<FreelancerHomeScreen> {
             ],
           ),
           const SizedBox(height: 8),
-          ...activeContracts.take(3).map(_buildContractListItem),
+          ...activeContracts.take(3).map((contract) => _buildContractListItem(contract, t)),
         ],
       ),
     );
   }
 
-  Widget _buildContractListItem(Contract contract) {
+  Widget _buildContractListItem(Contract contract, AppLocalizations t) {
     final theme = Theme.of(context);
     final project = contract.project;
     if (project == null) return const SizedBox.shrink();
@@ -2379,7 +2366,7 @@ class _FreelancerHomeScreenState extends State<FreelancerHomeScreen> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    _getStatusText(contract.status),
+                    _getStatusText(contract.status, t),
                     style: TextStyle(
                       fontSize: 9,
                       color: statusColor,
@@ -2486,6 +2473,7 @@ class _FreelancerHomeScreenState extends State<FreelancerHomeScreen> {
   }
 
   Widget _buildDeliveredProjectsSection() {
+    final t = AppLocalizations.of(context);
     if (recentCompletedProjects.isEmpty) return const SizedBox.shrink();
 
     final theme = Theme.of(context);
@@ -2505,9 +2493,9 @@ class _FreelancerHomeScreenState extends State<FreelancerHomeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Recently Delivered Projects',
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+          Text(
+            t!.recentlyDeliveredProjects,
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 10),
           ...recentCompletedProjects.take(5).map((item) {
@@ -2630,7 +2618,7 @@ class _FreelancerHomeScreenState extends State<FreelancerHomeScreen> {
             BoxShadow(
               color: Colors.black12,
               blurRadius: 4,
-              offset: Offset(0, 2),
+              offset: const Offset(0, 2),
             ),
           ],
         ),
@@ -2789,7 +2777,7 @@ class _FreelancerHomeScreenState extends State<FreelancerHomeScreen> {
                       ),
                     ),
                     child: Text(
-                      'View All Tests',
+                      t.viewAllTests,
                       style: TextStyle(
                         fontSize: 12,
                         color: theme.colorScheme.primary,
@@ -2845,15 +2833,11 @@ class _FreelancerHomeScreenState extends State<FreelancerHomeScreen> {
       case 5:
         return const MyDisputesScreen();
       case 6:
-        return const FavoritesScreen();
-      case 7:
         return const FinancialDashboardScreen();
-      case 8:
-        return AdvancedSearchScreen();
-      case 9:
+      case 7:
         print('🟢 Going to OffersScreen');
         return const OffersScreen();
-      case 10:
+      case 8:
         return const SkillTestsScreen();
       default:
         return _buildHomeTabWithRightPanel();

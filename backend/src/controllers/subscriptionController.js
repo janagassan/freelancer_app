@@ -91,7 +91,7 @@ export const confirmSubscriptionPayment = async (req, res) => {
 export const createSubscriptionCheckoutSession = async (req, res) => {
   try {
     const { planSlug } = req.body;
-    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5000";
+    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:58940";
 
     const result = await SubscriptionService.createSubscriptionCheckoutSession(
       planSlug,
@@ -111,42 +111,30 @@ export const createSubscriptionCheckoutSession = async (req, res) => {
 
 export const confirmCheckoutSession = async (req, res) => {
   try {
-    console.log("🔐 ===== CONFIRM CHECKOUT SESSION CALLED =====");
-    console.log("🔐 Request body:", req.body);
-    console.log("🔐 User ID:", req.user.id);
+    console.log("🔐 ===== CONFIRM CHECKOUT SESSION =====");
     const { session_id } = req.body;
     const userId = req.user.id;
 
-    console.log("🔍 Confirming checkout session:", session_id);
-
     if (!session_id) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Session ID is required" });
+      return res.status(400).json({ success: false, message: "Session ID is required" });
     }
 
     const session = await stripe.checkout.sessions.retrieve(session_id);
-
-    if (session.payment_status !== "paid" && session.status !== "complete") {
+    
+    console.log("🔍 Session payment_status:", session.payment_status);
+    
+    if (session.payment_status !== "paid") {
       return res.json({ success: false, message: "Payment not completed" });
     }
 
     const { planSlug } = session.metadata;
-
-    if (!planSlug) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Plan slug not found" });
-    }
-
+    
     const plan = await SubscriptionPlan.findOne({
       where: { slug: planSlug, is_active: true },
     });
 
     if (!plan) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Plan not found" });
+      return res.status(404).json({ success: false, message: "Plan not found" });
     }
 
     await UserSubscription.update(
@@ -165,50 +153,15 @@ export const confirmCheckoutSession = async (req, res) => {
       trial_end: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
     });
 
-    console.log("✅ Subscription activated:", subscription.id);
-
-    try {
-      const invoice = await InvoiceService.createInvoice(
-        subscription.id,
-        session.payment_intent,
-      );
-      console.log("✅ Invoice created:", invoice?.invoice_number);
-    } catch (invoiceError) {
-      console.error("❌ Error creating invoice:", invoiceError);
-    }
-
-    try {
-      await Transaction.create({
-        user_id: userId,
-        amount: plan.price,
-        type: "subscription",
-        status: "completed",
-        description: `Subscription payment for ${plan.name} plan`,
-        stripe_payment_intent_id: session.payment_intent,
-        stripe_subscription_id: session.subscription,
-        completed_at: new Date(),
-      });
-      console.log("✅ Transaction created");
-    } catch (txError) {
-      console.error("❌ Error creating transaction:", txError);
-    }
-
     await User.update(
       {
         proposal_count_this_month: 0,
         proposal_reset_date: new Date(),
-        active_projects_count: 0,
       },
       { where: { id: userId } },
     );
 
-    await NotificationService.createNotification({
-      userId: userId,
-      type: "subscription_activated",
-      title: "Subscription Activated! 🎉",
-      body: `Your ${plan.name} subscription has been activated successfully.`,
-      data: { screen: "subscription/my" },
-    });
+    console.log("✅ Subscription activated:", subscription.id);
 
     res.json({
       success: true,
@@ -221,15 +174,15 @@ export const confirmCheckoutSession = async (req, res) => {
           slug: plan.slug,
           price: plan.price,
         },
-        status: subscription.status,
-        current_period_end: subscription.current_period_end,
       },
     });
   } catch (error) {
-    console.error("❌ Error confirming checkout:", error);
+    console.error("❌ Error:", error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+
 
 export const manualConfirmSubscriptionPayment = async (req, res) => {
   try {

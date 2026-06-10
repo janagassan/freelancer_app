@@ -67,6 +67,24 @@ class WorkSubmission {
     );
   }
 
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'contract_id': contractId,
+      'milestone_index': milestoneIndex,
+      'freelancer_id': freelancerId,
+      'client_id': clientId,
+      'title': title,
+      'description': description,
+      'files': files,
+      'links': links,
+      'status': status,
+      'submitted_at': submittedAt?.toIso8601String(),
+      'approved_at': approvedAt?.toIso8601String(),
+      'revision_request_message': revisionRequestMessage,
+    };
+  }
+
   bool get isPending => status == 'pending';
   bool get isApproved => status == 'approved';
   bool get isRejected => status == 'rejected';

@@ -20,27 +20,52 @@ class SubscriptionService {
   }
 
   static async getUserSubscription(userId) {
-    const subscription = await UserSubscription.findOne({
-      where: {
-        user_id: userId,
-        status: { [Op.in]: ["active", "trialing"] },
-      },
-      include: [{ model: SubscriptionPlan }],
-    });
+  const subscription = await UserSubscription.findOne({
+    where: {
+      user_id: userId,
+      status: { [Op.in]: ["active", "trialing"] },
+    },
+    include: [{ model: SubscriptionPlan }],
+    order: [["createdAt", "DESC"]], 
+  });
 
-    if (!subscription) {
-      const freePlan = await SubscriptionPlan.findOne({
-        where: { slug: "free" },
-      });
-      return { plan: freePlan, isActive: true, usage: {} };
-    }
-
+  if (subscription) {
     return {
       plan: subscription.SubscriptionPlan,
       isActive: true,
       subscriptionData: subscription,
     };
   }
+
+  const freePlan = await SubscriptionPlan.findOne({
+    where: { slug: "free" },
+  });
+  
+  return {
+    plan: freePlan,
+    isActive: false,
+    usage: {},
+  };
+}
+
+static async refreshUserSubscriptionAfterPayment(userId) {
+  try {
+    await User.update(
+      {
+        proposal_count_this_month: 0,
+        proposal_reset_date: new Date(),
+        active_projects_count: 0,
+      },
+      { where: { id: userId } },
+    );
+    
+    console.log("✅ User counters reset after subscription payment");
+    return true;
+  } catch (error) {
+    console.error("❌ Error resetting user counters:", error);
+    return false;
+  }
+}
 
   static async canSubmitProposal(userId) {
     const user = await User.findByPk(userId);
@@ -87,7 +112,6 @@ class SubscriptionService {
     });
   }
 
-  /** Client-side limit: invitations created this calendar month vs plan.interview_limit */
   static async getClientInterviewUsage(clientId) {
     const used = await this.countClientInterviewsThisMonth(clientId);
     const sub = await this.getUserSubscription(clientId);
@@ -671,6 +695,71 @@ class SubscriptionService {
         console.log(`Unhandled subscription event type: ${event.type}`);
     }
   }
+
+  static async handleSubscriptionCheckoutSuccess(session) {
+  try {
+    console.log("🎯 handleSubscriptionCheckoutSuccess called with session:", session.id);
+    console.log("🔍 Session metadata:", session.metadata);
+
+    const { planSlug, userId } = session.metadata;
+    
+    if (!planSlug || !userId) {
+      console.error("❌ Missing planSlug or userId in metadata");
+      return;
+    }
+
+    const plan = await SubscriptionPlan.findOne({
+      where: { slug: planSlug, is_active: true },
+    });
+
+    if (!plan) {
+      console.error("❌ Plan not found:", planSlug);
+      return;
+    }
+
+    console.log("📋 Found plan:", plan.name);
+
+    await UserSubscription.update(
+      { status: "canceled" },
+      { where: { user_id: parseInt(userId), status: "active" } },
+    );
+
+    const subscription = await UserSubscription.create({
+      user_id: parseInt(userId),
+      plan_id: plan.id,
+      status: "active",
+      stripe_subscription_id: session.subscription || session.id,
+      stripe_customer_id: session.customer,
+      current_period_start: new Date(),
+      current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+      trial_end: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+    });
+
+    console.log("✅ Subscription created:", subscription.id);
+
+    await User.update(
+      {
+        proposal_count_this_month: 0,
+        proposal_reset_date: new Date(),
+      },
+      { where: { id: parseInt(userId) } },
+    );
+
+    console.log("✅ User counters reset");
+
+    await NotificationService.createNotification({
+      userId: parseInt(userId),
+      type: "subscription_activated",
+      title: "Subscription Activated! 🎉",
+      body: `Your ${plan.name} subscription has been activated successfully.`,
+      data: { screen: "subscription/my" },
+    });
+
+    console.log("✅ Notification sent");
+  } catch (error) {
+    console.error("❌ Error in handleSubscriptionCheckoutSuccess:", error);
+  }
+}
 
   static async activateSubscription(stripeCheckoutSession) {
     console.log(

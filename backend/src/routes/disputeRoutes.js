@@ -10,6 +10,7 @@ import {
 const router = express.Router();
 
 router.use(protect);
+router.get("/my", getUserDisputes); 
 
 router.post("/", createDispute);
 router.get("/", getUserDisputes);

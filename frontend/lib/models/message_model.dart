@@ -1,5 +1,9 @@
 // lib/models/message_model.dart
+import 'dart:ui';
+
+import 'package:flutter/material.dart';
 import 'package:freelancer_platform/models/reply_model.dart';
+import 'package:freelancer_platform/services/socket_service.dart';
 
 class Message {
   final int id;
@@ -58,23 +62,62 @@ class Message {
       }
     }
 
-    return Message(
-      id: int.parse(json['id'].toString()),
-      chatId: int.parse(json['chat_id'].toString()),
-      senderId: int.parse(json['sender_id'].toString()),
-      senderName: json['sender_name']?.toString() ?? '',
-      senderAvatar: json['sender_avatar']?.toString(),
+    String getSenderName() {
+      if (json['sender_name'] != null &&
+          json['sender_name'].toString().isNotEmpty) {
+        return json['sender_name'].toString();
+      }
+
+      if (json['sender'] != null && json['sender']['name'] != null) {
+        return json['sender']['name'].toString();
+      }
+
+      if (json['user'] != null && json['user']['name'] != null) {
+        return json['user']['name'].toString();
+      }
+
+      return 'User';
+    }
+
+    String? getSenderAvatar() {
+      if (json['sender_avatar'] != null &&
+          json['sender_avatar'].toString().isNotEmpty) {
+        return json['sender_avatar'].toString();
+      }
+      if (json['sender'] != null && json['sender']['avatar'] != null) {
+        return json['sender']['avatar'].toString();
+      }
+      if (json['user'] != null && json['user']['avatar'] != null) {
+        return json['user']['avatar'].toString();
+      }
+      return null;
+    }
+
+    List<int> getReadBy() {
+      if (json['read_by'] != null) {
+        if (json['read_by'] is List) {
+          return (json['read_by'] as List)
+              .map((e) => int.tryParse(e.toString()) ?? 0)
+              .where((id) => id > 0)
+              .toList();
+        }
+      }
+      return [];
+    }
+
+    final message = Message(
+      id: int.tryParse(json['id'].toString()) ?? 0,
+      chatId: int.tryParse(json['chat_id'].toString()) ?? 0,
+      senderId: int.tryParse(json['sender_id'].toString()) ?? 0,
+      senderName: getSenderName(),
+      senderAvatar: getSenderAvatar(),
       content: json['content']?.toString() ?? '',
       type: json['type']?.toString() ?? 'text',
       mediaUrl: json['media_url']?.toString(),
       createdAt: json['createdAt'] != null
-          ? DateTime.parse(json['createdAt'].toString())
+          ? DateTime.tryParse(json['createdAt'].toString()) ?? DateTime.now()
           : DateTime.now(),
-      readBy:
-          (json['read_by'] as List?)
-              ?.map((e) => int.parse(e.toString()))
-              .toList() ??
-          [],
+      readBy: getReadBy(),
       isReadByMe: json['is_read_by_me'] ?? false,
       replyToId: json['reply_to_id'] != null
           ? int.tryParse(json['reply_to_id'].toString())
@@ -88,6 +131,12 @@ class Message {
           ? DateTime.tryParse(json['edited_at'].toString())
           : null,
     );
+
+    print(
+      '📥 Parsed message: id=${message.id}, senderId=${message.senderId}, senderName=${message.senderName}',
+    );
+
+    return message;
   }
 
   Map<String, dynamic> toJson() {
@@ -173,4 +222,43 @@ class Message {
 
 List<Message> parseMessages(List<dynamic> jsonList) {
   return jsonList.map((json) => Message.fromJson(json)).toList();
+}
+
+extension MessageUtils on Message {
+  bool get isSentByMe => senderId == SocketService.instance.getCurrentUserId();
+
+  bool get isImage => type == 'image';
+
+  bool get isFile => type == 'file';
+
+  bool get isText => type == 'text';
+
+  String get formattedTime {
+    final now = DateTime.now();
+    final diff = now.difference(createdAt);
+
+    if (diff.inDays > 7) {
+      return '${createdAt.day}/${createdAt.month}/${createdAt.year}';
+    } else if (diff.inDays > 0) {
+      return '${diff.inDays}d ago';
+    } else if (diff.inHours > 0) {
+      return '${diff.inHours}h ago';
+    } else if (diff.inMinutes > 0) {
+      return '${diff.inMinutes}m ago';
+    } else {
+      return 'Just now';
+    }
+  }
+
+  String get readStatusIcon {
+    if (readBy.length > 1) return '✅✅';
+    if (readBy.isNotEmpty) return '✅';
+    return '✓';
+  }
+
+  Color getReadStatusColor(bool isDark) {
+    if (readBy.length > 1) return Colors.green;
+    if (readBy.isNotEmpty) return Colors.blue;
+    return isDark ? Colors.grey : Colors.grey.shade400;
+  }
 }

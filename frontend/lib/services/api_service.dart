@@ -8,7 +8,9 @@ import 'package:freelancer_platform/models/financial_model.dart';
 import 'package:freelancer_platform/models/interview_model.dart';
 import 'package:freelancer_platform/models/project_model.dart';
 import 'package:freelancer_platform/models/search_response.dart';
+import 'package:freelancer_platform/models/user_model.dart';
 import 'package:freelancer_platform/models/work_submission_model.dart';
+import 'package:freelancer_platform/screens/subscription/my_subscription_screen.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/http.dart';
 import '../utils/constants.dart';
@@ -1147,6 +1149,21 @@ class ApiService {
     } catch (e) {
       print('Error getting contract: $e');
       return {'message': 'Connection error: $e'};
+    }
+  }
+
+  static Future<Map<String, dynamic>> getContractByProjectId(
+    int projectId,
+  ) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$BASE_URL/contracts/project/$projectId'),
+        headers: headers,
+      );
+      return jsonDecode(response.body);
+    } catch (e) {
+      print('Error getting contract by project: $e');
+      return {'success': false, 'message': 'Connection error: $e'};
     }
   }
 
@@ -2610,26 +2627,36 @@ class ApiService {
   }
 
   static Future<String?> createSubscriptionCheckoutSessionDirect(
-    String planSlug, {
-    String? couponCode,
-  }) async {
+  String planSlug, {
+  String? couponCode,
+}) async {
+  try {
     final body = {'planSlug': planSlug};
-    if (couponCode != null) body['couponCode'] = couponCode;
-    try {
-      final response = await http.post(
-        Uri.parse('$BASE_URL/subscription/checkout-session'),
-        headers: headers,
-        body: jsonEncode({'planSlug': planSlug}),
-      );
+    if (couponCode != null && couponCode.isNotEmpty) {
+      body['couponCode'] = couponCode;
+    }
+    
+    final response = await http.post(
+      Uri.parse('$BASE_URL/subscription/checkout-session'),
+      headers: headers,
+      body: jsonEncode(body),
+    );
 
+    print('🔍 Checkout session response status: ${response.statusCode}');
+    print('🔍 Checkout session response body: ${response.body}');
+
+    if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      print('🔍 Checkout session response: $data');
       return data['checkoutUrl'];
-    } catch (e) {
-      print('Error creating subscription checkout session: $e');
+    } else {
+      print('❌ Error: ${response.statusCode}');
       return null;
     }
+  } catch (e) {
+    print('❌ Error creating subscription checkout session: $e');
+    return null;
   }
+}
 
   static Future<Map<String, dynamic>> confirmCheckoutSession(
     String sessionId,
@@ -4709,6 +4736,24 @@ class ApiService {
     }
   }
 
+static Future<Map<String, dynamic>> requestMilestoneRevision({
+  required int contractId,
+  required int milestoneIndex,
+  required String revisionMessage,
+}) async {
+  try {
+    final response = await http.post(
+      Uri.parse('$BASE_URL/contracts/$contractId/milestones/$milestoneIndex/request-revision'),
+      headers: headers,
+      body: jsonEncode({'revisionMessage': revisionMessage}),
+    );
+    return jsonDecode(response.body);
+  } catch (e) {
+    print('Error requesting revision: $e');
+    return {'success': false, 'message': 'Failed to send revision request'};
+  }
+}
+
   static Future<Map<String, dynamic>> getAdvancedStats() async {
     try {
       final response = await http.get(
@@ -4734,6 +4779,72 @@ class ApiService {
       return {'success': false, 'analysis': {}};
     }
   }
+
+static Future<List<MonthlyUsage>> getMonthlyUsage() async {
+  try {
+    final response = await _dio.get('/subscription/monthly-usage');  
+    if (response.data['success'] == true) {
+      final List data = response.data['data'] ?? [];
+      return data.map((e) => MonthlyUsage(
+        month: e['month'] ?? '',
+        proposals: e['proposals'] ?? 0,
+        projects: e['projects'] ?? 0,
+      )).toList();
+    }
+    return [];
+  } catch (e) {
+    print('❌ Error fetching monthly usage: $e');
+    return [];
+  }
+}
+
+
+static Future<Map<String, dynamic>?> refreshUserData() async {
+  try {
+    final token = await TokenStorage.getToken();
+    if (token == null) return null;
+    
+    final response = await http.get(
+      Uri.parse('$BASE_URL/auth/me'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+    
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      if (data['success'] == true) {
+        return data['user'];
+      }
+    }
+    return null;
+  } catch (e) {
+    print('Error refreshing user data: $e');
+    return null;
+  }
+}
+
+static Future<Map<String, dynamic>> changePassword({
+  required String currentPassword,
+  required String newPassword,
+}) async {
+  try {
+    final response = await http.post(
+      Uri.parse('$BASE_URL/auth/change-password'),
+      headers: headers,
+      body: jsonEncode({
+        'currentPassword': currentPassword,
+        'newPassword': newPassword,
+      }),
+    );
+    return jsonDecode(response.body);
+  } catch (e) {
+    print('Error changing password: $e');
+    return {'success': false, 'message': 'Connection error'};
+  }
+}
+
 }
 
 class FinancialStatsResponse {

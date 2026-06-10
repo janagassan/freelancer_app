@@ -34,10 +34,57 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (res['token'] != null) {
       ApiService.token = res['token'];
+
+      final userData = res['user'];
+      final userId = userData?['id'];
+
+      print('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      print('📦 LOGIN RESPONSE:');
+      print('📦 Token: ${res['token']?.substring(0, 20)}...');
+      print('📦 User data: $userData');
+      print('📦 User ID from API: $userId');
+      print('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+
       await TokenStorage.saveToken(res['token']);
       await TokenStorage.saveUserRole(res['user']?['role']);
 
+      if (userId != null) {
+        await TokenStorage.saveUserId(userId);
+        print('✅ User ID saved: $userId');
+      }
+
+      if (userData != null) {
+        await TokenStorage.saveUser(Map<String, dynamic>.from(userData));
+        print('✅ User data saved: ${userData['name']}');
+      }
+
+      try {
+        SocketService.instance.disconnect();
+        print('🔌 Old socket disconnected');
+      } catch (e) {
+        print('⚠️ Error disconnecting: $e');
+      }
+
+      await Future.delayed(Duration(milliseconds: 500));
+
+      print('🔄 Initializing new socket connection...');
       await SocketService.instance.init();
+
+      await Future.delayed(Duration(milliseconds: 1000));
+
+      if (userData != null) {
+        await SocketService.instance.updateUserData(userData);
+      }
+
+      final savedUserId = await TokenStorage.getUserId();
+      final savedUser = await TokenStorage.getUser();
+      print('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      print('✅ AFTER SAVE:');
+      print('✅ Saved UserId: $savedUserId');
+      print('✅ Saved User: ${savedUser?['name']}');
+      print('✅ Socket connected: ${SocketService.instance.isConnected}');
+      print('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+
       Fluttertoast.showToast(msg: res['message']);
 
       final userRole = res['user']?['role'];

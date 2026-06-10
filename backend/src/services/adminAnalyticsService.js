@@ -8,7 +8,6 @@ import {
   Rating,
   Dispute,
   AdCampaign,
-  FinancialTransaction,
 } from "../models/index.js";
 import AdminInsight from "../models/AdminInsight.js";
 import AdminAuditLog from "../models/AdminAuditLog.js";
@@ -245,7 +244,7 @@ class AdminAnalyticsService {
     const sixMonthsAgo = new Date();
     sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
-    const monthlyRevenue = await FinancialTransaction.findAll({
+    const monthlyRevenue = await Transaction.findAll({
       attributes: [
         [
           Sequelize.fn(

@@ -16,6 +16,22 @@ class FinancialCharts extends StatelessWidget {
     this.chartType = 'bar',
   });
 
+  double _parseToDouble(dynamic value) {
+    if (value == null) return 0.0;
+    if (value is double) return value;
+    if (value is int) return value.toDouble();
+    if (value is String) {
+      try {
+        return double.parse(value);
+      } catch (e) {
+        print('Error parsing "$value" to double: $e');
+        return 0.0;
+      }
+    }
+    if (value is num) return value.toDouble();
+    return 0.0;
+  }
+
   @override
   Widget build(BuildContext context) {
     switch (chartType) {
@@ -33,8 +49,17 @@ class FinancialCharts extends StatelessWidget {
       return _buildEmptyChart('No earnings data available');
     }
 
-    final maxY = periodStats
-        .map((s) => s['total'] ?? 0.0)
+    final validStats = periodStats.where((s) {
+      final total = _parseToDouble(s['total']);
+      return total > 0;
+    }).toList();
+
+    if (validStats.isEmpty) {
+      return _buildEmptyChart('No earnings data available');
+    }
+
+    final maxY = validStats
+        .map((s) => _parseToDouble(s['total']))
         .reduce((a, b) => a > b ? a : b);
 
     return SizedBox(
@@ -66,11 +91,11 @@ class FinancialCharts extends StatelessWidget {
                 showTitles: true,
                 getTitlesWidget: (value, meta) {
                   final index = value.toInt();
-                  if (index >= 0 && index < periodStats.length) {
+                  if (index >= 0 && index < validStats.length) {
                     return Padding(
                       padding: const EdgeInsets.only(top: 8),
                       child: Text(
-                        _getLabel(periodStats[index]),
+                        _getLabel(validStats[index]),
                         style: const TextStyle(fontSize: 10),
                       ),
                     );
@@ -119,8 +144,8 @@ class FinancialCharts extends StatelessWidget {
               );
             },
           ),
-          barGroups: List.generate(periodStats.length, (index) {
-            final total = periodStats[index]['total']?.toDouble() ?? 0;
+          barGroups: List.generate(validStats.length, (index) {
+            final total = _parseToDouble(validStats[index]['total']);
             return BarChartGroupData(
               x: index,
               barRods: [
@@ -150,9 +175,18 @@ class FinancialCharts extends StatelessWidget {
       return _buildEmptyChart('No earnings data available');
     }
 
+    final validStats = periodStats.where((s) {
+      final total = _parseToDouble(s['total']);
+      return total > 0;
+    }).toList();
+
+    if (validStats.isEmpty) {
+      return _buildEmptyChart('No earnings data available');
+    }
+
     final spots = <FlSpot>[];
-    for (int i = 0; i < periodStats.length; i++) {
-      final total = periodStats[i]['total']?.toDouble() ?? 0;
+    for (int i = 0; i < validStats.length; i++) {
+      final total = _parseToDouble(validStats[i]['total']);
       spots.add(FlSpot(i.toDouble(), total));
     }
 
@@ -181,11 +215,11 @@ class FinancialCharts extends StatelessWidget {
                 showTitles: true,
                 getTitlesWidget: (value, meta) {
                   final index = value.toInt();
-                  if (index >= 0 && index < periodStats.length) {
+                  if (index >= 0 && index < validStats.length) {
                     return Padding(
                       padding: const EdgeInsets.only(top: 8),
                       child: Text(
-                        _getLabel(periodStats[index]),
+                        _getLabel(validStats[index]),
                         style: const TextStyle(fontSize: 10),
                       ),
                     );
@@ -331,9 +365,9 @@ class FinancialCharts extends StatelessWidget {
   Widget buildMiniStats() {
     if (periodStats.isEmpty) return const SizedBox.shrink();
 
-    final currentTotal = periodStats.last['total']?.toDouble() ?? 0;
+    final currentTotal = _parseToDouble(periodStats.last['total']);
     final previousTotal = periodStats.length > 1
-        ? (periodStats[periodStats.length - 2]['total']?.toDouble() ?? 0)
+        ? _parseToDouble(periodStats[periodStats.length - 2]['total'])
         : 0;
 
     final percentageChange = previousTotal > 0
@@ -397,16 +431,51 @@ class FinancialCharts extends StatelessWidget {
     );
   }
 
-  String _getLabel(Map<String, dynamic> stat) {
-    if (stat['month'] != null) {
-      return stat['month'];
-    }
-    if (stat['week'] != null) {
-      return 'W${stat['week']}';
-    }
-    return '';
-  }
 
+String _getLabel(Map<String, dynamic> stat) {
+  if (stat['period'] != null) {
+    final period = stat['period'].toString();
+    if (period.contains('-')) {
+      final parts = period.split('-');
+      if (parts.length == 2) {
+        final month = int.tryParse(parts[1]);
+        if (month != null && month >= 1 && month <= 12) {
+          return '${_getMonthName(month)} ${parts[0]}';
+        }
+        return period; 
+      }
+    }
+    return period;
+  }
+  if (stat['month'] != null) {
+    final monthStr = stat['month'].toString();
+    if (monthStr.contains('-')) {
+      final parts = monthStr.split('-');
+      if (parts.length == 2) {
+        final month = int.tryParse(parts[1]);
+        if (month != null && month >= 1 && month <= 12) {
+          return '${_getMonthName(month)} ${parts[0]}';
+        }
+      }
+    }
+    return monthStr;
+  }
+  if (stat['week'] != null) {
+    return 'W${stat['week']}';
+  }
+  return '';
+}
+
+String _getMonthName(int month) {
+  if (month < 1 || month > 12) {
+    return 'Invalid'; 
+  }
+  const months = [
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+  ];
+  return months[month - 1];
+}
   Widget _buildEmptyChart(String message) {
     return Container(
       height: 220,

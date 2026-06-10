@@ -7,6 +7,90 @@ const parseMilestones = (c) => {
   if (typeof m === "string") m = JSON.parse(m || "[]");
   return Array.isArray(m) ? m : [];
 };
+export const requestMilestoneRevision = async (req, res) => {
+  try {
+    const { contractId, milestoneIndex } = req.params;
+    const { revisionMessage } = req.body;
+    const clientId = req.user.id;
+
+    const contract = await Contract.findOne({
+      where: { id: contractId, ClientId: clientId },
+      include: [{ model: Project }],
+    });
+
+    if (!contract) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Contract not found" });
+    }
+
+    if (contract.status !== "active") {
+      return res
+        .status(400)
+        .json({ success: false, message: "Contract is not active" });
+    }
+
+    let milestones = contract.milestones;
+    if (typeof milestones === "string") {
+      milestones = JSON.parse(milestones);
+    }
+
+    if (!milestones[milestoneIndex]) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Milestone not found" });
+    }
+
+    const milestone = milestones[milestoneIndex];
+
+    if (milestone.status !== "completed") {
+      return res
+        .status(400)
+        .json({ 
+          success: false, 
+          message: "Can only request revision for completed milestones" 
+        });
+    }
+
+    if (milestone.status === "approved") {
+      return res
+        .status(400)
+        .json({ 
+          success: false, 
+          message: "Cannot request revision for already approved milestone" 
+        });
+    }
+
+    milestones[milestoneIndex].status = "revision_requested";
+    milestones[milestoneIndex].revision_message = revisionMessage;
+    milestones[milestoneIndex].revision_requested_at = new Date();
+
+    await contract.update({
+      milestones: JSON.stringify(milestones),
+    });
+
+    await NotificationService.createNotification({
+      userId: contract.FreelancerId,
+      type: "revision_requested",
+      title: "Revision Requested",
+      body: revisionMessage || "The client has requested changes to your work.",
+      data: {
+        contractId: contract.id,
+        milestoneIndex: milestoneIndex,
+        screen: "contract_progress",
+      },
+    });
+
+    res.json({
+      success: true,
+      message: "Revision request sent successfully",
+      milestone: milestones[milestoneIndex],
+    });
+  } catch (error) {
+    console.error("Error requesting milestone revision:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
 
 export const getContractProgress = async (req, res) => {
   try {

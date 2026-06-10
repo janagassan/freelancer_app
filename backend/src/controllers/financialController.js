@@ -1,6 +1,7 @@
 // ===== backend/src/controllers/financialController.js =====
 import {
   FinancialTransaction,
+  Transaction,
   Wallet,
   Contract,
   User,
@@ -24,38 +25,38 @@ export const getFinancialStats = async (req, res) => {
       };
     }
 
-    const earnings = await FinancialTransaction.sum("amount", {
+    const earnings = await Transaction.sum("amount", {
       where: {
         user_id: userId,
         user_role: userRole,
-        type: userRole === "freelancer" ? "payment_received" : "payment_sent",
+        type: userRole === "freelancer" ? "payment" : "payment_sent",
         status: "completed",
         ...dateFilter,
       },
     });
 
-    const fees = await FinancialTransaction.sum("amount", {
+    const fees = await Transaction.sum("amount", {
       where: {
         user_id: userId,
-        type: "platform_fee",
+        type: "fee",
         status: "completed",
         ...dateFilter,
       },
     });
 
-    const withdrawals = await FinancialTransaction.sum("amount", {
+    const withdrawals = await Transaction.sum("amount", {
       where: {
         user_id: userId,
-        type: "withdrawal",
+        type: "withdraw",
         status: "completed",
         ...dateFilter,
       },
     });
 
-    let stats = {};
+    let periodStats = [];
 
     if (period === "monthly") {
-      const monthlyStats = await FinancialTransaction.findAll({
+      const monthlyStats = await Transaction.findAll({
         attributes: [
           [
             Sequelize.fn(
@@ -63,13 +64,14 @@ export const getFinancialStats = async (req, res) => {
               Sequelize.col("transaction_date"),
               "%Y-%m",
             ),
-            "month",
+            "period",
           ],
           [Sequelize.fn("SUM", Sequelize.col("amount")), "total"],
         ],
         where: {
           user_id: userId,
           status: "completed",
+          type: userRole === "freelancer" ? "payment" : "payment_sent",
           ...dateFilter,
         },
         group: [
@@ -91,9 +93,9 @@ export const getFinancialStats = async (req, res) => {
         ],
         raw: true,
       });
-      stats = monthlyStats;
+      periodStats = monthlyStats;
     } else if (period === "weekly") {
-      const weeklyStats = await FinancialTransaction.findAll({
+      const weeklyStats = await Transaction.findAll({
         attributes: [
           [
             Sequelize.fn(
@@ -101,13 +103,14 @@ export const getFinancialStats = async (req, res) => {
               Sequelize.col("transaction_date"),
               "%Y-%u",
             ),
-            "week",
+            "period",
           ],
           [Sequelize.fn("SUM", Sequelize.col("amount")), "total"],
         ],
         where: {
           user_id: userId,
           status: "completed",
+          type: userRole === "freelancer" ? "payment" : "payment_sent",
           ...dateFilter,
         },
         group: [
@@ -119,10 +122,10 @@ export const getFinancialStats = async (req, res) => {
         ],
         raw: true,
       });
-      stats = weeklyStats;
+      periodStats = weeklyStats;
     }
 
-    const recentTransactions = await FinancialTransaction.findAll({
+    const recentTransactions = await Transaction.findAll({
       where: {
         user_id: userId,
         status: "completed",
@@ -137,10 +140,10 @@ export const getFinancialStats = async (req, res) => {
         totalEarnings: earnings || 0,
         totalFees: fees || 0,
         totalWithdrawals: withdrawals || 0,
-        netEarnings: (earnings || 0) - (fees || 0) - (withdrawals || 0),
+        netEarnings: (earnings || 0) - (fees || 0) - (withdrawals|| 0),
       },
-      periodStats: stats,
-      recentTransactions,
+      periodStats: periodStats,  
+      recentTransactions: recentTransactions,
     });
   } catch (error) {
     console.error("Error getting financial stats:", error);
@@ -153,7 +156,7 @@ export const generateFinancialReport = async (req, res) => {
     const userId = req.user.id;
     const { startDate, endDate, format = "pdf" } = req.query;
 
-    const transactions = await FinancialTransaction.findAll({
+    const transactions = await Transaction.findAll({
       where: {
         user_id: userId,
         transaction_date: {
@@ -166,13 +169,13 @@ export const generateFinancialReport = async (req, res) => {
 
     const summary = {
       totalIncome: transactions
-        .filter((t) => t.type === "payment_received" || t.type === "deposit")
+        .filter((t) => t.type === "payment" || t.type === "deposit")
         .reduce((sum, t) => sum + parseFloat(t.amount), 0),
       totalExpenses: transactions
         .filter((t) => t.type === "payment_sent" || t.type === "withdrawal")
         .reduce((sum, t) => sum + parseFloat(t.amount), 0),
       totalFees: transactions
-        .filter((t) => t.type === "platform_fee")
+        .filter((t) => t.type === "fee")
         .reduce((sum, t) => sum + parseFloat(t.amount), 0),
     };
     summary.netIncome =
@@ -210,11 +213,11 @@ export const requestWithdrawalV2 = async (req, res) => {
         .json({ success: false, message: "Insufficient balance" });
     }
 
-    const transaction = await FinancialTransaction.create({
+    const transaction = await Transaction.create({
       user_id: userId,
       user_role: req.user.role,
       amount: -amount,
-      type: "withdrawal",
+      type: "withdraw",
       status: "pending",
       description: `Withdrawal request via ${method}`,
       metadata: {
@@ -247,16 +250,22 @@ export const getAdvancedFinancialAnalytics = async (req, res) => {
     const userId = req.user.id;
     const userRole = req.user.role;
 
+    console.log('📊 Analytics - UserId:', userId, 'Role:', userRole);
+
     const topProjects = await Contract.findAll({
-      where:
-        userRole === "freelancer"
-          ? { FreelancerId: userId, status: "completed" }
-          : { ClientId: userId, status: "completed" },
+      where: userRole === "freelancer"
+        ? { FreelancerId: userId, status: "completed" }
+        : { ClientId: userId, status: "completed" },
       attributes: ["id", "agreed_amount", "createdAt"],
-      include: [{ model: Project, attributes: ["title"] }],
+      include: [{ model: Project, attributes: ["title", "category"] }],
       order: [["agreed_amount", "DESC"]],
       limit: 5,
     });
+
+    console.log('📊 Top projects found:', topProjects.length);
+    if (topProjects.length > 0) {
+      console.log('📊 First project:', topProjects[0].toJSON());
+    }
 
     const categoryDistribution = await sequelize.query(
       `
@@ -273,7 +282,7 @@ export const getAdvancedFinancialAnalytics = async (req, res) => {
       { type: sequelize.QueryTypes.SELECT },
     );
 
-    const monthlyAverage = await FinancialTransaction.findAll({
+    const monthlyAverage = await Transaction.findAll({
       attributes: [
         [
           Sequelize.fn(
@@ -288,7 +297,7 @@ export const getAdvancedFinancialAnalytics = async (req, res) => {
       where: {
         user_id: userId,
         status: "completed",
-        type: userRole === "freelancer" ? "payment_received" : "payment_sent",
+        type: userRole === "freelancer" ? "payment" : "payment_sent",
       },
       group: [
         Sequelize.fn("DATE_FORMAT", Sequelize.col("transaction_date"), "%Y-%m"),
@@ -315,12 +324,12 @@ async function calculateProjectedEarnings(userId, userRole) {
   const threeMonthsAgo = new Date();
   threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
 
-  const transactions = await FinancialTransaction.findAll({
+  const transactions = await Transaction.findAll({
     where: {
       user_id: userId,
       transaction_date: { [Op.gte]: threeMonthsAgo },
       status: "completed",
-      type: userRole === "freelancer" ? "payment_received" : "payment_sent",
+      type: userRole === "freelancer" ? "payment" : "payment",
     },
     attributes: ["amount"],
   });

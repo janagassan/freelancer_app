@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:freelancer_platform/screens/ads/create_ad_campaign_screen.dart';
 import 'package:freelancer_platform/screens/auth/reset_password_screen.dart';
+import 'package:freelancer_platform/screens/contract/work_submissions_screen.dart';
+import 'package:freelancer_platform/screens/settings/change_password_screen.dart';
 import 'package:freelancer_platform/screens/settings/settings_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:freelancer_platform/providers/theme_provider.dart';
@@ -182,6 +184,8 @@ class _FreelancerAppState extends State<FreelancerApp> {
             '/signup': (_) => const SignupScreen(),
             '/verify': (_) => const VerifyScreen(),
             '/forgot': (_) => ForgotPasswordScreen(),
+            '/change-password': (context) => const ChangePasswordScreen(),
+
 
             '/home': (_) => HomeScreen(),
 
@@ -208,6 +212,13 @@ class _FreelancerAppState extends State<FreelancerApp> {
             '/favorites': (_) => const FavoritesScreen(),
             '/financial-dashboard': (_) => const FinancialDashboardScreen(),
             '/advanced-search': (_) => const AdvancedSearchScreen(),
+            '/contract/submissions': (context) {
+  final args = ModalRoute.of(context)!.settings.arguments as Map;
+  return WorkSubmissionsScreen(
+    contractId: args['contractId'],
+    userRole: args['userRole'],
+  );
+},
 
             '/my-contracts': (context) {
               final userRole =

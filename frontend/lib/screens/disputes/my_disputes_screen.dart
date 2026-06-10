@@ -26,6 +26,7 @@ class _MyDisputesScreenState extends State<MyDisputesScreen> {
   @override
   void initState() {
     super.initState();
+     print('🔍 MyDisputesScreen initState called'); 
     _loadDisputes();
     _scrollController.addListener(_onScroll);
   }
@@ -46,6 +47,9 @@ class _MyDisputesScreenState extends State<MyDisputesScreen> {
   }
 
   Future<void> _loadDisputes({bool refresh = false}) async {
+    print('🔍 _loadDisputes called, refresh: $refresh'); 
+  print('🔍 _selectedStatus: $_selectedStatus');
+  print('🔍 _currentPage: $_currentPage');
     if (refresh) {
       setState(() {
         _currentPage = 1;
@@ -53,20 +57,27 @@ class _MyDisputesScreenState extends State<MyDisputesScreen> {
         _isLoading = true;
       });
     }
+     print('🔍 Before API call');
+
 
     try {
+      print('🔍 Calling ApiService.getUserDisputes...'); 
       final response = await ApiService.getUserDisputes(
         status: _selectedStatus,
         page: _currentPage,
         limit: 20,
       );
+       print('🔍 After API call, response received');
+       print('🔍 Response: $response');
 
       if (!mounted) return;
+      print('🔍 Response success: ${response['success']}'); 
 
       if (response['success'] == true) {
         final disputes = (response['disputes'] as List)
             .map((json) => Dispute.fromJson(json))
             .toList();
+            print('🔍 Disputes parsed: ${disputes.length}');
 
         setState(() {
           if (refresh) {
@@ -78,6 +89,7 @@ class _MyDisputesScreenState extends State<MyDisputesScreen> {
           _isLoading = false;
         });
       } else {
+        print('❌ Response success false: ${response['message']}');   
         setState(() => _isLoading = false);
         final t = AppLocalizations.of(context);
         ScaffoldMessenger.of(context).showSnackBar(
@@ -93,6 +105,7 @@ class _MyDisputesScreenState extends State<MyDisputesScreen> {
         );
       }
     } catch (e) {
+      print('❌ Exception in _loadDisputes: $e');
       if (!mounted) return;
       setState(() => _isLoading = false);
       final t = AppLocalizations.of(context);

@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter_html/flutter_html.dart';
+import 'package:freelancer_platform/screens/freelancer/work_submission_screen.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/contract_model.dart';
 import '../../services/api_service.dart';
@@ -390,6 +391,7 @@ class _ContractScreenState extends State<ContractScreen> {
             ],
           ],
         ),
+
         elevation: 0,
         backgroundColor: theme.scaffoldBackgroundColor,
         foregroundColor: theme.colorScheme.onSurface,
@@ -521,6 +523,64 @@ class _ContractScreenState extends State<ContractScreen> {
                   ),
 
                   const SizedBox(height: 20),
+
+                  if (widget.userRole == 'freelancer' &&
+                      contract?.status == 'active')
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 20),
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: isEscrowFunded
+                            ? AppColors.success.withOpacity(0.1)
+                            : AppColors.warning.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: isEscrowFunded
+                              ? AppColors.success
+                              : AppColors.warning,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            isEscrowFunded
+                                ? Icons.security
+                                : Icons.warning_amber,
+                            color: isEscrowFunded
+                                ? AppColors.success
+                                : AppColors.warning,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  isEscrowFunded
+                                      ? t.escrowSecuredForFreelancer
+                                      : t.waitingForClientPayment,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: isEscrowFunded
+                                        ? AppColors.success
+                                        : AppColors.warning,
+                                  ),
+                                ),
+                                Text(
+                                  isEscrowFunded
+                                      ? '${t.fundsAreProtected} ${t.dollar}${_formatAmountInt(contract?.agreedAmount)} ${t.inEscrow}'
+                                      : t.clientWillFundEscrowBeforeWork,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: AppColors.gray,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
 
                   if (contract!.milestones != null &&
                       contract!.milestones!.isNotEmpty)
@@ -789,6 +849,96 @@ class _ContractScreenState extends State<ContractScreen> {
                           ),
                         ],
                         const SizedBox(height: 20),
+                      ],
+                    ),
+
+                  if (widget.userRole == 'client' &&
+                      contract != null &&
+                      (contract!.status == 'active' ||
+                          contract!.status == 'completed'))
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 20),
+                        Text(
+                          t.workSubmissions,
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: theme.colorScheme.onSurface,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          width: double.infinity,
+                          child: OutlinedButton.icon(
+                            onPressed: () {
+                              Navigator.pushNamed(
+                                context,
+                                '/contract/submissions',
+                                arguments: {
+                                  'contractId': widget.contractId,
+                                  'userRole': widget.userRole,
+                                },
+                              );
+                            },
+                            icon: Icon(
+                              Icons.folder_open,
+                              color: theme.colorScheme.primary,
+                            ),
+                            label: Text(t.viewAllSubmissions),
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                  if (widget.userRole == 'freelancer' &&
+                      contract?.status == 'active')
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 20),
+                        Text(
+                          t.workSubmissions,
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: theme.colorScheme.onSurface,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          width: double.infinity,
+                          child: OutlinedButton.icon(
+                            onPressed: () {
+                              Navigator.pushNamed(
+                                context,
+                                '/contract/submissions',
+                                arguments: {
+                                  'contractId': widget.contractId,
+                                  'userRole': widget.userRole,
+                                },
+                              );
+                            },
+                            icon: Icon(
+                              Icons.history,
+                              color: theme.colorScheme.primary,
+                            ),
+                            label: Text(t.viewMySubmissions),
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
+                        ),
                       ],
                     ),
 
@@ -1209,8 +1359,8 @@ class _ContractScreenState extends State<ContractScreen> {
                         child: OutlinedButton.icon(
                           onPressed: () => _navigateToCreateDispute(),
                           icon: const Icon(Icons.gavel, color: Colors.red),
-                          label: const Text(
-                            'رفع نزاع',
+                          label: Text(
+                            t.raiseDispute,
                             style: TextStyle(
                               color: Colors.red,
                               fontSize: 16,
@@ -1346,6 +1496,8 @@ class _ContractScreenState extends State<ContractScreen> {
         milestone['status'] == 'in_progress';
     final progress = getAmount(milestone['progress']);
     final amount = getAmount(milestone['amount']);
+
+    final isEscrowFunded = contract?.escrowStatus == 'funded';
 
     Color statusColor;
     IconData statusIcon;
@@ -1499,7 +1651,10 @@ class _ContractScreenState extends State<ContractScreen> {
                 ],
               ),
 
-            if (widget.userRole == 'freelancer' && !isCompleted && !isApproved)
+            if (widget.userRole == 'freelancer' &&
+                !isCompleted &&
+                !isApproved &&
+                isEscrowFunded)
               Padding(
                 padding: const EdgeInsets.only(top: 16),
                 child: Row(
@@ -1521,6 +1676,39 @@ class _ContractScreenState extends State<ContractScreen> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+            if (widget.userRole == 'freelancer' &&
+                !isCompleted &&
+                !isApproved &&
+                !isEscrowFunded &&
+                contract?.status == 'active')
+              Container(
+                margin: const EdgeInsets.only(top: 16),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppColors.warning.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.info_outline,
+                      color: AppColors.warning,
+                      size: 16,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        t.waitingForClientPaymentBeforeWork,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: AppColors.warning,
                         ),
                       ),
                     ),
@@ -1606,30 +1794,41 @@ class _ContractScreenState extends State<ContractScreen> {
 
   Future<void> _completeMilestone(int index) async {
     final t = AppLocalizations.of(context)!;
-    setState(() => _isProcessing = true);
 
-    try {
-      final result = await ApiService.updateMilestoneProgress(
-        contractId: widget.contractId,
-        milestoneIndex: index,
-        progress: 100,
-        status: 'completed',
-      );
+    if (contract == null ||
+        contract!.milestones == null ||
+        index >= contract!.milestones!.length) {
+      Fluttertoast.showToast(msg: t.errorCompletingMilestone);
+      return;
+    }
 
-      if (result['success'] == true || result['message'] != null) {
-        Fluttertoast.showToast(
-          msg: result['message'] ?? t.milestoneMarkedCompleted,
-        );
-        await fetchContract(context);
-      } else {
-        Fluttertoast.showToast(
-          msg: result['message'] ?? t.errorCompletingMilestone,
-        );
-      }
-    } catch (e) {
-      Fluttertoast.showToast(msg: '${t.error}: $e');
-    } finally {
-      setState(() => _isProcessing = false);
+    if (contract?.escrowStatus != 'funded') {
+      Fluttertoast.showToast(msg: t.cannotSubmitWorkEscrowNotFunded);
+      return;
+    }
+
+    final milestone = contract!.milestones![index];
+    final isCompleted = milestone['status'] == 'completed';
+
+    if (isCompleted) {
+      Fluttertoast.showToast(msg: t.milestoneAlreadyCompleted);
+      return;
+    }
+
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => WorkSubmissionScreen(
+          contract: contract!,
+          milestoneIndex: index,
+          milestone: milestone,
+        ),
+      ),
+    );
+
+    if (result == true) {
+      await fetchContract(context);
+      Fluttertoast.showToast(msg: t.workSubmittedSuccess);
     }
   }
 
@@ -1792,7 +1991,28 @@ class _ContractScreenState extends State<ContractScreen> {
     );
 
     if (confirmed == true && controller.text.isNotEmpty) {
-      Fluttertoast.showToast(msg: t.revisionRequestSent);
+      setState(() => _isProcessing = true);
+
+      try {
+        final result = await ApiService.requestMilestoneRevision(
+          contractId: widget.contractId,
+          milestoneIndex: index,
+          revisionMessage: controller.text,
+        );
+
+        if (result['success'] == true) {
+          Fluttertoast.showToast(msg: t.revisionRequestSent);
+          await fetchContract(context);
+        } else {
+          Fluttertoast.showToast(
+            msg: result['message'] ?? t.errorSendingRevision,
+          );
+        }
+      } catch (e) {
+        Fluttertoast.showToast(msg: '${t.error}: $e');
+      } finally {
+        setState(() => _isProcessing = false);
+      }
     }
   }
 

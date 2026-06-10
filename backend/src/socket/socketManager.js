@@ -83,8 +83,27 @@ export const initSocket = (server) => {
     });
 
     socket.on("send_message", async (data) => {
-      const { chatId, content, type, mediaUrl, fileName, replyTo, replyToId } =
-        data;
+      const {
+        chatId,
+        content,
+        type,
+        mediaUrl,
+        fileName,
+        replyTo,
+        replyToId,
+        senderName,
+        senderAvatar,
+      } = data;
+
+      const finalSenderName = senderName || socket.user?.name;
+      const finalSenderAvatar = senderAvatar || socket.user?.avatar;
+
+      console.log("📨 Received send_message:", {
+        chatId,
+        content,
+        senderName: finalSenderName,
+        senderAvatar: finalSenderAvatar,
+      });
 
       const replyToMessageId = replyTo || replyToId;
 
@@ -172,8 +191,8 @@ export const initSocket = (server) => {
           reply_to_id: message.reply_to_id,
           reply_to: replyPreview,
           createdAt: message.createdAt.toISOString(),
-          sender_name: socket.user.name,
-          sender_avatar: socket.user.avatar,
+          sender_name: finalSenderName,
+          sender_avatar: finalSenderAvatar,
           read_by: [],
           is_read_by_me: false,
         };
@@ -225,6 +244,15 @@ export const initSocket = (server) => {
         console.error("Error deleting message:", err);
         socket.emit("message_error", { error: "Failed to delete message" });
       }
+    });
+
+    socket.on("update_user", async (userData) => {
+      console.log(`🔄 Updating user ${socket.userId} data:`, userData);
+
+      if (userData.name) socket.user.name = userData.name;
+      if (userData.avatar) socket.user.avatar = userData.avatar;
+
+      socket.emit("user_updated", { success: true });
     });
 
     socket.on("edit_message", async (data) => {

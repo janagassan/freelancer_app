@@ -8,6 +8,7 @@ import '../../models/wallet_model.dart';
 import '../../models/transaction_model.dart';
 import '../../theme/app_theme.dart';
 import '../freelancer/financial_dashboard_screen.dart';
+import 'transaction_history_screen.dart';
 
 class WalletScreen extends StatefulWidget {
   final String userRole;
@@ -243,6 +244,11 @@ class _WalletScreenState extends State<WalletScreen> {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
+           leading: IconButton(
+        icon: Icon(Icons.arrow_back, color: theme.iconTheme.color),
+        onPressed: () => Navigator.pop(context),
+        tooltip: 'Back',
+      ),
         title: Text(t.myWallet),
         elevation: 0,
         backgroundColor: theme.scaffoldBackgroundColor,
@@ -313,44 +319,40 @@ class _WalletScreenState extends State<WalletScreen> {
   }
 
   Widget _buildActionButtons() {
-    final t = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
+  final t = AppLocalizations.of(context)!;
+  final theme = Theme.of(context);
 
-    return Row(
-      children: [
-        Expanded(
-          child: _buildActionCard(
-            icon: Icons.arrow_downward,
-            label: t.withdraw,
-            color: AppColors.warning,
-            onTap: () => _requestWithdrawal(context),
-          ),
+  return Row(
+    children: [
+      Expanded(
+        child: _buildActionCard(
+          icon: Icons.arrow_downward,
+          label: t.withdraw,
+          color: AppColors.warning,
+          onTap: () => _requestWithdrawal(context),
         ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _buildActionCard(
-            icon: Icons.shopping_bag,
-            label: t.boost,
-            color: theme.colorScheme.primary,
-            onTap: () {
-              Navigator.pushNamed(context, '/features/shop');
-            },
-          ),
+      ),
+      const SizedBox(width: 12),
+      Expanded(
+        child: _buildActionCard(
+          icon: Icons.history,
+          label: t.history,
+          color: AppColors.info,
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => TransactionHistoryScreen(
+                  userRole: widget.userRole,
+                ),
+              ),
+            );
+          },
         ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _buildActionCard(
-            icon: Icons.history,
-            label: t.history,
-            color: AppColors.info,
-            onTap: () {
-              // TODO: Show transaction history
-            },
-          ),
-        ),
-      ],
-    );
-  }
+      ),
+    ],
+  );
+}
 
   Widget _buildActionCard({
     required IconData icon,

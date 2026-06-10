@@ -57,7 +57,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get activeProjects => 'المشاريع النشطة';
 
   @override
-  String get proposals => 'عرض';
+  String get proposals => 'العروض';
 
   @override
   String get rating => 'التقييم';
@@ -66,22 +66,22 @@ class AppLocalizationsAr extends AppLocalizations {
   String get profileCompletion => 'اكتمال الملف الشخصي';
 
   @override
-  String get trendingSkills => 'المهارات الرائجة 🔥';
+  String get trendingSkills => 'المهارات الرائجة';
 
   @override
-  String get myPortfolio => 'معرض أعمالي 🎨';
+  String get myPortfolio => 'معرض أعمالي';
 
   @override
-  String get skillTests => 'اختبارات المهارات 🏆';
+  String get skillTests => 'اختبارات المهارات';
 
   @override
-  String get premium => 'الباقة المميزة';
+  String get premium => 'بريميوم';
 
   @override
-  String get subscribe => 'اشتراك';
+  String get subscribe => 'اشترك';
 
   @override
-  String get schedule => 'جدول أعمالك';
+  String get schedule => 'الجدول الزمني';
 
   @override
   String get fullCalendar => 'التقويم الكامل';
@@ -180,7 +180,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get logoutConfirmation => 'هل أنت متأكد من تسجيل الخروج؟';
 
   @override
-  String get upgrade => 'ترقية الباقة';
+  String get upgrade => 'ترقية';
 
   @override
   String get noImage => 'لا توجد صورة';
@@ -874,8 +874,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get proposalsThisMonth => 'العروض هذا الشهر';
 
   @override
-  String get proposalLimitReached =>
-      'لقد وصلت إلى حد العروض المسموح بها. قم بترقية حسابك لتقديم المزيد.';
+  String get proposalLimitReached => 'تم الوصول للحد الأقصى للعروض';
 
   @override
   String proposalsRemaining(int count) {
@@ -1256,7 +1255,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get whatShouldBeChanged => 'ما الذي يجب تغييره؟';
 
   @override
-  String get revisionRequested => 'تم طلب المراجعة';
+  String get revisionRequested => 'طلب تعديل';
 
   @override
   String get requestFailed => 'فشل الطلب';
@@ -1396,7 +1395,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get freelancerSignature => 'توقيع المستقل';
 
   @override
-  String get enterCouponCode => 'أدخل رمز القسيمة';
+  String get enterCouponCode => 'الرجاء إدخال رمز الكوبون';
 
   @override
   String get couponApplied => 'تم تطبيق القسيمة';
@@ -3819,7 +3818,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get billingPeriod => 'فترة الفوترة';
 
   @override
-  String get price => 'السعر *';
+  String get price => 'السعر';
 
   @override
   String get proposalLimitEmpty => 'حد العروض (فارغ = غير محدود)';
@@ -3867,10 +3866,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get recommended => 'موصى به';
 
   @override
-  String get prioritySupport => 'دعم';
+  String get prioritySupport => 'دعم مميز';
 
   @override
-  String get apiAccess => 'الوصول عبر API';
+  String get apiAccess => 'الوصول إلى API';
 
   @override
   String get disputesManagement => 'إدارة النزاعات';
@@ -4422,4 +4421,462 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get actions => 'أحداث';
+
+  @override
+  String get browse => 'تصفح';
+
+  @override
+  String get raiseDispute => 'رفع نزاع';
+
+  @override
+  String get limitReached => 'الحد الأقصى';
+
+  @override
+  String projectLimitMessage(Object limit) {
+    return 'لقد وصلت إلى الحد الأقصى البالغ $limit مشروع نشط في خطتك الحالية.\n\nقم بترقية خطتك لإنشاء المزيد من المشاريع أو انتظر حتى اكتمال المشاريع الحالية.';
+  }
+
+  @override
+  String get noContract => 'لا يوجد عقد';
+
+  @override
+  String get createContractFirst => 'يرجى إنشاء عقد أولاً قبل تسليم العمل.';
+
+  @override
+  String get milestoneAlreadyCompleted => 'هذه المرحلة تم إكمالها بالفعل.';
+
+  @override
+  String get workSubmissions => 'تسليمات العمل';
+
+  @override
+  String get viewAllSubmissions => 'عرض جميع التسليمات';
+
+  @override
+  String get escrowSecuredForFreelancer => 'الضمان مؤمن';
+
+  @override
+  String get waitingForClientPayment => 'بانتظار دفع العميل';
+
+  @override
+  String get fundsAreProtected => 'الأموال محمية:';
+
+  @override
+  String get clientWillFundEscrowBeforeWork =>
+      'سيدفع العميل الضمان قبل بدء العمل';
+
+  @override
+  String get errorSendingRevision => 'خطأ في إرسال طلب المراجعة';
+
+  @override
+  String get cannotSubmitWorkEscrowNotFunded =>
+      'لا يمكن تسليم العمل قبل دفع الضمان من قبل العميل';
+
+  @override
+  String get waitingForClientPaymentBeforeWork =>
+      'بانتظار دفع العميل للضمان قبل بدء العمل';
+
+  @override
+  String get submissionDetails => 'تفاصيل التسليم';
+
+  @override
+  String get noSubmissionsYet => 'لا توجد تسليمات بعد';
+
+  @override
+  String get waitingForFreelancerToSubmit => 'بانتظار تسليم الفريلانسر للعمل';
+
+  @override
+  String get youHaventSubmittedAnyWorkYet => 'لم تقم بتسليم أي عمل بعد';
+
+  @override
+  String get attachments => 'مرفقات';
+
+  @override
+  String get submittedOn => 'تم التسليم في';
+
+  @override
+  String get untitledSubmission => 'تسليم بدون عنوان';
+
+  @override
+  String get approved => 'تمت الموافقة';
+
+  @override
+  String get pendingReview => 'قيد المراجعة';
+
+  @override
+  String get revisionFeedback => 'ملاحظات التعديل';
+
+  @override
+  String get resubmitWork => 'إعادة تسليم العمل';
+
+  @override
+  String get workApprovedSuccess => 'تمت الموافقة على العمل بنجاح';
+
+  @override
+  String get errorApprovingWork => 'خطأ في الموافقة على العمل';
+
+  @override
+  String get viewMySubmissions => 'عرض تسليماتي';
+
+  @override
+  String get tapToSeeAllReviews => 'اضغط لعرض جميع التقييمات';
+
+  @override
+  String get proposalsRunningLow => 'العروض المتبقية قليلة';
+
+  @override
+  String get proposalsPerMonth => 'العروض شهرياً';
+
+  @override
+  String get proposalsLeftThisMonth => 'عرض متبقي هذا الشهر.';
+
+  @override
+  String get activeProjectsFire => 'المشاريع النشطة 🔥';
+
+  @override
+  String get pendingYourSignature => 'بانتظار توقيعك';
+
+  @override
+  String get recentlyDeliveredProjects => 'المشاريع المسلمة مؤخراً';
+
+  @override
+  String get individualSubscription => 'اشتراك فردي';
+
+  @override
+  String get oneMonthFree => 'شهر بريميوم مجاناً';
+
+  @override
+  String get twoMonthsStudentDiscount => 'شهرين بخصم الطلاب';
+
+  @override
+  String get cancelAnytime => 'إلغاء في أي وقت';
+
+  @override
+  String get bestDealsMonthly => 'أفضل العروض شهرياً';
+
+  @override
+  String get noSavedJobsYet => 'لا توجد وظائف محفوظة بعد';
+
+  @override
+  String get noAISuggestionsYet => 'لا توجد اقتراحات ذكية بعد';
+
+  @override
+  String get refreshSuggestions => 'تحديث الاقتراحات';
+
+  @override
+  String get viewAllTests => 'عرض جميع الاختبارات';
+
+  @override
+  String get nothingOnThisDay => 'لا يوجد مواعيد في هذا اليوم';
+
+  @override
+  String get more => 'المزيد';
+
+  @override
+  String get milestonesRemindersInterviews => 'المراحل، التذكيرات والمقابلات';
+
+  @override
+  String get wallet => 'المحفظة';
+
+  @override
+  String get shop => 'المتجر';
+
+  @override
+  String get shareProfile => 'مشاركة الملف الشخصي';
+
+  @override
+  String get shareProfileText => 'اطلع على ملفي الشخصي: ';
+
+  @override
+  String get loadingSubscription => 'جاري تحميل اشتراكك...';
+
+  @override
+  String get cancelSubscription => 'إلغاء الاشتراك';
+
+  @override
+  String get cancelSubscriptionConfirmation =>
+      'هل أنت متأكد من إلغاء اشتراكك؟ سيبقى لديك حق الوصول حتى نهاية فترة الفوترة.';
+
+  @override
+  String get noKeepIt => 'لا، احتفظ به';
+
+  @override
+  String get yesCancel => 'نعم، إلغاء';
+
+  @override
+  String get subscriptionCanceledSuccess => 'تم إلغاء الاشتراك بنجاح';
+
+  @override
+  String get errorCanceling => 'خطأ في الإلغاء';
+
+  @override
+  String get tryAgain => 'حاول مرة أخرى';
+
+  @override
+  String get noActiveSubscription => 'لا يوجد اشتراك نشط';
+
+  @override
+  String get freePlanMessage => 'أنت حالياً على الخطة المجانية';
+
+  @override
+  String get viewPlans => 'عرض الخطط';
+
+  @override
+  String get daysRemaining => 'يوم متبقي';
+
+  @override
+  String get billingCycle => 'دورة الفوترة';
+
+  @override
+  String get usageOverview => 'نظرة عامة على الاستخدام';
+
+  @override
+  String get remaining => 'متبقي';
+
+  @override
+  String get includedFeatures => 'الميزات المضمنة';
+
+  @override
+  String get unlimited => 'غير محدود';
+
+  @override
+  String get billingInformation => 'معلومات الفوترة';
+
+  @override
+  String get currentPlan => '✨ الخطة الحالية';
+
+  @override
+  String get nextBillingDate => 'تاريخ الفوترة القادم';
+
+  @override
+  String get subscriptionEndNotice => 'سينتهي اشتراكك في تاريخ الفوترة القادم.';
+
+  @override
+  String get readyForMore => 'هل أنت مستعد للمزيد؟';
+
+  @override
+  String get upgradeMessage =>
+      'قم بالترقية للحصول على عروض غير محدودة ورؤى الذكاء الاصطناعي والدعم المميز!';
+
+  @override
+  String get upgradeNow => 'ترقية الآن';
+
+  @override
+  String get upgradeToPro => 'قم بالترقية إلى Pro للحصول على';
+
+  @override
+  String get businessPlanUnlimited => 'الخطة التجارية تمنحك عروضاً غير محدودة';
+
+  @override
+  String get yearlyBillingSave => 'وفر 20% مع الفوترة السنوية';
+
+  @override
+  String get contactSales => 'اتصل بالمبيعات للحصول على خطط مؤسسية مخصصة';
+
+  @override
+  String get viewUpgradeOptions => 'عرض خيارات الترقية';
+
+  @override
+  String get noUsageData => 'لا توجد بيانات استخدام بعد';
+
+  @override
+  String get noUsageDataSubtitle => 'ابدأ في استخدام المنصة لمشاهدة إحصائياتك';
+
+  @override
+  String get monthlyActivity => 'النشاط الشهري';
+
+  @override
+  String get quickStats => 'إحصائيات سريعة';
+
+  @override
+  String get proposalsUsed => 'العروض المستخدمة';
+
+  @override
+  String get activeProjectsUsed => 'المشاريع النشطة المستخدمة';
+
+  @override
+  String get remainingProposals => 'العروض المتبقية';
+
+  @override
+  String get remainingProjects => 'المشاريع المتبقية';
+
+  @override
+  String get interviewsUsed => 'المقابلات المستخدمة';
+
+  @override
+  String get interviewsLeft => 'المقابلات المتبقية';
+
+  @override
+  String get off => 'من';
+
+  @override
+  String get leftThisMonth => 'متبقي هذا الشهر';
+
+  @override
+  String get canStart => 'يمكن البدء';
+
+  @override
+  String get noLimit => 'لا يوجد حد';
+
+  @override
+  String get thisMonth => 'هذا الشهر';
+
+  @override
+  String get basicFeatures => 'ميزات أساسية';
+
+  @override
+  String get limitedProposals => 'عروض محدودة';
+
+  @override
+  String get oneActiveProject => 'مشروع نشط واحد';
+
+  @override
+  String get unlimitedProposals => 'عروض غير محدودة';
+
+  @override
+  String get tenActiveProjects => '10 مشاريع نشطة';
+
+  @override
+  String get advancedAnalytics => 'تحليلات متقدمة';
+
+  @override
+  String get teamManagement => 'إدارة الفريق';
+
+  @override
+  String get jan => 'يناير';
+
+  @override
+  String get feb => 'فبراير';
+
+  @override
+  String get mar => 'مارس';
+
+  @override
+  String get apr => 'أبريل';
+
+  @override
+  String get may => 'مايو';
+
+  @override
+  String get jun => 'يونيو';
+
+  @override
+  String get jul => 'يوليو';
+
+  @override
+  String get aug => 'أغسطس';
+
+  @override
+  String get sep => 'سبتمبر';
+
+  @override
+  String get oct => 'أكتوبر';
+
+  @override
+  String get nov => 'نوفمبر';
+
+  @override
+  String get dec => 'ديسمبر';
+
+  @override
+  String get errorLoadingPlans => 'خطأ في تحميل الخطط';
+
+  @override
+  String get couponAppliedSuccess => 'تم تطبيق الكوبون!';
+
+  @override
+  String get offf => 'خصم';
+
+  @override
+  String get invalidCoupon => 'Invalid coupon';
+
+  @override
+  String get errorValidatingCoupon => 'Error validating coupon';
+
+  @override
+  String get alreadyOnFreePlan => 'أنت بالفعل على الخطة المجانية';
+
+  @override
+  String get couldNotLaunchCheckout => 'لا يمكن فتح رابط الدفع';
+
+  @override
+  String get subscriptionFailed => 'فشل الاشتراك';
+
+  @override
+  String get errorActivating => 'خطأ في التفعيل';
+
+  @override
+  String get yourPlanYourChoice => '✨ خطتك، اختيارك ✨';
+
+  @override
+  String get chooseWhatFitsYou => 'اختر ما يناسبك • إلغاء في أي وقت';
+
+  @override
+  String get mostPopular => 'الأكثر شيوعاً';
+
+  @override
+  String get freePlan => 'خطة مجانية';
+
+  @override
+  String get perMonth => '/ شهر';
+
+  @override
+  String get whatsIncluded => 'ما هو مشمول:';
+
+  @override
+  String get freeTrialMessage => 'فترة تجريبية 14 يوماً! إلغاء في أي وقت.';
+
+  @override
+  String get couponCodeHint => '🎟️ رمز الكوبون';
+
+  @override
+  String get couponAppliedLabel => 'تم تطبيق الكوبون:';
+
+  @override
+  String get startFreeTrial => '🚀 ابدأ الفترة التجريبية';
+
+  @override
+  String get devActivateManually => 'DEV: تفعيل يدوي';
+
+  @override
+  String get invoices => 'الفواتير';
+
+  @override
+  String get comparePlans => 'مقارنة الخطط';
+
+  @override
+  String get currentPassword => 'كلمة المرور الحالية';
+
+  @override
+  String get newPassword => 'كلمة المرور الجديدة';
+
+  @override
+  String get confirmNewPassword => 'تأكيد كلمة المرور الجديدة';
+
+  @override
+  String get pleaseEnterCurrentPassword => 'الرجاء إدخال كلمة المرور الحالية';
+
+  @override
+  String get pleaseEnterNewPassword => 'الرجاء إدخال كلمة المرور الجديدة';
+
+  @override
+  String get pleaseConfirmNewPassword => 'الرجاء تأكيد كلمة المرور الجديدة';
+
+  @override
+  String get passwordMinLength => 'يجب أن تكون كلمة المرور 6 أحرف على الأقل';
+
+  @override
+  String get passwordsDoNotMatch => 'كلمتا المرور غير متطابقتين';
+
+  @override
+  String get passwordChangedSuccess => 'تم تغيير كلمة المرور بنجاح';
+
+  @override
+  String get errorChangingPassword => 'خطأ في تغيير كلمة المرور';
+
+  @override
+  String get completePaymentInBrowser =>
+      'أكمل عملية الدفع في المتصفح لتفعيل اشتراكك.';
+
+  @override
+  String get failedToCreateCheckout => 'فشل في إنشاء جلسة الدفع';
 }

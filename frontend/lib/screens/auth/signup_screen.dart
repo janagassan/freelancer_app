@@ -40,35 +40,56 @@ class _SignupScreenState extends State<SignupScreen>
   final List<String> selectedSkills = [];
   final TextEditingController skillController = TextEditingController();
 
-  bool phoneVerified = false;
-  bool showPhoneVerification = false;
-
   bool nationalIdVerified = false;
   bool checkingNationalId = false;
+
+  String? nameError;
+  String? emailError;
+  String? passwordError;
+  String? confirmPasswordError;
+  String? phoneError;
+  String? companyNameError;
 
   late TabController _tabController;
   int _currentStep = 0;
 
   final List<String> referralOptions = [
-  'Search Engine (Google, Bing)',
-  'Social Media (Facebook, LinkedIn, Instagram)',
-  'Friend / Referral',
-  'YouTube / Online Tutorials',
-  'Freelancer Community (Forums, Groups)',
-  'University / Course',
-  'Other',
-];
+    'Search Engine (Google, Bing)',
+    'Social Media (Facebook, LinkedIn, Instagram)',
+    'Friend / Referral',
+    'YouTube / Online Tutorials',
+    'Freelancer Community (Forums, Groups)',
+    'University / Course',
+    'Other',
+  ];
 
   final List<String> popularSkills = [
-    'Flutter', 'React', 'Node.js', 'Python', 'UI/UX Design',
-    'Graphic Design', 'Content Writing', 'SEO', 'Digital Marketing',
-    'WordPress', 'PHP', 'Java', 'Swift', 'Kotlin', 'Django',
-    'MongoDB', 'PostgreSQL', 'AWS', 'Docker', 'Git',
+    'Flutter',
+    'React',
+    'Node.js',
+    'Python',
+    'UI/UX Design',
+    'Graphic Design',
+    'Content Writing',
+    'SEO',
+    'Digital Marketing',
+    'WordPress',
+    'PHP',
+    'Java',
+    'Swift',
+    'Kotlin',
+    'Django',
+    'MongoDB',
+    'PostgreSQL',
+    'AWS',
+    'Docker',
+    'Git',
   ];
 
   static const Color primaryPurple = Color(0xFF5B5BD6);
   static const Color loginButtonColor = Color(0xFF122543);
   static const Color primaryBlue = Color(0xFF3A5A8C);
+  static const Color errorRed = Color(0xFFE53935);
 
   @override
   void initState() {
@@ -78,6 +99,7 @@ class _SignupScreenState extends State<SignupScreen>
       if (_tabController.indexIsChanging) {
         setState(() {
           _currentStep = _tabController.index;
+          _clearErrors();
         });
       }
     });
@@ -101,6 +123,59 @@ class _SignupScreenState extends State<SignupScreen>
     super.dispose();
   }
 
+  void _clearErrors() {
+    setState(() {
+      nameError = null;
+      emailError = null;
+      passwordError = null;
+      confirmPasswordError = null;
+      phoneError = null;
+      companyNameError = null;
+    });
+  }
+
+  void _showErrorToast(String message) {
+    Fluttertoast.showToast(
+      msg: message,
+      toastLength: Toast.LENGTH_LONG,
+      gravity: ToastGravity.BOTTOM,
+      timeInSecForIosWeb: 3,
+      backgroundColor: errorRed,
+      textColor: Colors.white,
+      fontSize: 14.0,
+    );
+  }
+
+  void _showSuccessToast(String message) {
+    Fluttertoast.showToast(
+      msg: message,
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.BOTTOM,
+      backgroundColor: Colors.green,
+      textColor: Colors.white,
+      fontSize: 14.0,
+    );
+  }
+
+  void _showErrorSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.error_outline, color: Colors.white),
+            const SizedBox(width: 12),
+            Expanded(child: Text(message)),
+          ],
+        ),
+        backgroundColor: errorRed,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        margin: const EdgeInsets.all(16),
+        duration: const Duration(seconds: 3),
+      ),
+    );
+  }
+
   Future<void> _pickCV() async {
     try {
       FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -111,10 +186,10 @@ class _SignupScreenState extends State<SignupScreen>
         setState(() {
           cvFile = File(result.files.single.path!);
         });
-        Fluttertoast.showToast(msg: 'CV uploaded successfully');
+        _showSuccessToast('CV uploaded successfully');
       }
     } catch (e) {
-      Fluttertoast.showToast(msg: 'Error picking file: $e');
+      _showErrorToast('Error picking file: $e');
     }
   }
 
@@ -128,10 +203,10 @@ class _SignupScreenState extends State<SignupScreen>
         setState(() {
           verificationDocument = File(result.files.single.path!);
         });
-        Fluttertoast.showToast(msg: 'Document uploaded');
+        _showSuccessToast('Document uploaded');
       }
     } catch (e) {
-      Fluttertoast.showToast(msg: 'Error: $e');
+      _showErrorToast('Error: $e');
     }
   }
 
@@ -145,80 +220,18 @@ class _SignupScreenState extends State<SignupScreen>
         setState(() {
           commercialRegisterImage = File(result.files.single.path!);
         });
-        Fluttertoast.showToast(msg: 'Commercial register uploaded');
+        _showSuccessToast('Commercial register uploaded');
       }
     } catch (e) {
-      Fluttertoast.showToast(msg: 'Error: $e');
+      _showErrorToast('Error: $e');
     }
-  }
-
-  Future<void> _verifyPhone() async {
-    if (phoneController.text.isEmpty) {
-      Fluttertoast.showToast(msg: 'Enter phone number first');
-      return;
-    }
-    setState(() => loading = true);
-    final res = await ApiService.resendPhoneCode(phone: phoneController.text);
-    setState(() => loading = false);
-    if (res['success'] == true) {
-      setState(() => showPhoneVerification = true);
-      _showPhoneVerificationDialog();
-    } else {
-      Fluttertoast.showToast(msg: res['message'] ?? 'Failed to send code');
-    }
-  }
-
-  void _showPhoneVerificationDialog() {
-    TextEditingController codeController = TextEditingController();
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: const Text('Verify Phone Number'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('Code sent to ${phoneController.text}'),
-            const SizedBox(height: 16),
-            TextField(
-              controller: codeController,
-              decoration: const InputDecoration(
-                hintText: 'Enter 6-digit code',
-                border: OutlineInputBorder(),
-              ),
-              keyboardType: TextInputType.number,
-              maxLength: 6,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              final res = await ApiService.verifyPhone(
-                phone: phoneController.text,
-                code: codeController.text,
-              );
-              if (res['success'] == true) {
-                setState(() => phoneVerified = true);
-                if (mounted) Navigator.pop(context);
-                Fluttertoast.showToast(msg: 'Phone verified!');
-              } else {
-                Fluttertoast.showToast(msg: res['message'] ?? 'Invalid code');
-              }
-            },
-            child: const Text('Verify'),
-          ),
-        ],
-      ),
-    );
   }
 
   Future<void> _checkNationalId() async {
-    if (nationalIdController.text.isEmpty) return;
+    if (nationalIdController.text.isEmpty) {
+      _showErrorToast('Please enter National ID first');
+      return;
+    }
     setState(() => checkingNationalId = true);
     final res = await ApiService.verifyNationalId(
       nationalId: nationalIdController.text,
@@ -227,18 +240,23 @@ class _SignupScreenState extends State<SignupScreen>
     setState(() => checkingNationalId = false);
     if (res['success'] == true) {
       setState(() => nationalIdVerified = true);
-      Fluttertoast.showToast(msg: '✓ Valid National ID');
+      _showSuccessToast('✓ National ID Verified Successfully');
     } else {
-      Fluttertoast.showToast(msg: res['message'] ?? 'Invalid National ID');
+      _showErrorToast(res['message'] ?? '❌ Invalid National ID');
     }
   }
 
   void _addSkill() {
-    if (skillController.text.isNotEmpty && !selectedSkills.contains(skillController.text)) {
+    if (skillController.text.isNotEmpty &&
+        !selectedSkills.contains(skillController.text)) {
       setState(() {
         selectedSkills.add(skillController.text);
         skillController.clear();
       });
+    } else if (skillController.text.isEmpty) {
+      _showErrorToast('Please enter a skill name');
+    } else if (selectedSkills.contains(skillController.text)) {
+      _showErrorToast('Skill already added');
     }
   }
 
@@ -249,41 +267,64 @@ class _SignupScreenState extends State<SignupScreen>
   }
 
   bool _validateStep(int step) {
+    setState(() {
+      nameError = null;
+      emailError = null;
+      passwordError = null;
+      confirmPasswordError = null;
+      phoneError = null;
+      companyNameError = null;
+    });
+
     switch (step) {
       case 0:
-        if (nameController.text.isEmpty) {
-          Fluttertoast.showToast(msg: 'Please enter your name');
+        if (nameController.text.trim().isEmpty) {
+          nameError = 'Please enter your full name';
+          _showErrorSnackBar(nameError!);
           return false;
         }
-        if (emailController.text.isEmpty || !emailController.text.contains('@')) {
-          Fluttertoast.showToast(msg: 'Please enter valid email');
+        if (emailController.text.trim().isEmpty) {
+          emailError = 'Please enter your email address';
+          _showErrorSnackBar(emailError!);
+          return false;
+        }
+        if (!emailController.text.contains('@') ||
+            !emailController.text.contains('.')) {
+          emailError = 'Please enter a valid email address';
+          _showErrorSnackBar(emailError!);
           return false;
         }
         if (passwordController.text.length < 6) {
-          Fluttertoast.showToast(msg: 'Password must be at least 6 characters');
+          passwordError = 'Password must be at least 6 characters';
+          _showErrorSnackBar(passwordError!);
           return false;
         }
         if (passwordController.text != confirmPasswordController.text) {
-          Fluttertoast.showToast(msg: 'Passwords do not match');
+          confirmPasswordError = 'Passwords do not match';
+          _showErrorSnackBar(confirmPasswordError!);
           return false;
         }
         if (!agreedToTerms) {
-          Fluttertoast.showToast(msg: 'Please accept Terms & Conditions');
+          _showErrorSnackBar('Please accept Terms & Conditions to continue');
           return false;
         }
         return true;
+
       case 1:
         if (role == 'client') {
-          if (clientType == 'business' && companyNameController.text.isEmpty) {
-            Fluttertoast.showToast(msg: 'Please enter company name');
+          if (clientType == 'business' && companyNameController.text.trim().isEmpty) {
+            companyNameError = 'Company name is required for business accounts';
+            _showErrorSnackBar(companyNameError!);
             return false;
           }
         }
-        if (phoneController.text.isNotEmpty && !phoneVerified) {
-          Fluttertoast.showToast(msg: 'Please verify your phone number');
+        if (phoneController.text.trim().isEmpty) {
+          phoneError = 'Phone number is required';
+          _showErrorSnackBar(phoneError!);
           return false;
         }
         return true;
+
       default:
         return true;
     }
@@ -303,36 +344,57 @@ class _SignupScreenState extends State<SignupScreen>
 
   void signup() async {
     if (!_validateStep(_currentStep)) return;
+    
     setState(() => loading = true);
+    
     final res = await ApiService.signup(
       name: nameController.text,
       email: emailController.text,
       password: passwordController.text,
       role: role,
-      nationalId: nationalIdController.text.isEmpty ? null : nationalIdController.text,
+      nationalId: nationalIdController.text.isEmpty
+          ? null
+          : nationalIdController.text,
       phone: phoneController.text.isEmpty ? null : phoneController.text,
       clientType: clientType,
-      companyName: companyNameController.text.isEmpty ? null : companyNameController.text,
-      commercialRegisterNumber: commercialRegisterController.text.isEmpty ? null : commercialRegisterController.text,
-      taxNumber: taxNumberController.text.isEmpty ? null : taxNumberController.text,
-      hourlyRate: hourlyRateController.text.isEmpty ? null : double.tryParse(hourlyRateController.text),
+      companyName: companyNameController.text.isEmpty
+          ? null
+          : companyNameController.text,
+      commercialRegisterNumber: commercialRegisterController.text.isEmpty
+          ? null
+          : commercialRegisterController.text,
+      taxNumber: taxNumberController.text.isEmpty
+          ? null
+          : taxNumberController.text,
+      hourlyRate: hourlyRateController.text.isEmpty
+          ? null
+          : double.tryParse(hourlyRateController.text),
       skills: selectedSkills.isEmpty ? null : selectedSkills,
       cvFile: cvFile,
       verificationDocument: verificationDocument,
       commercialRegisterImage: commercialRegisterImage,
       agreedToTerms: agreedToTerms,
-      referralSource: referralSourceController.text.isEmpty ? null : referralSourceController.text,
+      referralSource: referralSourceController.text.isEmpty
+          ? null
+          : referralSourceController.text,
     );
+    
     setState(() => loading = false);
+    
     if (res['error'] != null) {
-      Fluttertoast.showToast(msg: res['error']);
+      _showErrorToast(res['error']);
     } else {
-      Fluttertoast.showToast(msg: res['message'] ?? 'Account created!');
+      _showSuccessToast(res['message'] ?? 'Account created successfully!');
       if (res['user'] != null && mounted) {
-        if (res['cvAnalysis'] != null && res['cvAnalysis']['has_analysis'] == true) {
+        if (res['cvAnalysis'] != null &&
+            res['cvAnalysis']['has_analysis'] == true) {
           _showCVAnalysisDialog(res['cvAnalysis']);
         } else {
-          Navigator.pushNamed(context, '/verify', arguments: emailController.text);
+          Navigator.pushNamed(
+            context,
+            '/verify',
+            arguments: emailController.text,
+          );
         }
       }
     }
@@ -358,7 +420,9 @@ class _SignupScreenState extends State<SignupScreen>
             const SizedBox(height: 8),
             Text('🔧 Skills Found: ${analysis['skills_count'] ?? 0}'),
             const SizedBox(height: 8),
-            Text('🎯 AI Confidence: ${((analysis['confidence'] ?? 0) * 100).toInt()}%'),
+            Text(
+              '🎯 AI Confidence: ${((analysis['confidence'] ?? 0) * 100).toInt()}%',
+            ),
             const SizedBox(height: 16),
             const Text(
               'Your profile has been enhanced with AI suggestions!',
@@ -371,7 +435,11 @@ class _SignupScreenState extends State<SignupScreen>
             onPressed: () {
               Navigator.pop(context);
               if (mounted) {
-                Navigator.pushNamed(context, '/verify', arguments: emailController.text);
+                Navigator.pushNamed(
+                  context,
+                  '/verify',
+                  arguments: emailController.text,
+                );
               }
             },
             child: const Text('Continue'),
@@ -483,7 +551,11 @@ class _SignupScreenState extends State<SignupScreen>
         const SizedBox(height: 16),
         Text(
           _getStepTitle(),
-          style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w500),
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+          ),
         ),
       ],
     );
@@ -562,7 +634,9 @@ class _SignupScreenState extends State<SignupScreen>
             width: double.infinity,
             height: 48,
             child: ElevatedButton(
-              onPressed: loading ? null : (_currentStep < 2 ? _nextStep : signup),
+              onPressed: loading
+                  ? null
+                  : (_currentStep < 2 ? _nextStep : signup),
               style: ElevatedButton.styleFrom(
                 backgroundColor: primaryBlue,
                 disabledBackgroundColor: primaryBlue.withOpacity(0.7),
@@ -603,12 +677,14 @@ class _SignupScreenState extends State<SignupScreen>
           controller: nameController,
           hint: 'Full Name',
           icon: Icons.person_outline,
+          errorText: nameError,
         ),
         const SizedBox(height: 14),
         _buildTextField(
           controller: emailController,
           hint: 'Email Address',
           icon: Icons.email_outlined,
+          errorText: emailError,
         ),
         const SizedBox(height: 14),
         _buildTextField(
@@ -617,6 +693,7 @@ class _SignupScreenState extends State<SignupScreen>
           icon: Icons.lock_outline,
           isPassword: true,
           isConfirmPassword: false,
+          errorText: passwordError,
         ),
         const SizedBox(height: 14),
         _buildTextField(
@@ -625,6 +702,7 @@ class _SignupScreenState extends State<SignupScreen>
           icon: Icons.lock_outline,
           isPassword: true,
           isConfirmPassword: true,
+          errorText: confirmPasswordError,
         ),
         const SizedBox(height: 14),
         _buildRoleDropdown(),
@@ -674,7 +752,10 @@ class _SignupScreenState extends State<SignupScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Professional Information', style: TextStyle(fontWeight: FontWeight.bold)),
+        const Text(
+          'Professional Information',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 8),
         _buildTextField(
           controller: hourlyRateController,
@@ -683,17 +764,24 @@ class _SignupScreenState extends State<SignupScreen>
           keyboardType: TextInputType.number,
         ),
         const SizedBox(height: 14),
-        const Text('Skills', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
+        const Text(
+          'Skills',
+          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+        ),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
           runSpacing: 8,
-          children: selectedSkills.map((skill) => Chip(
-            label: Text(skill),
-            onDeleted: () => _removeSkill(skill),
-            deleteIcon: const Icon(Icons.close, size: 16),
-            backgroundColor: loginButtonColor.withOpacity(0.1),
-          )).toList(),
+          children: selectedSkills
+              .map(
+                (skill) => Chip(
+                  label: Text(skill),
+                  onDeleted: () => _removeSkill(skill),
+                  deleteIcon: const Icon(Icons.close, size: 16),
+                  backgroundColor: loginButtonColor.withOpacity(0.1),
+                ),
+              )
+              .toList(),
         ),
         const SizedBox(height: 8),
         Row(
@@ -704,7 +792,10 @@ class _SignupScreenState extends State<SignupScreen>
                 decoration: const InputDecoration(
                   hintText: 'Add a skill',
                   border: OutlineInputBorder(),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
                 ),
                 onSubmitted: (_) => _addSkill(),
               ),
@@ -723,11 +814,15 @@ class _SignupScreenState extends State<SignupScreen>
               child: OutlinedButton.icon(
                 onPressed: _pickCV,
                 icon: const Icon(Icons.upload_file, size: 18),
-                label: Text(cvFile == null ? 'Upload CV (Optional)' : 'CV Uploaded ✓'),
+                label: Text(
+                  cvFile == null ? 'Upload CV (Optional)' : 'CV Uploaded ✓',
+                ),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   side: const BorderSide(color: Color(0xFFE0E0E0), width: 1.5),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(50),
+                  ),
                 ),
               ),
             ),
@@ -749,7 +844,10 @@ class _SignupScreenState extends State<SignupScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Company Information', style: TextStyle(fontWeight: FontWeight.bold)),
+        const Text(
+          'Company Information',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 8),
         Row(
           children: [
@@ -778,6 +876,7 @@ class _SignupScreenState extends State<SignupScreen>
             controller: companyNameController,
             hint: 'Company Name',
             icon: Icons.business_outlined,
+            errorText: companyNameError,
           ),
           const SizedBox(height: 12),
           _buildTextField(
@@ -803,7 +902,7 @@ class _SignupScreenState extends State<SignupScreen>
         const SizedBox(height: 16),
         _buildUploadCard(
           title: 'Identity Verification',
-          subtitle: clientType == 'business' 
+          subtitle: clientType == 'business'
               ? 'Upload business license or company registration'
               : 'Upload government ID or passport',
           file: verificationDocument,
@@ -876,8 +975,20 @@ class _SignupScreenState extends State<SignupScreen>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(title, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
-                    Text(subtitle, style: TextStyle(fontSize: 10, color: Colors.grey.shade600)),
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                      ),
+                    ),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -886,7 +997,11 @@ class _SignupScreenState extends State<SignupScreen>
           const SizedBox(height: 8),
           OutlinedButton.icon(
             onPressed: onTap,
-            icon: Icon(file != null ? Icons.check_circle : Icons.cloud_upload, size: 16, color: primaryBlue),
+            icon: Icon(
+              file != null ? Icons.check_circle : Icons.cloud_upload,
+              size: 16,
+              color: primaryBlue,
+            ),
             label: Text(
               file != null ? 'File Uploaded' : 'Upload Document',
               style: const TextStyle(fontSize: 12),
@@ -894,7 +1009,9 @@ class _SignupScreenState extends State<SignupScreen>
             style: OutlinedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
               side: const BorderSide(color: Color(0xFFE0E0E0)),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(50),
+              ),
             ),
           ),
         ],
@@ -906,41 +1023,23 @@ class _SignupScreenState extends State<SignupScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Phone Number (Optional but recommended)',
-            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            Expanded(
-              child: _buildTextField(
-                controller: phoneController,
-                hint: '+1234567890',
-                icon: Icons.phone_outlined,
-                keyboardType: TextInputType.phone,
-              ),
-            ),
-            const SizedBox(width: 8),
-            if (phoneController.text.isNotEmpty && !phoneVerified)
-              ElevatedButton(
-                onPressed: loading ? null : _verifyPhone,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: primaryBlue,
-                  minimumSize: const Size(80, 48),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
-                ),
-                child: loading
-                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                    : const Text('Verify'),
-              ),
-            if (phoneVerified)
-              const Icon(Icons.check_circle, color: Colors.green, size: 28),
-          ],
+        const Text(
+          'Phone Number *',
+          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
         ),
-        if (phoneVerified)
-          const Padding(
-            padding: EdgeInsets.only(top: 4),
-            child: Text('✓ Phone verified', style: TextStyle(color: Colors.green, fontSize: 11)),
-          ),
+        const SizedBox(height: 8),
+        _buildTextField(
+          controller: phoneController,
+          hint: '+1234567890',
+          icon: Icons.phone_outlined,
+          keyboardType: TextInputType.phone,
+          errorText: phoneError,
+        ),
+        const SizedBox(height: 4),
+        const Text(
+          'We will use this for account recovery and notifications',
+          style: TextStyle(fontSize: 10, color: Colors.grey),
+        ),
       ],
     );
   }
@@ -949,8 +1048,10 @@ class _SignupScreenState extends State<SignupScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('National ID (Optional - Builds Trust)',
-            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
+        const Text(
+          'National ID (Optional - Builds Trust)',
+          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+        ),
         const SizedBox(height: 8),
         Row(
           children: [
@@ -969,10 +1070,16 @@ class _SignupScreenState extends State<SignupScreen>
                 style: ElevatedButton.styleFrom(
                   backgroundColor: primaryBlue,
                   minimumSize: const Size(80, 48),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(50),
+                  ),
                 ),
                 child: checkingNationalId
-                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
                     : const Text('Verify'),
               ),
             if (nationalIdVerified)
@@ -982,7 +1089,10 @@ class _SignupScreenState extends State<SignupScreen>
         if (nationalIdVerified)
           const Padding(
             padding: EdgeInsets.only(top: 4),
-            child: Text('✓ Identity verified', style: TextStyle(color: Colors.green, fontSize: 11)),
+            child: Text(
+              '✓ Identity verified',
+              style: TextStyle(color: Colors.green, fontSize: 11),
+            ),
           ),
       ],
     );
@@ -992,11 +1102,15 @@ class _SignupScreenState extends State<SignupScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('How did you hear about us?',
-            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
+        const Text(
+          'How did you hear about us?',
+          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+        ),
         const SizedBox(height: 8),
         DropdownButtonFormField<String>(
-          value: referralSourceController.text.isEmpty ? null : referralSourceController.text,
+          value: referralSourceController.text.isEmpty
+              ? null
+              : referralSourceController.text,
           hint: const Text('Select an option'),
           items: referralOptions.map((option) {
             return DropdownMenuItem(value: option, child: Text(option));
@@ -1008,7 +1122,10 @@ class _SignupScreenState extends State<SignupScreen>
           },
           decoration: InputDecoration(
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(50)),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 12,
+            ),
             enabledBorder: const OutlineInputBorder(
               borderSide: BorderSide(color: Color(0xFFE0E0E0), width: 1.5),
             ),
@@ -1027,7 +1144,10 @@ class _SignupScreenState extends State<SignupScreen>
       children: [
         _buildReviewTile('Full Name', nameController.text),
         _buildReviewTile('Email', emailController.text),
-        _buildReviewTile('Account Type', role == 'freelancer' ? 'Freelancer' : 'Client'),
+        _buildReviewTile(
+          'Account Type',
+          role == 'freelancer' ? 'Freelancer' : 'Client',
+        ),
         if (role == 'freelancer') ...[
           if (hourlyRateController.text.isNotEmpty)
             _buildReviewTile('Hourly Rate', '\$${hourlyRateController.text}'),
@@ -1039,14 +1159,23 @@ class _SignupScreenState extends State<SignupScreen>
           if (companyNameController.text.isNotEmpty)
             _buildReviewTile('Company', companyNameController.text),
           if (commercialRegisterController.text.isNotEmpty)
-            _buildReviewTile('Commercial Register', commercialRegisterController.text),
+            _buildReviewTile(
+              'Commercial Register',
+              commercialRegisterController.text,
+            ),
         ],
         const Divider(),
-        if (phoneController.text.isNotEmpty)
-          _buildReviewTile('Phone', phoneController.text, verified: phoneVerified),
+        _buildReviewTile(
+          'Phone',
+          phoneController.text,
+          verified: false,
+        ),
         if (nationalIdController.text.isNotEmpty)
-          _buildReviewTile('National ID', '••••${nationalIdController.text.substring(nationalIdController.text.length - 4)}',
-              verified: nationalIdVerified),
+          _buildReviewTile(
+            'National ID',
+            '••••${nationalIdController.text.substring(nationalIdController.text.length - 4)}',
+            verified: nationalIdVerified,
+          ),
         const SizedBox(height: 16),
         Container(
           padding: const EdgeInsets.all(12),
@@ -1078,10 +1207,14 @@ class _SignupScreenState extends State<SignupScreen>
         children: [
           SizedBox(
             width: 120,
-            child: Text(label, style: const TextStyle(fontWeight: FontWeight.w500)),
+            child: Text(
+              label,
+              style: const TextStyle(fontWeight: FontWeight.w500),
+            ),
           ),
           Expanded(child: Text(value)),
-          if (verified) const Icon(Icons.verified, color: Colors.green, size: 18),
+          if (verified)
+            const Icon(Icons.verified, color: Colors.green, size: 18),
         ],
       ),
     );
@@ -1123,46 +1256,64 @@ class _SignupScreenState extends State<SignupScreen>
     bool isPassword = false,
     bool isConfirmPassword = false,
     TextInputType keyboardType = TextInputType.text,
+    String? errorText,
   }) {
-    return TextField(
-      controller: controller,
-      obscureText: isPassword ? (isConfirmPassword ? obscureConfirmPassword : obscurePassword) : false,
-      style: const TextStyle(fontSize: 14, color: Color(0xFF333333)),
-      keyboardType: keyboardType,
-      decoration: InputDecoration(
-        hintText: hint,
-        hintStyle: const TextStyle(color: Color(0xFFBBBBBB), fontSize: 14),
-        prefixIcon: Icon(icon, color: const Color(0xFFBBBBBB), size: 20),
-        suffixIcon: isPassword
-            ? GestureDetector(
-                onTap: () => setState(() {
-                  if (isConfirmPassword) {
-                    obscureConfirmPassword = !obscureConfirmPassword;
-                  } else {
-                    obscurePassword = !obscurePassword;
-                  }
-                }),
-                child: Icon(
-                  (isConfirmPassword ? obscureConfirmPassword : obscurePassword)
-                      ? Icons.visibility_off_outlined
-                      : Icons.visibility_outlined,
-                  color: const Color(0xFFBBBBBB),
-                  size: 20,
-                ),
-              )
-            : null,
-        contentPadding: const EdgeInsets.symmetric(vertical: 14),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(50),
-          borderSide: const BorderSide(color: Color(0xFFE0E0E0), width: 1.5),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TextField(
+          controller: controller,
+          obscureText: isPassword
+              ? (isConfirmPassword ? obscureConfirmPassword : obscurePassword)
+              : false,
+          style: const TextStyle(fontSize: 14, color: Color(0xFF333333)),
+          keyboardType: keyboardType,
+          decoration: InputDecoration(
+            hintText: hint,
+            hintStyle: const TextStyle(color: Color(0xFFBBBBBB), fontSize: 14),
+            prefixIcon: Icon(icon, color: const Color(0xFFBBBBBB), size: 20),
+            suffixIcon: isPassword
+                ? GestureDetector(
+                    onTap: () => setState(() {
+                      if (isConfirmPassword) {
+                        obscureConfirmPassword = !obscureConfirmPassword;
+                      } else {
+                        obscurePassword = !obscurePassword;
+                      }
+                    }),
+                    child: Icon(
+                      (isConfirmPassword ? obscureConfirmPassword : obscurePassword)
+                          ? Icons.visibility_off_outlined
+                          : Icons.visibility_outlined,
+                      color: const Color(0xFFBBBBBB),
+                      size: 20,
+                    ),
+                  )
+                : null,
+            contentPadding: const EdgeInsets.symmetric(vertical: 14),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(50),
+              borderSide: const BorderSide(color: Color(0xFFE0E0E0), width: 1.5),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(50),
+              borderSide: const BorderSide(color: primaryBlue, width: 1.5),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(50),
+              borderSide: const BorderSide(color: errorRed, width: 1.5),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(50),
+              borderSide: const BorderSide(color: errorRed, width: 1.5),
+            ),
+            errorText: errorText,
+            errorStyle: const TextStyle(fontSize: 11, color: errorRed),
+            filled: true,
+            fillColor: Colors.white,
+          ),
         ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(50),
-          borderSide: const BorderSide(color: primaryBlue, width: 1.5),
-        ),
-        filled: true,
-        fillColor: Colors.white,
-      ),
+      ],
     );
   }
 
@@ -1187,13 +1338,17 @@ class _SignupScreenState extends State<SignupScreen>
                   child: Row(
                     children: [
                       Icon(
-                        e == 'client' ? Icons.business_outlined : Icons.person_outline,
+                        e == 'client'
+                            ? Icons.business_outlined
+                            : Icons.person_outline,
                         color: primaryBlue,
                         size: 18,
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        e == 'client' ? 'Client (Hire Freelancers)' : 'Freelancer (Find Work)',
+                        e == 'client'
+                            ? 'Client (Hire Freelancers)'
+                            : 'Freelancer (Find Work)',
                         style: const TextStyle(fontSize: 14),
                       ),
                     ],

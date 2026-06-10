@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:freelancer_platform/screens/ads/ads_management_screen.dart';
 import 'package:freelancer_platform/screens/disputes/my_disputes_screen.dart';
+import 'package:freelancer_platform/services/socket_service.dart';
 import 'package:freelancer_platform/widgets/ad_banner.dart';
 import '../../l10n/app_localizations.dart';
 import 'package:freelancer_platform/models/usage_limits_model.dart';
@@ -1949,7 +1950,6 @@ class _ClientDashboardState extends State<ClientDashboard> {
           ),
         ),
       );
-
   Future<void> _logout() async {
     final t = AppLocalizations.of(context)!;
     final ok = await showDialog<bool>(
@@ -1965,7 +1965,21 @@ class _ClientDashboardState extends State<ClientDashboard> {
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.danger),
             onPressed: () async {
-              await ApiService.logout();
+              print('🚪 Logging out, cleaning up socket...');
+              try {
+                await SocketService.instance.logoutAndClear();
+                print('✅ Socket cleaned up');
+              } catch (e) {
+                print('⚠️ Error cleaning socket: $e');
+              }
+
+              try {
+                await ApiService.logout();
+                print('✅ API logout completed');
+              } catch (e) {
+                print('⚠️ Error in API logout: $e');
+              }
+
               Navigator.pop(context, true);
             },
             child: Text(t.logout),
@@ -1973,8 +1987,11 @@ class _ClientDashboardState extends State<ClientDashboard> {
         ],
       ),
     );
-    if (ok == true && mounted)
+
+    if (ok == true && mounted) {
+      print('✅ Navigating to login screen...');
       Navigator.pushReplacementNamed(context, '/login');
+    }
   }
 
   @override

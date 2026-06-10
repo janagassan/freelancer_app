@@ -17,11 +17,27 @@ class FinancialStats {
   });
 
   factory FinancialStats.fromJson(Map<String, dynamic> json) {
+    double parseToDouble(dynamic value) {
+      if (value == null) return 0.0;
+      if (value is double) return value;
+      if (value is int) return value.toDouble();
+      if (value is String) {
+        try {
+          return double.parse(value);
+        } catch (e) {
+          print('Error parsing "$value" to double: $e');
+          return 0.0;
+        }
+      }
+      if (value is num) return value.toDouble();
+      return 0.0;
+    }
+
     return FinancialStats(
-      totalEarnings: (json['totalEarnings'] ?? 0).toDouble(),
-      totalFees: (json['totalFees'] ?? 0).toDouble(),
-      totalWithdrawals: (json['totalWithdrawals'] ?? 0).toDouble(),
-      netEarnings: (json['netEarnings'] ?? 0).toDouble(),
+      totalEarnings: parseToDouble(json['totalEarnings']),
+      totalFees: parseToDouble(json['totalFees']),
+      totalWithdrawals: parseToDouble(json['totalWithdrawals']),
+      netEarnings: parseToDouble(json['netEarnings']),
     );
   }
 }
@@ -46,19 +62,37 @@ class FinancialTransaction {
   });
 
   factory FinancialTransaction.fromJson(Map<String, dynamic> json) {
+    double parseToDouble(dynamic value) {
+      if (value == null) return 0.0;
+      if (value is double) return value;
+      if (value is int) return value.toDouble();
+      if (value is String) {
+        try {
+          return double.parse(value);
+        } catch (e) {
+          return 0.0;
+        }
+      }
+      if (value is num) return value.toDouble();
+      return 0.0;
+    }
+
     return FinancialTransaction(
-      id: json['id'],
-      amount: (json['amount'] ?? 0).toDouble(),
-      type: json['type'],
-      status: json['status'],
+      id: json['id'] ?? 0,
+      amount: parseToDouble(json['amount']),
+      type: json['type'] ?? '',
+      status: json['status'] ?? '',
       description: json['description'],
-      transactionDate: DateTime.parse(json['transaction_date']),
+      transactionDate: json['transaction_date'] != null
+          ? DateTime.parse(json['transaction_date'])
+          : DateTime.now(),
       metadata: json['metadata'],
     );
   }
 
   bool get isIncome =>
       type == 'payment_received' || type == 'deposit' || type == 'bonus';
+
   bool get isExpense =>
       type == 'payment_sent' || type == 'withdrawal' || type == 'platform_fee';
 
@@ -97,6 +131,57 @@ class SavedFilter {
       filterData: json['filter_data'],
       isDefault: json['is_default'] ?? false,
       createdAt: DateTime.parse(json['created_at']),
+    );
+  }
+}
+
+class FinancialStatsResponse {
+  final FinancialStats stats;
+  final List<Map<String, dynamic>> periodStats;
+  final List<FinancialTransaction> recentTransactions;
+
+  FinancialStatsResponse({
+    required this.stats,
+    required this.periodStats,
+    required this.recentTransactions,
+  });
+
+  factory FinancialStatsResponse.fromJson(Map<String, dynamic> json) {
+    List<Map<String, dynamic>> parsePeriodStats(dynamic data) {
+      if (data == null) return [];
+      if (data is List) {
+        return data.map((item) {
+          if (item is Map) {
+            return Map<String, dynamic>.from(item);
+          }
+          return <String, dynamic>{};
+        }).toList();
+      }
+      return [];
+    }
+
+    List<FinancialTransaction> parseTransactions(dynamic data) {
+      if (data == null) return [];
+      if (data is List) {
+        return data
+            .map((tx) {
+              try {
+                return FinancialTransaction.fromJson(tx);
+              } catch (e) {
+                print('Error parsing transaction: $e');
+                return null;
+              }
+            })
+            .whereType<FinancialTransaction>()
+            .toList();
+      }
+      return [];
+    }
+
+    return FinancialStatsResponse(
+      stats: FinancialStats.fromJson(json['stats'] ?? {}),
+      periodStats: parsePeriodStats(json['periodStats']),
+      recentTransactions: parseTransactions(json['recentTransactions']),
     );
   }
 }

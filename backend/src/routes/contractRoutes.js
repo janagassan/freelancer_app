@@ -8,9 +8,60 @@ import {
   getContractProgress,
   applyContractCoupon,
   removeContractCoupon,
+  requestMilestoneRevision,
 } from "../controllers/contractWorkspaceController.js";
 
 const router = express.Router();
+ router.post('/contracts/:contractId/milestones/:milestoneIndex/request-revision', protect, requestMilestoneRevision);
+router.get("/project/:projectId", protect, async (req, res) => {
+  try {
+    console.log(
+      `📥 Fetching contract for project ${req.params.projectId} for user ${req.user.id}`,
+    );
+
+    const contract = await Contract.findOne({
+      where: { ProjectId: req.params.projectId },
+      include: [
+        {
+          model: Project,
+          include: [
+            {
+              model: User,
+              as: "client",
+              attributes: ["id", "name", "avatar"],
+            },
+          ],
+        },
+        {
+          model: User,
+          as: "freelancer",
+          attributes: ["id", "name", "avatar"],
+        },
+        {
+          model: User,
+          as: "client",
+          attributes: ["id", "name", "avatar"],
+        },
+      ],
+    });
+
+    if (!contract) {
+      return res.json({ success: false, message: "No contract found for this project" });
+    }
+
+    if (
+      contract.ClientId !== req.user.id &&
+      contract.FreelancerId !== req.user.id
+    ) {
+      return res.status(403).json({ success: false, message: "Unauthorized" });
+    }
+
+    res.json({ success: true, contract });
+  } catch (error) {
+    console.error("❌ Error in getContractByProjectId:", error);
+    res.status(500).json({ success: false, message: "Server error", error: error.message });
+  }
+});
 
 router.get("/:contractId/progress", protect, getContractProgress);
 router.post("/:contractId/coupon", protect, applyContractCoupon);

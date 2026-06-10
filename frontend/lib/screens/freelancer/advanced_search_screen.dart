@@ -15,29 +15,23 @@ class AdvancedSearchScreen extends StatefulWidget {
   State<AdvancedSearchScreen> createState() => _AdvancedSearchScreenState();
 }
 
-class _AdvancedSearchScreenState extends State<AdvancedSearchScreen>
-    with SingleTickerProviderStateMixin {
+class _AdvancedSearchScreenState extends State<AdvancedSearchScreen> {
   final TextEditingController _searchController = TextEditingController();
   final TextEditingController _minBudgetController = TextEditingController();
   final TextEditingController _maxBudgetController = TextEditingController();
-  final TextEditingController _minDurationController = TextEditingController();
-  final TextEditingController _maxDurationController = TextEditingController();
   final TextEditingController _skillsController = TextEditingController();
 
   List<Project> _projects = [];
   List<SavedFilter> _savedFilters = [];
-  List<ProjectAlert> _alerts = [];
+  bool _loading = false;
+  bool _hasMore = true;
+  int _currentPage = 1;
+  int _totalPages = 1;
 
   String _selectedCategory = 'all';
   String _selectedSortBy = 'newest';
-  bool _loading = false;
-  bool _loadingFilters = false;
-  bool _showFilters = false;
-  int _currentPage = 1;
-  int _totalPages = 1;
-  bool _hasMore = true;
+  String _selectedDuration = 'any';
 
-  late TabController _tabController;
   final ScrollController _scrollController = ScrollController();
 
   List<String> get _categories {
@@ -51,28 +45,48 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen>
       t.graphicDesign,
       t.contentWriting,
       t.digitalMarketing,
-      t.devOps,
-      t.database,
     ];
   }
 
   List<Map<String, dynamic>> get _sortOptions {
     final t = AppLocalizations.of(context);
     return [
-      {'value': 'newest', 'label': t!.newestFirst},
-      {'value': 'budget_high', 'label': t.budgetHighToLow},
-      {'value': 'budget_low', 'label': t.budgetLowToHigh},
-      {'value': 'duration_short', 'label': t.durationShortestFirst},
-      {'value': 'duration_long', 'label': t.durationLongestFirst},
+      {'value': 'newest', 'label': t!.newestFirst, 'icon': Icons.access_time},
+      {'value': 'budget_low', 'label': t.budgetLowToHigh, 'icon': Icons.attach_money},
+      {'value': 'budget_high', 'label': t.budgetHighToLow, 'icon': Icons.attach_money},
     ];
+  }
+
+  List<Map<String, dynamic>> get _durationOptions {
+    final t = AppLocalizations.of(context);
+    return [
+      {'value': 'any', 'label': t!.any, 'icon': Icons.timer_off, 'min': null, 'max': null},
+      {'value': 'short', 'label': '1-7 ${t.days}', 'icon': Icons.timer, 'min': 1, 'max': 7},
+      {'value': 'medium', 'label': '8-30 ${t.days}', 'icon': Icons.timer, 'min': 8, 'max': 30},
+      {'value': 'long', 'label': '30+ ${t.days}', 'icon': Icons.timer, 'min': 30, 'max': null},
+    ];
+  }
+
+  Map<String, dynamic> get _currentSortOption {
+    return _sortOptions.firstWhere(
+      (opt) => opt['value'] == _selectedSortBy,
+      orElse: () => _sortOptions.first,
+    );
+  }
+
+  Map<String, dynamic> get _currentDurationOption {
+    return _durationOptions.firstWhere(
+      (opt) => opt['value'] == _selectedDuration,
+      orElse: () => _durationOptions.first,
+    );
   }
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
     _scrollController.addListener(_onScroll);
-    _loadData();
+    _loadSavedFilters();
+    _searchProjects();
   }
 
   @override
@@ -80,78 +94,54 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen>
     _searchController.dispose();
     _minBudgetController.dispose();
     _maxBudgetController.dispose();
-    _minDurationController.dispose();
-    _maxDurationController.dispose();
     _skillsController.dispose();
     _scrollController.dispose();
-    _tabController.dispose();
     super.dispose();
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels >=
-        _scrollController.position.maxScrollExtent - 200) {
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
       if (_hasMore && !_loading) {
         _searchProjects(loadMore: true);
       }
     }
   }
 
-  Future<void> _loadData() async {
-    await Future.wait([_loadSavedFilters(), _loadAlerts()]);
-    _searchProjects();
-  }
-
   Future<void> _loadSavedFilters() async {
-    setState(() => _loadingFilters = true);
     try {
       final filters = await ApiService.getSavedFilters();
-      setState(() {
-        _savedFilters = filters;
-        _loadingFilters = false;
-      });
+      if (mounted) setState(() => _savedFilters = filters);
     } catch (e) {
-      setState(() => _loadingFilters = false);
-    }
-  }
-
-  Future<void> _loadAlerts() async {
-    try {
-      final alerts = await ApiService.getUserAlerts();
-      setState(() => _alerts = alerts);
-    } catch (e) {
-      print('Error loading alerts: $e');
     }
   }
 
   Future<void> _searchProjects({bool loadMore = false}) async {
     if (loadMore && !_hasMore) return;
+    if (_loading) return;
+    if (!mounted) return;
 
     setState(() => _loading = true);
 
     try {
       final page = loadMore ? _currentPage + 1 : 1;
+      
+      final durationOpt = _currentDurationOption;
+      final minDuration = durationOpt['min'] as int?;
+      final maxDuration = durationOpt['max'] as int?;
+
       final response = await ApiService.advancedProjectSearch(
         query: _searchController.text,
         category: _selectedCategory == 'all' ? null : _selectedCategory,
-        minBudget: _minBudgetController.text.isNotEmpty
-            ? double.tryParse(_minBudgetController.text)
-            : null,
-        maxBudget: _maxBudgetController.text.isNotEmpty
-            ? double.tryParse(_maxBudgetController.text)
-            : null,
-        minDuration: _minDurationController.text.isNotEmpty
-            ? int.tryParse(_minDurationController.text)
-            : null,
-        maxDuration: _maxDurationController.text.isNotEmpty
-            ? int.tryParse(_maxDurationController.text)
-            : null,
-        skills: _skillsController.text.isNotEmpty
-            ? _skillsController.text
-            : null,
+        minBudget: _minBudgetController.text.isNotEmpty ? double.tryParse(_minBudgetController.text) : null,
+        maxBudget: _maxBudgetController.text.isNotEmpty ? double.tryParse(_maxBudgetController.text) : null,
+        minDuration: minDuration,
+        maxDuration: maxDuration,
+        skills: _skillsController.text.isNotEmpty ? _skillsController.text : null,
         sortBy: _selectedSortBy,
         page: page,
       );
+
+      if (!mounted) return;
 
       setState(() {
         if (loadMore) {
@@ -166,15 +156,43 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen>
         _loading = false;
       });
     } catch (e) {
-      setState(() => _loading = false);
-      final t = AppLocalizations.of(context);
-      Fluttertoast.showToast(msg: '${t!.searchError}: $e');
+      if (mounted) {
+        setState(() => _loading = false);
+        final t = AppLocalizations.of(context);
+        Fluttertoast.showToast(msg: '${t!.searchError}: $e');
+      }
     }
+  }
+
+  void _resetFilters() {
+    setState(() {
+      _searchController.clear();
+      _selectedCategory = 'all';
+      _minBudgetController.clear();
+      _maxBudgetController.clear();
+      _skillsController.clear();
+      _selectedSortBy = 'newest';
+      _selectedDuration = 'any';
+    });
+    _searchProjects();
+  }
+
+  void _applySavedFilter(SavedFilter filter) {
+    final data = filter.filterData;
+    setState(() {
+      _searchController.text = data['query'] ?? '';
+      _selectedCategory = data['category'] ?? 'all';
+      _minBudgetController.text = data['minBudget'] ?? '';
+      _maxBudgetController.text = data['maxBudget'] ?? '';
+      _skillsController.text = data['skills'] ?? '';
+      _selectedSortBy = data['sortBy'] ?? 'newest';
+      _selectedDuration = data['duration'] ?? 'any';
+    });
+    _searchProjects();
   }
 
   Future<void> _saveCurrentFilter() async {
     final t = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
     final nameController = TextEditingController();
 
     final result = await showDialog<bool>(
@@ -190,15 +208,10 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen>
           autofocus: true,
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(t.cancel),
-          ),
+          TextButton(onPressed: () => Navigator.pop(context, false), child: Text(t.cancel)),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.secondary,
-            ),
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.secondary),
             child: Text(t.save),
           ),
         ],
@@ -211,53 +224,19 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen>
         'category': _selectedCategory,
         'minBudget': _minBudgetController.text,
         'maxBudget': _maxBudgetController.text,
-        'minDuration': _minDurationController.text,
-        'maxDuration': _maxDurationController.text,
         'skills': _skillsController.text,
         'sortBy': _selectedSortBy,
+        'duration': _selectedDuration,
       };
 
       try {
-        await ApiService.saveSearchFilter(
-          name: nameController.text,
-          filterData: filterData,
-          isDefault: false,
-        );
+        await ApiService.saveSearchFilter(name: nameController.text, filterData: filterData);
         Fluttertoast.showToast(msg: t.filterSaved);
         _loadSavedFilters();
       } catch (e) {
         Fluttertoast.showToast(msg: '${t.errorSavingFilter}: $e');
       }
     }
-  }
-
-  void _applySavedFilter(SavedFilter filter) {
-    final data = filter.filterData;
-    setState(() {
-      _searchController.text = data['query'] ?? '';
-      _selectedCategory = data['category'] ?? 'all';
-      _minBudgetController.text = data['minBudget'] ?? '';
-      _maxBudgetController.text = data['maxBudget'] ?? '';
-      _minDurationController.text = data['minDuration'] ?? '';
-      _maxDurationController.text = data['maxDuration'] ?? '';
-      _skillsController.text = data['skills'] ?? '';
-      _selectedSortBy = data['sortBy'] ?? 'newest';
-    });
-    _searchProjects();
-  }
-
-  void _resetFilters() {
-    setState(() {
-      _searchController.clear();
-      _selectedCategory = 'all';
-      _minBudgetController.clear();
-      _maxBudgetController.clear();
-      _minDurationController.clear();
-      _maxDurationController.clear();
-      _skillsController.clear();
-      _selectedSortBy = 'newest';
-    });
-    _searchProjects();
   }
 
   @override
@@ -272,805 +251,571 @@ class _AdvancedSearchScreenState extends State<AdvancedSearchScreen>
         automaticallyImplyLeading: false,
         elevation: 0,
         backgroundColor: theme.scaffoldBackgroundColor,
-        foregroundColor: theme.colorScheme.onSurface,
-        bottom: TabBar(
-          controller: _tabController,
-          indicatorColor: AppColors.secondary,
-          labelColor: theme.colorScheme.onSurface,
-          unselectedLabelColor: theme.colorScheme.onSurface.withOpacity(0.5),
-          tabs: [
-            Tab(text: t.search, icon: const Icon(Icons.search)),
-            Tab(text: t.saved, icon: const Icon(Icons.bookmark)),
-          ],
-        ),
         actions: [
-          IconButton(
-            icon: Icon(
-              Icons.filter_list,
-              color: _showFilters ? AppColors.secondary : theme.iconTheme.color,
+          if (_savedFilters.isNotEmpty)
+            IconButton(
+              icon: Icon(Icons.bookmark_outline, color: theme.iconTheme.color),
+              onPressed: _showSavedFiltersDialog,
+              tooltip: t.savedSearches,
             ),
-            onPressed: () => setState(() => _showFilters = !_showFilters),
+          IconButton(
+            icon: Icon(Icons.save, color: theme.iconTheme.color),
+            onPressed: _saveCurrentFilter,
+            tooltip: t.saveThisSearch,
           ),
         ],
       ),
       body: Column(
         children: [
-          if (_showFilters) _buildFiltersPanel(),
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [_buildSearchResults(), _buildSavedTab()],
+          _buildQuickFiltersRow(t, theme, isDark),
+          _buildSearchBar(t, theme, isDark),
+          _buildFiltersPanel(t, theme, isDark),
+          _buildResultsHeader(t, theme, isDark),
+          Expanded(child: _buildResultsList(t, theme, isDark)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuickFiltersRow(AppLocalizations t, ThemeData theme, bool isDark) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            decoration: BoxDecoration(
+              color: isDark ? Colors.grey.shade800 : Colors.grey.shade100,
+              borderRadius: BorderRadius.circular(20),
             ),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                value: _selectedSortBy,
+                icon: const Icon(Icons.arrow_drop_down, size: 18),
+                style: TextStyle(fontSize: 13, color: theme.colorScheme.onSurface),
+                items: _sortOptions.map((opt) {
+                  return DropdownMenuItem(
+                    value: opt['value'] as String,
+                    child: Row(
+                      children: [
+                        Icon(opt['icon'] as IconData, size: 16, color: AppColors.secondary),
+                        const SizedBox(width: 6),
+                        Text(opt['label'] as String, style: const TextStyle(fontSize: 12)),
+                      ],
+                    ),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  if (value != null) {
+                    setState(() => _selectedSortBy = value);
+                    _searchProjects();
+                  }
+                },
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          _buildQuickChip(
+            label: _currentDurationOption['label'] as String,
+            icon: Icons.timer,
+            isSelected: _selectedDuration != 'any',
+            onTap: _showDurationPicker,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildFiltersPanel() {
-    final t = AppLocalizations.of(context)!;
+  Widget _buildQuickChip({
+    required String label,
+    required IconData icon,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
-    return Container(
-      height: MediaQuery.of(context).size.height * 0.55,
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(isDark ? 0.3 : 0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.all(16),
-        child: Column(
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.secondary.withOpacity(0.15) : Colors.transparent,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: theme.dividerColor),
+        ),
+        child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: t.searchProjects,
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                filled: true,
-                fillColor: theme.cardColor,
-              ),
-              style: TextStyle(color: theme.colorScheme.onSurface),
-            ),
-            const SizedBox(height: 12),
-            DropdownButtonFormField<String>(
-              value: _selectedCategory,
-              decoration: InputDecoration(
-                labelText: t.category,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                filled: true,
-                fillColor: theme.cardColor,
-                labelStyle: TextStyle(
-                  color: theme.colorScheme.onSurface.withOpacity(0.7),
-                ),
-              ),
-              dropdownColor: theme.cardColor,
-              style: TextStyle(color: theme.colorScheme.onSurface),
-              items: _categories.map((cat) {
-                return DropdownMenuItem(
-                  value: cat,
-                  child: Text(cat == 'all' ? t.all : cat),
-                );
-              }).toList(),
-              onChanged: (value) => setState(() => _selectedCategory = value!),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _minBudgetController,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      labelText: t.minBudget,
-                      prefixText: '\$ ',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      filled: true,
-                      fillColor: theme.cardColor,
-                      labelStyle: TextStyle(
-                        color: theme.colorScheme.onSurface.withOpacity(0.7),
-                      ),
-                    ),
-                    style: TextStyle(color: theme.colorScheme.onSurface),
+            Icon(icon, size: 14, color: isSelected ? AppColors.secondary : Colors.grey),
+            const SizedBox(width: 6),
+            Text(label, style: TextStyle(fontSize: 12, color: isSelected ? AppColors.secondary : null)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSearchBar(AppLocalizations t, ThemeData theme, bool isDark) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: TextField(
+        controller: _searchController,
+        style: TextStyle(fontSize: 16, color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary),
+        decoration: InputDecoration(
+          hintText: t.searchProjects,
+          hintStyle: TextStyle(fontSize: 16, color: isDark ? AppColors.darkTextHint : AppColors.lightTextHint),
+          prefixIcon: Icon(Icons.search, size: 24, color: AppColors.secondary),
+          suffixIcon: _searchController.text.isNotEmpty
+              ? IconButton(
+                  icon: Icon(Icons.clear, color: Colors.grey),
+                  onPressed: () {
+                    _searchController.clear();
+                    _searchProjects();
+                  },
+                )
+              : null,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(30), borderSide: BorderSide.none),
+          filled: true,
+          fillColor: theme.cardColor,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        ),
+        onChanged: (_) => _searchProjects(),
+      ),
+    );
+  }
+
+  Widget _buildFiltersPanel(AppLocalizations t, ThemeData theme, bool isDark) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 4, offset: const Offset(0, 2))],
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: DropdownButtonFormField<String>(
+                  value: _selectedCategory,
+                  decoration: InputDecoration(
+                    labelText: t.category,
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                   ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: TextField(
-                    controller: _maxBudgetController,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      labelText: t.maxBudget,
-                      prefixText: '\$ ',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      filled: true,
-                      fillColor: theme.cardColor,
-                      labelStyle: TextStyle(
-                        color: theme.colorScheme.onSurface.withOpacity(0.7),
-                      ),
-                    ),
-                    style: TextStyle(color: theme.colorScheme.onSurface),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _minDurationController,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      labelText: t.minDuration,
-                      suffixText: t.days,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      filled: true,
-                      fillColor: theme.cardColor,
-                      labelStyle: TextStyle(
-                        color: theme.colorScheme.onSurface.withOpacity(0.7),
-                      ),
-                    ),
-                    style: TextStyle(color: theme.colorScheme.onSurface),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: TextField(
-                    controller: _maxDurationController,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      labelText: t.maxDuration,
-                      suffixText: t.days,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      filled: true,
-                      fillColor: theme.cardColor,
-                      labelStyle: TextStyle(
-                        color: theme.colorScheme.onSurface.withOpacity(0.7),
-                      ),
-                    ),
-                    style: TextStyle(color: theme.colorScheme.onSurface),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _skillsController,
-              decoration: InputDecoration(
-                hintText: t.skillsCommaSeparated,
-                prefixIcon: const Icon(Icons.code),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                filled: true,
-                fillColor: theme.cardColor,
-                hintStyle: TextStyle(
-                  color: theme.colorScheme.onSurface.withOpacity(0.5),
+                  items: _categories.map((cat) {
+                    return DropdownMenuItem(value: cat, child: Text(cat == 'all' ? t.all : cat));
+                  }).toList(),
+                  onChanged: (value) {
+                    if (value != null) {
+                      setState(() => _selectedCategory = value);
+                      _searchProjects();
+                    }
+                  },
                 ),
               ),
-              style: TextStyle(color: theme.colorScheme.onSurface),
-            ),
-            const SizedBox(height: 12),
-            DropdownButtonFormField<String>(
-              value: _selectedSortBy,
-              decoration: InputDecoration(
-                labelText: t.sortBy,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                filled: true,
-                fillColor: theme.cardColor,
-                labelStyle: TextStyle(
-                  color: theme.colorScheme.onSurface.withOpacity(0.7),
+              const SizedBox(width: 12),
+              Expanded(
+                child: TextField(
+                  controller: _skillsController,
+                  decoration: InputDecoration(
+                    labelText: t.skills,
+                    hintText: t.skillsCommaSeparated,
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                  ),
+                  onChanged: (_) => _searchProjects(),
                 ),
               ),
-              dropdownColor: theme.cardColor,
-              style: TextStyle(color: theme.colorScheme.onSurface),
-              items: _sortOptions.map<DropdownMenuItem<String>>((opt) {
-                return DropdownMenuItem<String>(
-                  value: opt['value'] as String,
-                  child: Text(opt['label'] as String),
-                );
-              }).toList(),
-              onChanged: (value) => setState(() => _selectedSortBy = value!),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _minBudgetController,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    labelText: t.minBudget,
+                    prefixText: '\$ ',
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                  ),
+                  onChanged: (_) => _searchProjects(),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: TextField(
+                  controller: _maxBudgetController,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    labelText: t.maxBudget,
+                    prefixText: '\$ ',
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                  ),
+                  onChanged: (_) => _searchProjects(),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton(
+              onPressed: _resetFilters,
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.secondary,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              ),
+              child: Text(t.reset),
             ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildResultsHeader(AppLocalizations t, ThemeData theme, bool isDark) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            '${_projects.length} ${t.projectsFound}',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: isDark ? AppColors.darkTextHint : AppColors.lightTextHint,
+            ),
+          ),
+          if (_loading && _projects.isNotEmpty)
+            const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildResultsList(AppLocalizations t, ThemeData theme, bool isDark) {
+  if (_loading && _projects.isEmpty) {
+    return const Center(child: CircularProgressIndicator());
+  }
+
+  if (_projects.isEmpty) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: IntrinsicHeight(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const Spacer(),  
+                  Icon(
+                    Icons.search_off,
+                    size: 80,
+                    color: Colors.grey.shade400,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    t.noProjectsFound,
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.grey.shade600,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 12),
+                  TextButton(
                     onPressed: _resetFilters,
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: theme.colorScheme.primary,
-                      side: BorderSide(
-                        color: theme.colorScheme.primary.withOpacity(0.5),
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+                    style: TextButton.styleFrom(
+                      foregroundColor: AppColors.secondary,
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     ),
-                    child: Text(t.reset),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () => _searchProjects(),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.secondary,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+                    child: Text(
+                      t.reset,
+                      style: TextStyle(fontSize: 14, color: AppColors.secondary),
                     ),
-                    child: Text(t.search),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            TextButton.icon(
-              onPressed: _saveCurrentFilter,
-              icon: Icon(
-                Icons.save,
-                size: 16,
-                color: theme.colorScheme.primary,
-              ),
-              label: Text(
-                t.saveThisSearch,
-                style: TextStyle(color: theme.colorScheme.primary),
+                  const Spacer(),  
+                ],
               ),
             ),
-            const SizedBox(height: 16),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
-  Widget _buildSearchResults() {
-    final t = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+  return RefreshIndicator(
+    onRefresh: () => _searchProjects(),
+    color: AppColors.secondary,
+    child: ListView.builder(
+      controller: _scrollController,
+      padding: const EdgeInsets.all(16),
+      itemCount: _projects.length + (_hasMore ? 1 : 0),
+      itemBuilder: (context, index) {
+        if (index == _projects.length) {
+          return const Padding(
+            padding: EdgeInsets.all(16),
+            child: Center(child: SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2))),
+          );
+        }
+        return _buildProjectCard(_projects[index], theme, isDark, t);
+      },
+    ),
+  );
+}
 
-    if (_loading && _projects.isEmpty) {
-      return Center(
-        child: CircularProgressIndicator(color: theme.colorScheme.primary),
-      );
-    }
-
-    if (_projects.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.search_off,
-              size: 64,
-              color: theme.colorScheme.onSurface.withOpacity(0.3),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              t.noProjectsFound,
-              style: TextStyle(
-                color: theme.colorScheme.onSurface.withOpacity(0.6),
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextButton(
-              onPressed: () => setState(() => _showFilters = true),
-              child: Text(
-                t.adjustYourFilters,
-                style: TextStyle(color: theme.colorScheme.primary),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return RefreshIndicator(
-      onRefresh: () => _searchProjects(),
-      color: theme.colorScheme.primary,
-      child: ListView.builder(
-        controller: _scrollController,
-        padding: const EdgeInsets.all(16),
-        itemCount: _projects.length + (_hasMore ? 1 : 0),
-        itemBuilder: (context, index) {
-          if (index == _projects.length) {
-            return const Padding(
-              padding: EdgeInsets.all(16),
-              child: Center(
-                child: SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
-              ),
-            );
-          }
-          return _buildProjectCard(_projects[index]);
-        },
-      ),
-    );
-  }
-
-  Widget _buildProjectCard(Project project) {
-    final t = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+  Widget _buildProjectCard(Project project, ThemeData theme, bool isDark, AppLocalizations t) {
+    if (project.id == null) return const SizedBox.shrink();
 
     return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      margin: const EdgeInsets.only(bottom: 16),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       color: theme.cardColor,
       elevation: isDark ? 1 : 2,
       child: InkWell(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => ProjectDetailsScreen(projectId: project.id!),
-            ),
-          );
-        },
-        borderRadius: BorderRadius.circular(16),
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => ProjectDetailsScreen(projectId: project.id!)),
+        ),
+        borderRadius: BorderRadius.circular(20),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                project.title ?? t.untitled,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                project.description ?? '',
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurface.withOpacity(0.7),
-                ),
-              ),
-              const SizedBox(height: 12),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.secondary.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+                  Expanded(
                     child: Text(
-                      '\$${project.budget?.toStringAsFixed(0)}',
+                      project.title ?? t.untitled,
                       style: TextStyle(
-                        fontSize: 12,
+                        fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: AppColors.secondary,
+                        color: theme.colorScheme.onSurface,
                       ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
+                  _FavoriteButton(projectId: project.id!),
+                ],
+              ),
+              const SizedBox(height: 12),
+              
+              Text(
+                project.description ?? t.noDescription,
+                style: TextStyle(
+                  fontSize: 14,
+                  height: 1.5,
+                  color: theme.colorScheme.onSurface.withOpacity(0.7),
+                ),
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 16),
+              
+              if (project.skills != null && project.skills!.isNotEmpty)
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: project.skills!.map((skill) {
+                    return Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: AppColors.secondary.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        skill,
+                        style: TextStyle(fontSize: 12, color: AppColors.secondary),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              const SizedBox(height: 16),
+              
+              Wrap(
+                spacing: 12,
+                runSpacing: 8,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: Colors.blue.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(12),
+                      color: Colors.green.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(20),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.access_time, size: 12),
+                        Icon(Icons.attach_money, size: 16, color: Colors.green.shade700),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${project.budget?.toStringAsFixed(0)}',
+                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.green.shade700),
+                        ),
+                      ],
+                    ),
+                  ),
+                  
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.access_time, size: 16, color: Colors.blue.shade700),
                         const SizedBox(width: 4),
                         Text(
                           '${project.duration} ${t.days}',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.blue.shade700,
+                          style: TextStyle(fontSize: 14, color: Colors.blue.shade700),
+                        ),
+                      ],
+                    ),
+                  ),
+                  
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: isDark ? Colors.grey.shade800 : Colors.grey.shade100,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        CircleAvatar(
+                          radius: 10,
+                          backgroundColor: isDark ? Colors.grey.shade700 : Colors.grey.shade300,
+                          backgroundImage: (project.client?.avatar != null && project.client!.avatar!.isNotEmpty)
+                              ? NetworkImage(project.client!.avatar!)
+                              : null,
+                          child: (project.client?.avatar == null || project.client!.avatar!.isEmpty)
+                              ? Text(
+                                  (project.client?.name != null && project.client!.name!.isNotEmpty)
+                                      ? project.client!.name![0].toUpperCase()
+                                      : 'C',
+                                  style: const TextStyle(fontSize: 8, fontWeight: FontWeight.bold),
+                                )
+                              : null,
+                        ),
+                        const SizedBox(width: 6),
+                        ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 150),
+                          child: Text(
+                            project.client?.name ?? t.unknownClient,
+                            style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurface.withOpacity(0.6)),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ],
                     ),
                   ),
-                  if (project.category != null)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.purple.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        project.category!,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.purple.shade700,
-                        ),
-                      ),
-                    ),
-                  _FavoriteButton(projectId: project.id!),
                 ],
               ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSavedTab() {
-    final t = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
-    return RefreshIndicator(
-      onRefresh: () async {
-        await _loadSavedFilters();
-        await _loadAlerts();
-      },
-      color: theme.colorScheme.primary,
-      child: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          if (_loadingFilters)
-            Center(
-              child: CircularProgressIndicator(
-                color: theme.colorScheme.primary,
-              ),
-            )
-          else ...[
-            if (_savedFilters.isNotEmpty) ...[
-              Text(
-                t.savedSearches,
-                style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
               const SizedBox(height: 12),
-              ..._savedFilters.map((filter) => _buildSavedFilterCard(filter)),
-            ],
-
-            const SizedBox(height: 24),
-
-            if (_alerts.isNotEmpty) ...[
-              Text(
-                t.projectAlerts,
-                style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
+              
+              Align(
+                alignment: Alignment.centerRight,
+                child: Text(
+                  _formatDate(project.createdAt, t),
+                  style: TextStyle(fontSize: 11, color: theme.colorScheme.onSurface.withOpacity(0.4)),
                 ),
               ),
-              const SizedBox(height: 12),
-              ..._alerts.map((alert) => _buildAlertCard(alert)),
             ],
-
-            const SizedBox(height: 24),
-
-            ElevatedButton.icon(
-              onPressed: _showCreateAlertDialog,
-              icon: const Icon(Icons.add_alert),
-              label: Text(t.createNewAlert),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.secondary,
-                foregroundColor: Colors.white,
-                minimumSize: const Size(double.infinity, 48),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 40),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSavedFilterCard(SavedFilter filter) {
-    final t = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
-
-    return Card(
-      margin: const EdgeInsets.only(bottom: 8),
-      color: theme.cardColor,
-      child: ListTile(
-        leading: Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: AppColors.secondary.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(10),
           ),
-          child: Icon(Icons.bookmark, color: AppColors.secondary),
-        ),
-        title: Text(
-          filter.name,
-          style: TextStyle(color: theme.colorScheme.onSurface),
-        ),
-        subtitle: Text(
-          '${filter.filterData['category'] ?? t.all} • ${filter.filterData['minBudget'] != null ? '\$${filter.filterData['minBudget']}' : t.any} ${t.budget}',
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.7)),
-        ),
-        trailing: IconButton(
-          icon: const Icon(Icons.delete_outline),
-          onPressed: () => _deleteFilter(filter),
-          color: theme.colorScheme.onSurface.withOpacity(0.6),
-        ),
-        onTap: () => _applySavedFilter(filter),
-      ),
-    );
-  }
-
-  Widget _buildAlertCard(ProjectAlert alert) {
-    final t = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
-    return Card(
-      margin: const EdgeInsets.only(bottom: 8),
-      color: theme.cardColor,
-      child: ListTile(
-        leading: Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: alert.isActive
-                ? AppColors.secondary.withOpacity(0.1)
-                : (isDark ? Colors.grey.shade800 : Colors.grey.shade100),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Icon(
-            Icons.notifications_active,
-            color: alert.isActive ? AppColors.secondary : Colors.grey,
-          ),
-        ),
-        title: Text(
-          alert.name,
-          style: TextStyle(color: theme.colorScheme.onSurface),
-        ),
-        subtitle: Text(
-          alert.keywords.isNotEmpty ? alert.keywords.join(', ') : t.anyKeywords,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.7)),
-        ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Switch(
-              value: alert.isActive,
-              onChanged: (_) => _toggleAlert(alert),
-              activeColor: AppColors.secondary,
-            ),
-            IconButton(
-              icon: const Icon(Icons.delete_outline),
-              onPressed: () => _deleteAlert(alert),
-              color: theme.colorScheme.onSurface.withOpacity(0.6),
-            ),
-          ],
         ),
       ),
     );
   }
 
-  Future<void> _deleteFilter(SavedFilter filter) async {
+  String _formatDate(DateTime? date, AppLocalizations t) {
+    if (date == null) return t.unknown;
+    final now = DateTime.now();
+    final diff = now.difference(date);
+    if (diff.inDays > 7) return '${date.day}/${date.month}/${date.year}';
+    if (diff.inDays > 0) return '${diff.inDays} ${t.daysAgo}';
+    if (diff.inHours > 0) return '${diff.inHours} ${t.hoursAgo}';
+    return t.justNow;
+  }
+
+  void _showDurationPicker() {
     final t = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
-
-    final confirm = await showDialog<bool>(
+    showModalBottomSheet(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(t.deleteFilter),
-        content: Text('${t.deleteFilterQuestion} "${filter.name}"?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(t.cancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: Text(t.delete),
-          ),
-        ],
-      ),
-    );
-
-    if (confirm == true) {
-      try {
-        await ApiService.deleteSavedFilter(filter.id);
-        _loadSavedFilters();
-        Fluttertoast.showToast(msg: t.filterDeleted);
-      } catch (e) {
-        Fluttertoast.showToast(msg: '${t.error}: $e');
-      }
-    }
-  }
-
-  Future<void> _deleteAlert(ProjectAlert alert) async {
-    final t = AppLocalizations.of(context)!;
-    try {
-      await ApiService.deleteAlert(alert.id);
-      _loadAlerts();
-      Fluttertoast.showToast(msg: t.alertDeleted);
-    } catch (e) {
-      Fluttertoast.showToast(msg: '${t.error}: $e');
-    }
-  }
-
-  Future<void> _toggleAlert(ProjectAlert alert) async {
-    try {
-      await ApiService.toggleAlert(alert.id);
-      _loadAlerts();
-    } catch (e) {
-      final t = AppLocalizations.of(context)!;
-      Fluttertoast.showToast(msg: '${t.error}: $e');
-    }
-  }
-
-  void _showCreateAlertDialog() {
-    final t = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
-    final nameController = TextEditingController();
-    final keywordsController = TextEditingController();
-    final skillsController = TextEditingController();
-    final minBudgetController = TextEditingController();
-    final maxBudgetController = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(t.createProjectAlert),
-        backgroundColor: theme.cardColor,
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: nameController,
-                decoration: InputDecoration(
-                  labelText: t.alertName,
-                  labelStyle: TextStyle(
-                    color: theme.colorScheme.onSurface.withOpacity(0.7),
-                  ),
-                ),
-                style: TextStyle(color: theme.colorScheme.onSurface),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: keywordsController,
-                decoration: InputDecoration(
-                  labelText: t.keywordsCommaSeparated,
-                  hintText: t.keywordsHint,
-                  labelStyle: TextStyle(
-                    color: theme.colorScheme.onSurface.withOpacity(0.7),
-                  ),
-                  hintStyle: TextStyle(
-                    color: theme.colorScheme.onSurface.withOpacity(0.5),
-                  ),
-                ),
-                style: TextStyle(color: theme.colorScheme.onSurface),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: skillsController,
-                decoration: InputDecoration(
-                  labelText: t.skillsCommaSeparated,
-                  labelStyle: TextStyle(
-                    color: theme.colorScheme.onSurface.withOpacity(0.7),
-                  ),
-                ),
-                style: TextStyle(color: theme.colorScheme.onSurface),
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: minBudgetController,
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        labelText: t.minBudget,
-                        prefixText: '\$ ',
-                        labelStyle: TextStyle(
-                          color: theme.colorScheme.onSurface.withOpacity(0.7),
-                        ),
-                      ),
-                      style: TextStyle(color: theme.colorScheme.onSurface),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: TextField(
-                      controller: maxBudgetController,
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        labelText: t.maxBudget,
-                        prefixText: '\$ ',
-                        labelStyle: TextStyle(
-                          color: theme.colorScheme.onSurface.withOpacity(0.7),
-                        ),
-                      ),
-                      style: TextStyle(color: theme.colorScheme.onSurface),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(t.cancel),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              final keywords = keywordsController.text
-                  .split(',')
-                  .map((s) => s.trim())
-                  .where((s) => s.isNotEmpty)
-                  .toList();
-              final skills = skillsController.text
-                  .split(',')
-                  .map((s) => s.trim())
-                  .where((s) => s.isNotEmpty)
-                  .toList();
-
-              await ApiService.createProjectAlert(
-                name: nameController.text,
-                keywords: keywords,
-                skills: skills,
-                minBudget: minBudgetController.text.isNotEmpty
-                    ? double.tryParse(minBudgetController.text)
-                    : null,
-                maxBudget: maxBudgetController.text.isNotEmpty
-                    ? double.tryParse(maxBudgetController.text)
-                    : null,
-              );
-
+      backgroundColor: theme.cardColor,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (context) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: _durationOptions.map((opt) {
+          final isSelected = _selectedDuration == opt['value'];
+          return ListTile(
+            leading: Icon(opt['icon'] as IconData, color: isSelected ? AppColors.secondary : null),
+            title: Text(opt['label'] as String, style: TextStyle(color: isSelected ? AppColors.secondary : null)),
+            trailing: isSelected ? Icon(Icons.check, color: AppColors.secondary) : null,
+            onTap: () {
+              setState(() => _selectedDuration = opt['value'] as String);
               Navigator.pop(context);
-              _loadAlerts();
-              Fluttertoast.showToast(msg: t.alertCreated);
+              _searchProjects();
             },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.secondary,
-            ),
-            child: Text(t.create),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  void _showSavedFiltersDialog() {
+    final t = AppLocalizations.of(context)!;
+    if (_savedFilters.isEmpty) return;
+    
+    final theme = Theme.of(context);
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: theme.cardColor,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (context) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Padding(
+            padding: EdgeInsets.all(16),
+            child: Text('Saved Searches', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           ),
+          const Divider(),
+          ..._savedFilters.map((filter) => ListTile(
+            leading: Icon(Icons.bookmark, color: AppColors.secondary),
+            title: Text(filter.name),
+            subtitle: Text(filter.filterData['category'] ?? t.all),
+            trailing: IconButton(
+              icon: const Icon(Icons.delete_outline, color: Colors.grey),
+              onPressed: () async {
+                await ApiService.deleteSavedFilter(filter.id);
+                if (mounted) {
+                  Navigator.pop(context);
+                  _loadSavedFilters();
+                }
+              },
+            ),
+            onTap: () {
+              Navigator.pop(context);
+              _applySavedFilter(filter);
+            },
+          )),
         ],
       ),
     );
@@ -1115,33 +860,21 @@ class _FavoriteButtonState extends State<_FavoriteButton> {
     try {
       if (_isFavorite) {
         await ApiService.removeFromFavorites(widget.projectId);
-        if (mounted) {
-          setState(() => _isFavorite = false);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                t?.removedFromFavorites ?? 'Removed from favorites',
-              ),
-            ),
-          );
-        }
+        if (mounted) setState(() => _isFavorite = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(t?.removedFromFavorites ?? 'Removed from favorites')),
+        );
       } else {
         await ApiService.addToFavorites(widget.projectId);
-        if (mounted) {
-          setState(() => _isFavorite = true);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(t?.addedToFavorites ?? 'Added to favorites'),
-            ),
-          );
-        }
+        if (mounted) setState(() => _isFavorite = true);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(t?.addedToFavorites ?? 'Added to favorites')),
+        );
       }
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('${t?.error}: $e')));
-      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('${t?.error}: $e')),
+      );
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -1166,7 +899,7 @@ class _FavoriteButtonState extends State<_FavoriteButton> {
       icon: Icon(
         _isFavorite ? Icons.favorite : Icons.favorite_border,
         color: _isFavorite ? Colors.red : Colors.grey,
-        size: 22,
+        size: 28,
       ),
       onPressed: _toggleFavorite,
       padding: EdgeInsets.zero,

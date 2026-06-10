@@ -57,7 +57,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get activeProjects => 'Active Projects';
 
   @override
-  String get proposals => 'proposal';
+  String get proposals => 'Proposals';
 
   @override
   String get rating => 'Rating';
@@ -66,25 +66,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileCompletion => 'Profile Completion';
 
   @override
-  String get trendingSkills => 'Trending Skills 🔥';
+  String get trendingSkills => 'Trending Skills';
 
   @override
-  String get myPortfolio => 'My Portfolio 🎨';
+  String get myPortfolio => 'My Portfolio';
 
   @override
-  String get skillTests => 'Skill Tests 🏆';
+  String get skillTests => 'Skill Tests';
 
   @override
-  String get premium => 'Freelancer Premium';
+  String get premium => 'Premium';
 
   @override
   String get subscribe => 'Subscribe';
 
   @override
-  String get schedule => 'Your schedule';
+  String get schedule => 'Schedule';
 
   @override
-  String get fullCalendar => 'Full calendar';
+  String get fullCalendar => 'Full Calendar';
 
   @override
   String get bestMatches => 'Best Matches';
@@ -180,7 +180,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get logoutConfirmation => 'Are you sure you want to logout?';
 
   @override
-  String get upgrade => 'Upgrade Plan';
+  String get upgrade => 'Upgrade';
 
   @override
   String get noImage => 'No image';
@@ -875,8 +875,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get proposalsThisMonth => 'Proposals This Month';
 
   @override
-  String get proposalLimitReached =>
-      'You have reached your proposal limit. Upgrade to submit more.';
+  String get proposalLimitReached => 'Proposal limit reached';
 
   @override
   String proposalsRemaining(int count) {
@@ -1261,7 +1260,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get whatShouldBeChanged => 'What should be changed?';
 
   @override
-  String get revisionRequested => 'Revision requested';
+  String get revisionRequested => 'Revision Requested';
 
   @override
   String get requestFailed => 'Request failed';
@@ -1403,7 +1402,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get freelancerSignature => 'Freelancer Signature';
 
   @override
-  String get enterCouponCode => 'Enter a coupon code';
+  String get enterCouponCode => 'Please enter a coupon code';
 
   @override
   String get couponApplied => 'Coupon applied';
@@ -2268,7 +2267,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get interviewsCompleted => 'interviews completed';
 
   @override
-  String get aiInsights => 'AI Insights';
+  String get aiInsights => 'AI insights';
 
   @override
   String get bestTimeToInterview => 'Best Time to Interview';
@@ -3850,7 +3849,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get billingPeriod => 'Billing Period';
 
   @override
-  String get price => 'Price *';
+  String get price => 'Price';
 
   @override
   String get proposalLimitEmpty => 'Proposal Limit (empty=∞)';
@@ -3892,16 +3891,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get proposals_plural => 'proposals';
 
   @override
-  String get customBranding => 'Custom Branding';
+  String get customBranding => 'Custom branding';
 
   @override
   String get recommended => 'Recommended';
 
   @override
-  String get prioritySupport => 'Priority Support';
+  String get prioritySupport => 'Priority support';
 
   @override
-  String get apiAccess => 'API Access';
+  String get apiAccess => 'API access';
 
   @override
   String get disputesManagement => 'Disputes Management';
@@ -4454,4 +4453,471 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get actions => 'Actions';
+
+  @override
+  String get browse => 'Browse';
+
+  @override
+  String get raiseDispute => 'Raise Dispute';
+
+  @override
+  String get limitReached => 'LIMIT';
+
+  @override
+  String projectLimitMessage(Object limit) {
+    return 'You have reached the maximum of $limit active projects on your current plan.\n\nUpgrade your plan to create more projects or wait for existing projects to complete.';
+  }
+
+  @override
+  String get noContract => 'No Contract';
+
+  @override
+  String get createContractFirst =>
+      'Please create a contract first before submitting work.';
+
+  @override
+  String get milestoneAlreadyCompleted =>
+      'This milestone has already been completed.';
+
+  @override
+  String get workSubmissions => 'Work Submissions';
+
+  @override
+  String get viewAllSubmissions => 'View All Submissions';
+
+  @override
+  String get escrowSecuredForFreelancer => 'Escrow Secured';
+
+  @override
+  String get waitingForClientPayment => 'Waiting for Client Payment';
+
+  @override
+  String get fundsAreProtected => 'Funds are protected:';
+
+  @override
+  String get clientWillFundEscrowBeforeWork =>
+      'Client will fund escrow before work begins';
+
+  @override
+  String get errorSendingRevision => 'Error sending revision request';
+
+  @override
+  String get cannotSubmitWorkEscrowNotFunded =>
+      'Cannot submit work before client funds the escrow';
+
+  @override
+  String get waitingForClientPaymentBeforeWork =>
+      'Waiting for client payment before starting work';
+
+  @override
+  String get submissionDetails => 'Submission Details';
+
+  @override
+  String get noSubmissionsYet => 'No submissions yet';
+
+  @override
+  String get waitingForFreelancerToSubmit =>
+      'Waiting for freelancer to submit work';
+
+  @override
+  String get youHaventSubmittedAnyWorkYet =>
+      'You haven\'t submitted any work yet';
+
+  @override
+  String get attachments => 'Attachments';
+
+  @override
+  String get submittedOn => 'Submitted on';
+
+  @override
+  String get untitledSubmission => 'Untitled Submission';
+
+  @override
+  String get approved => 'Approved';
+
+  @override
+  String get pendingReview => 'Pending Review';
+
+  @override
+  String get revisionFeedback => 'Revision Feedback';
+
+  @override
+  String get resubmitWork => 'Resubmit Work';
+
+  @override
+  String get workApprovedSuccess => 'Work approved successfully';
+
+  @override
+  String get errorApprovingWork => 'Error approving work';
+
+  @override
+  String get viewMySubmissions => 'View My Submissions';
+
+  @override
+  String get tapToSeeAllReviews => 'Tap to see all reviews';
+
+  @override
+  String get proposalsRunningLow => 'Proposals running low';
+
+  @override
+  String get proposalsPerMonth => 'Proposals per month';
+
+  @override
+  String get proposalsLeftThisMonth => 'proposals left this month.';
+
+  @override
+  String get activeProjectsFire => 'Active Projects 🔥';
+
+  @override
+  String get pendingYourSignature => 'Pending Your Signature';
+
+  @override
+  String get recentlyDeliveredProjects => 'Recently Delivered Projects';
+
+  @override
+  String get individualSubscription => 'Individual subscription';
+
+  @override
+  String get oneMonthFree => '1 month Premium free';
+
+  @override
+  String get twoMonthsStudentDiscount => '2 months for students discount';
+
+  @override
+  String get cancelAnytime => 'Cancel anytime';
+
+  @override
+  String get bestDealsMonthly => 'Best deals & offers monthly';
+
+  @override
+  String get noSavedJobsYet => 'No saved jobs yet';
+
+  @override
+  String get noAISuggestionsYet => 'No AI suggestions yet';
+
+  @override
+  String get refreshSuggestions => 'Refresh suggestions';
+
+  @override
+  String get viewAllTests => 'View All Tests';
+
+  @override
+  String get nothingOnThisDay => 'Nothing on this day';
+
+  @override
+  String get more => 'more';
+
+  @override
+  String get milestonesRemindersInterviews =>
+      'Milestones, reminders & interviews';
+
+  @override
+  String get wallet => 'Wallet';
+
+  @override
+  String get shop => 'Shop';
+
+  @override
+  String get shareProfile => 'Share Profile';
+
+  @override
+  String get shareProfileText => 'Check out my profile: ';
+
+  @override
+  String get loadingSubscription => 'Loading your subscription...';
+
+  @override
+  String get cancelSubscription => 'Cancel Subscription';
+
+  @override
+  String get cancelSubscriptionConfirmation =>
+      'Are you sure you want to cancel your subscription? You will continue to have access until the end of your billing period.';
+
+  @override
+  String get noKeepIt => 'No, Keep It';
+
+  @override
+  String get yesCancel => 'Yes, Cancel';
+
+  @override
+  String get subscriptionCanceledSuccess =>
+      'Subscription canceled successfully';
+
+  @override
+  String get errorCanceling => 'Error canceling';
+
+  @override
+  String get tryAgain => 'Try Again';
+
+  @override
+  String get noActiveSubscription => 'No Active Subscription';
+
+  @override
+  String get freePlanMessage => 'You are currently on the Free plan';
+
+  @override
+  String get viewPlans => 'View Plans';
+
+  @override
+  String get daysRemaining => 'days remaining';
+
+  @override
+  String get billingCycle => 'Billing Cycle';
+
+  @override
+  String get usageOverview => 'Usage Overview';
+
+  @override
+  String get remaining => 'remaining';
+
+  @override
+  String get includedFeatures => 'Included Features';
+
+  @override
+  String get unlimited => 'Unlimited';
+
+  @override
+  String get billingInformation => 'Billing Information';
+
+  @override
+  String get currentPlan => '✨ Current Plan';
+
+  @override
+  String get nextBillingDate => 'Next Billing Date';
+
+  @override
+  String get subscriptionEndNotice =>
+      'Your subscription will end on the next billing date.';
+
+  @override
+  String get readyForMore => 'Ready for more?';
+
+  @override
+  String get upgradeMessage =>
+      'Upgrade to unlock unlimited proposals, AI insights, and priority support!';
+
+  @override
+  String get upgradeNow => 'Upgrade Now';
+
+  @override
+  String get upgradeToPro => 'Upgrade to Pro to get';
+
+  @override
+  String get businessPlanUnlimited =>
+      'Business plan gives you unlimited proposals';
+
+  @override
+  String get yearlyBillingSave => 'Save 20% with yearly billing';
+
+  @override
+  String get contactSales => 'Contact sales for custom enterprise plans';
+
+  @override
+  String get viewUpgradeOptions => 'View Upgrade Options';
+
+  @override
+  String get noUsageData => 'No usage data available yet';
+
+  @override
+  String get noUsageDataSubtitle =>
+      'Start using the platform to see your statistics';
+
+  @override
+  String get monthlyActivity => 'Monthly Activity';
+
+  @override
+  String get quickStats => 'Quick Stats';
+
+  @override
+  String get proposalsUsed => 'Proposals Used';
+
+  @override
+  String get activeProjectsUsed => 'Active Projects Used';
+
+  @override
+  String get remainingProposals => 'Remaining Proposals';
+
+  @override
+  String get remainingProjects => 'Remaining Projects';
+
+  @override
+  String get interviewsUsed => 'Interviews Used';
+
+  @override
+  String get interviewsLeft => 'Interviews Left';
+
+  @override
+  String get off => 'of';
+
+  @override
+  String get leftThisMonth => 'left this month';
+
+  @override
+  String get canStart => 'can start';
+
+  @override
+  String get noLimit => 'No limit';
+
+  @override
+  String get thisMonth => 'this month';
+
+  @override
+  String get basicFeatures => 'Basic features';
+
+  @override
+  String get limitedProposals => 'Limited proposals';
+
+  @override
+  String get oneActiveProject => '1 active project';
+
+  @override
+  String get unlimitedProposals => 'Unlimited proposals';
+
+  @override
+  String get tenActiveProjects => '10 active projects';
+
+  @override
+  String get advancedAnalytics => 'Advanced analytics';
+
+  @override
+  String get teamManagement => 'Team management';
+
+  @override
+  String get jan => 'Jan';
+
+  @override
+  String get feb => 'Feb';
+
+  @override
+  String get mar => 'Mar';
+
+  @override
+  String get apr => 'Apr';
+
+  @override
+  String get may => 'May';
+
+  @override
+  String get jun => 'Jun';
+
+  @override
+  String get jul => 'Jul';
+
+  @override
+  String get aug => 'Aug';
+
+  @override
+  String get sep => 'Sep';
+
+  @override
+  String get oct => 'Oct';
+
+  @override
+  String get nov => 'Nov';
+
+  @override
+  String get dec => 'Dec';
+
+  @override
+  String get errorLoadingPlans => 'Error loading plans';
+
+  @override
+  String get couponAppliedSuccess => 'Coupon applied!';
+
+  @override
+  String get offf => 'off';
+
+  @override
+  String get invalidCoupon => 'Invalid coupon';
+
+  @override
+  String get errorValidatingCoupon => 'Error validating coupon';
+
+  @override
+  String get alreadyOnFreePlan => 'You are already on the Free plan';
+
+  @override
+  String get couldNotLaunchCheckout => 'Could not launch checkout URL';
+
+  @override
+  String get subscriptionFailed => 'Subscription failed';
+
+  @override
+  String get errorActivating => 'Error activating';
+
+  @override
+  String get yourPlanYourChoice => '✨ Your Plan, Your Choice ✨';
+
+  @override
+  String get chooseWhatFitsYou => 'Choose what fits you best • Cancel anytime';
+
+  @override
+  String get mostPopular => 'MOST POPULAR';
+
+  @override
+  String get freePlan => 'FREE PLAN';
+
+  @override
+  String get perMonth => '/ month';
+
+  @override
+  String get whatsIncluded => 'What\'s included:';
+
+  @override
+  String get freeTrialMessage => '14-day free trial! Cancel anytime.';
+
+  @override
+  String get couponCodeHint => '🎟️ Coupon code';
+
+  @override
+  String get couponAppliedLabel => 'Coupon applied:';
+
+  @override
+  String get startFreeTrial => '🚀 Start Free Trial';
+
+  @override
+  String get devActivateManually => 'DEV: Activate Manually';
+
+  @override
+  String get invoices => 'Invoices';
+
+  @override
+  String get comparePlans => 'Compare Plans';
+
+  @override
+  String get currentPassword => 'Current Password';
+
+  @override
+  String get newPassword => 'New Password';
+
+  @override
+  String get confirmNewPassword => 'Confirm New Password';
+
+  @override
+  String get pleaseEnterCurrentPassword => 'Please enter your current password';
+
+  @override
+  String get pleaseEnterNewPassword => 'Please enter your new password';
+
+  @override
+  String get pleaseConfirmNewPassword => 'Please confirm your new password';
+
+  @override
+  String get passwordMinLength => 'Password must be at least 6 characters';
+
+  @override
+  String get passwordsDoNotMatch => 'Passwords do not match';
+
+  @override
+  String get passwordChangedSuccess => 'Password changed successfully';
+
+  @override
+  String get errorChangingPassword => 'Error changing password';
+
+  @override
+  String get completePaymentInBrowser =>
+      'Complete payment in the browser to activate your subscription.';
+
+  @override
+  String get failedToCreateCheckout => 'Failed to create checkout session';
 }

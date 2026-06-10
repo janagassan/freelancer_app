@@ -94,6 +94,8 @@ export const getUserDisputes = async (req, res) => {
     const { status, page = 1, limit = 20 } = req.query;
     const offset = (parseInt(page) - 1) * parseInt(limit);
 
+    console.log('🔍 getUserDisputes - userId:', userId);
+
     const where = {
       [Op.or]: [{ ClientId: userId }, { FreelancerId: userId }],
     };
@@ -117,10 +119,13 @@ export const getUserDisputes = async (req, res) => {
       offset,
     });
 
+    console.log('🔍 Disputes found:', disputes.length);
+    console.log('🔍 Total count:', count);
+
     res.json({
       success: true,
-      disputes: rows,
-      total: count,
+      disputes: disputes, 
+      total: count,       
       page: parseInt(page),
       totalPages: Math.ceil(count / parseInt(limit)),
     });
@@ -131,6 +136,7 @@ export const getUserDisputes = async (req, res) => {
       .json({ success: false, message: "Server error", error: err.message });
   }
 };
+
 
 export const getUserDisputeDetails = async (req, res) => {
   try {

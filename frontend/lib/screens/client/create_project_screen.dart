@@ -10,6 +10,7 @@ import '../../services/draft_local_storage.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/ai_analysis_card.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import '../../models/usage_limits_model.dart'; 
 
 class CreateProjectScreen extends StatefulWidget {
   const CreateProjectScreen({super.key});
@@ -29,6 +30,8 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
   List<String> selectedSkills = [];
   bool loading = false;
   bool analyzing = false;
+  bool _checkingLimits = false;
+  UsageLimits? _usageLimits; 
   Map<String, dynamic>? aiAnalysis;
   bool showAIAnalysis = false;
 
@@ -74,6 +77,7 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
   @override
   void initState() {
     super.initState();
+    _checkProjectLimits(); 
     titleController.addListener(_debounceAnalysis);
     descriptionController.addListener(_debounceAnalysis);
     titleController.addListener(_scheduleProjectDraftSave);
@@ -84,6 +88,69 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
     WidgetsBinding.instance.addPostFrameCallback(
       (_) => _loadSavedProjectDraft(),
     );
+  }
+
+  Future<void> _checkProjectLimits() async {
+    setState(() => _checkingLimits = true);
+    try {
+      final response = await ApiService.getUserUsage();
+      if (response['success'] == true && response['usage'] != null) {
+        _usageLimits = UsageLimits.fromJson(response['usage']);
+      }
+    } catch (e) {
+      print('Error checking limits: $e');
+    } finally {
+      if (mounted) setState(() => _checkingLimits = false);
+    }
+  }
+
+  Future<bool> _canCreateProject() async {
+    if (_usageLimits == null) {
+      await _checkProjectLimits();
+    }
+    
+    if (_usageLimits?.activeProjectsLimit == null || _usageLimits!.activeProjectsLimit == 0) {
+      return true;
+    }
+    
+    final remaining = _usageLimits!.remainingActiveProjects;
+    if (remaining <= 0) {
+      final t = AppLocalizations.of(context);
+      final limit = _usageLimits!.activeProjectsLimit;
+      
+      if (mounted) {
+        await showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text(t?.limitReached ?? 'Project Limit Reached'),
+            content: Text(
+              t?.projectLimitMessage(limit.toString()) ??
+              'You have reached the maximum of $limit active projects on your current plan.\n\n'
+              'Upgrade your plan to create more projects or wait for existing projects to complete.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(t?.cancel ?? 'Cancel'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  Navigator.pushNamed(context, '/subscription/plans');
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.accent,
+                ),
+                child: Text(t?.upgrade ?? 'Upgrade Plan'),
+              ),
+            ],
+          ),
+        );
+      }
+      return false;
+    }
+    
+    return true;
   }
 
   Map<String, dynamic> _projectDraftSnapshot() {
@@ -345,8 +412,12 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
 
   Future<void> _createProject() async {
     final t = AppLocalizations.of(context);
+    
     if (!_formKey.currentState!.validate()) return;
-
+    
+    final canCreate = await _canCreateProject();
+    if (!canCreate) return;
+    
     setState(() => loading = true);
 
     final result = await ApiService.createProject(
@@ -368,6 +439,9 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
       Fluttertoast.showToast(
         msg: t?.projectCreatedSuccess ?? "✅ Project created successfully",
       );
+      
+      await _checkProjectLimits();
+      
       if (mounted) Navigator.pop(context, true);
     } else {
       Fluttertoast.showToast(
@@ -439,6 +513,9 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              if (_usageLimits != null && _usageLimits!.activeProjectsLimit != null)
+                _buildLimitWarningCard(),
+              
               Text(
                 t?.projectDetails ?? "Project Details",
                 style: TextStyle(
@@ -800,7 +877,7 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
                 width: double.infinity,
                 height: 55,
                 child: ElevatedButton(
-                  onPressed: loading ? null : _createProject,
+                  onPressed: (loading || _checkingLimits) ? null : _createProject,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.secondary,
                     shape: RoundedRectangleBorder(
@@ -822,6 +899,78 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+  
+  Widget _buildLimitWarningCard() {
+    final t = AppLocalizations.of(context);
+    final limit = _usageLimits!.activeProjectsLimit!;
+    final used = _usageLimits!.activeProjectsUsed;
+    final remaining = limit - used;
+    final percentage = used / limit;
+    
+    if (percentage < 0.8) return const SizedBox.shrink(); 
+    
+    final isCritical = remaining <= 1;
+    
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: isCritical ? Colors.red.withOpacity(0.1) : Colors.orange.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isCritical ? Colors.red.withOpacity(0.3) : Colors.orange.withOpacity(0.3),
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            isCritical ? Icons.warning : Icons.info_outline,
+            color: isCritical ? Colors.red : Colors.orange,
+            size: 24,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  isCritical 
+                      ? '⚠️ Only $remaining project slot remaining!'
+                      : '📊 $used of $limit active projects used',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: isCritical ? Colors.red : Colors.orange,
+                    fontSize: 13,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  isCritical
+                      ? 'Complete existing projects or upgrade your plan to create more.'
+                      : 'You have $remaining project slot${remaining > 1 ? 's' : ''} remaining.',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: isCritical ? Colors.red.shade700 : Colors.orange.shade700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (remaining <= 1)
+            TextButton(
+              onPressed: () => Navigator.pushNamed(context, '/subscription/plans'),
+              child: Text(
+                t?.upgrade ?? 'Upgrade',
+                style: TextStyle(
+                  color: isCritical ? Colors.red : Colors.orange,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }

@@ -120,63 +120,54 @@ class _SubscriptionPaymentScreenState extends State<SubscriptionPaymentScreen> {
   }
 
   Future<void> _openStripeCheckout() async {
-    final t = AppLocalizations.of(context)!;
-    setState(() => _isProcessing = true);
+  final t = AppLocalizations.of(context)!;
+  setState(() => _isProcessing = true);
 
-    try {
-      print(
-        '🔍 Creating checkout session for subscription: ${widget.planSlug}',
-      );
-      print('🔍 Payment Intent ID: ${widget.paymentIntent['paymentIntentId']}');
+  try {
+    print('🔍 Creating checkout session for: ${widget.planSlug}');
+    
+    final checkoutUrl = await ApiService.createSubscriptionCheckoutSessionDirect(
+      widget.planSlug,
+    );
 
-      final checkoutUrl = await ApiService.createSubscriptionCheckoutSession(
-        planSlug: widget.planSlug,
-        paymentIntentId: widget.paymentIntent['paymentIntentId'],
-      );
-
-      print('🔍 Checkout URL received: $checkoutUrl');
-
-      if (checkoutUrl != null && checkoutUrl.isNotEmpty) {
-        final uri = Uri.parse(checkoutUrl);
-        print('🔍 Opening URL: $uri');
-
-        if (kIsWeb) {
-          html.window.open(checkoutUrl, '_blank');
-
-          Fluttertoast.showToast(
-            msg: t.completePaymentInNewTab,
-            timeInSecForIosWeb: 3,
-            gravity: ToastGravity.BOTTOM,
-            backgroundColor: AppColors.info,
-            textColor: Colors.white,
-          );
-
-          Future.delayed(const Duration(seconds: 5), () {
-            if (mounted) {
-              Navigator.pushReplacementNamed(context, '/subscription/my');
-            }
-          });
-        } else {
-          if (await canLaunchUrl(uri)) {
-            await launchUrl(uri, mode: LaunchMode.externalApplication);
-          } else {
-            throw Exception('Could not launch checkout URL: $checkoutUrl');
+    if (checkoutUrl != null && checkoutUrl.isNotEmpty) {
+      print('🔍 Opening checkout URL: $checkoutUrl');
+      
+      if (kIsWeb) {
+        html.window.open(checkoutUrl, '_blank');
+        
+        Fluttertoast.showToast(
+          msg: 'Complete payment in the new tab. You will be redirected automatically.',
+          timeInSecForIosWeb: 5,
+          gravity: ToastGravity.BOTTOM,
+        );
+        
+        Future.delayed(const Duration(seconds: 3), () {
+          if (mounted) {
+            Navigator.pop(context);
           }
-        }
+        });
       } else {
-        throw Exception('No checkout URL returned from server');
+        final uri = Uri.parse(checkoutUrl);
+        if (await canLaunchUrl(uri)) {
+          await launchUrl(uri, mode: LaunchMode.externalApplication);
+        }
       }
-    } catch (e) {
-      print('❌ Subscription payment error: $e');
-      if (mounted) {
-        Fluttertoast.showToast(msg: '${t.subscriptionPaymentFailed}: $e');
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isProcessing = false);
-      }
+    } else {
+      throw Exception('No checkout URL returned');
+    }
+  } catch (e) {
+    print('❌ Error: $e');
+    if (mounted) {
+      Fluttertoast.showToast(msg: '${t.subscriptionPaymentFailed}: $e');
+    }
+  } finally {
+    if (mounted) {
+      setState(() => _isProcessing = false);
     }
   }
+}
+
 
   @override
   Widget build(BuildContext context) {

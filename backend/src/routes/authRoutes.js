@@ -12,6 +12,7 @@ import {
   ClientProfile,
   Wallet,
 } from "../models/index.js";
+import { protect } from "../middleware/authMiddleware.js";
 import { sendVerificationEmail, sendResetCodeEmail } from "../utils/mailer.js";
 import VerificationService from "../services/verificationService.js";
 import AIService from "../services/aiService.js";
@@ -83,6 +84,12 @@ router.post("/signup", upload, async (req, res) => {
     tax_number,
   } = req.body;
 
+  if (!phone || phone.trim() === "") {
+    return res.status(400).json({
+      message: "Phone number is required",
+    });
+  }
+
   const ip_address =
     req.ip || req.connection.remoteAddress || req.socket.remoteAddress;
 
@@ -106,12 +113,6 @@ router.post("/signup", upload, async (req, res) => {
       }
     }
 
-    let phoneValid = false;
-    if (phone) {
-      await VerificationService.sendPhoneVerificationCode(phone);
-      phoneValid = true;
-    }
-
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const emailVerificationCode = Math.floor(100000 + Math.random() * 900000);
@@ -126,7 +127,7 @@ router.post("/signup", upload, async (req, res) => {
       national_id: national_id || null,
       national_id_verified: nationalIdValidation?.valid || false,
       phone: phone || null,
-      phone_verified: false,
+      phone_verified: true,
       agreed_to_terms_at: agreed_to_terms === "true" ? new Date() : null,
       ip_address,
       preferred_payment_method: preferred_payment_method || null,
@@ -139,8 +140,10 @@ router.post("/signup", upload, async (req, res) => {
     let commercialRegisterUrl = null;
 
     if (req.files) {
+      let cvUrl = null;
+
       if (req.files.cv && req.files.cv[0]) {
-        verificationDocUrl = req.files.cv[0].path;
+        cvUrl = req.files.cv[0].path;
       }
       if (
         req.files.verification_document &&
@@ -220,13 +223,6 @@ router.post("/signup", upload, async (req, res) => {
 
     await sendVerificationEmail(email, emailVerificationCode);
 
-    let smsSent = false;
-    if (phone) {
-      const smsResult =
-        await VerificationService.sendPhoneVerificationCode(phone);
-      smsSent = smsResult.success;
-    }
-
     console.log(`✅ User created with ID: ${newUser.id}`);
 
     res.status(201).json({
@@ -241,7 +237,6 @@ router.post("/signup", upload, async (req, res) => {
       },
       requiresVerification: true,
       emailSent: true,
-      smsSent: smsSent,
       cvAnalysis: cvAnalysis
         ? {
             has_analysis: true,
@@ -254,47 +249,6 @@ router.post("/signup", upload, async (req, res) => {
   } catch (err) {
     console.error("❌ Signup error:", err);
     res.status(500).json({ message: "Server error", error: err.message });
-  }
-});
-
-router.post("/verify-phone", async (req, res) => {
-  const { phone, code } = req.body;
-
-  try {
-    const verification = await VerificationService.verifyPhoneCode(phone, code);
-
-    if (verification.valid) {
-      await User.update(
-        { phone_verified: true, phone_verification_code: null },
-        { where: { phone } },
-      );
-      res.json({ success: true, message: "Phone verified successfully" });
-    } else {
-      res.status(400).json({
-        success: false,
-        message: verification.message,
-        attemptsLeft: verification.attemptsLeft,
-      });
-    }
-  } catch (err) {
-    console.error("Phone verification error:", err);
-    res.status(500).json({ message: "Server error" });
-  }
-});
-
-router.post("/resend-phone-code", async (req, res) => {
-  const { phone } = req.body;
-
-  try {
-    const result = await VerificationService.sendPhoneVerificationCode(phone);
-    if (result.success) {
-      res.json({ success: true, message: "Verification code sent" });
-    } else {
-      res.status(500).json({ success: false, message: "Failed to send code" });
-    }
-  } catch (err) {
-    console.error("Resend code error:", err);
-    res.status(500).json({ message: "Server error" });
   }
 });
 
@@ -535,4 +489,32 @@ router.post("/reset-password", async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+
+export const changePassword = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { currentPassword, newPassword } = req.body;
+
+    const user = await User.findByPk(userId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ success: false, message: "Current password is incorrect" });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await user.update({ password: hashedPassword });
+
+    res.json({ success: true, message: "Password changed successfully" });
+  } catch (error) {
+    console.error("Error changing password:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+router.post("/change-password", protect, changePassword);
+
 export default router;
