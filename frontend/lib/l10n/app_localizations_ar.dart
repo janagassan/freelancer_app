@@ -874,7 +874,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get proposalsThisMonth => 'العروض هذا الشهر';
 
   @override
-  String get proposalLimitReached => 'تم الوصول للحد الأقصى للعروض';
+  String get proposalLimitReached => 'لقد وصلت للحد المسموح';
 
   @override
   String proposalsRemaining(int count) {
@@ -2944,7 +2944,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get generatingSOW => 'جاري إنشاء نطاق العمل...';
 
   @override
-  String get generateSOW => 'إنشاء نطاق العمل';
+  String get generateSOW => 'إنشاء SOW';
 
   @override
   String get creating => 'جاري الإنشاء...';
@@ -3068,7 +3068,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get done => 'مكتمل';
 
   @override
-  String get hireForProject => 'توظيف للمشروع';
+  String get hireForProject => 'توظيف لهذا المشروع';
 
   @override
   String get contact => 'تواصل';
@@ -3281,7 +3281,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get myCampaigns => 'حملاتي';
 
   @override
-  String get createCampaign => 'انشاء حملة';
+  String get createCampaign => 'إنشاء حملة';
 
   @override
   String get createDispute => 'رفع نزاع';
@@ -4094,13 +4094,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get campaignName => 'Campaign Name';
 
   @override
-  String get totalBudget => 'Total Budget';
+  String get totalBudget => 'إجمالي الميزانية';
 
   @override
   String get dailyBudget => 'Daily Budget';
 
   @override
-  String get costPerClick => 'Cost Per Click';
+  String get costPerClick => 'التكلفة لكل نقرة';
 
   @override
   String get costPerImpression => 'Cost Per Impression';
@@ -4121,7 +4121,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get campaigns => 'Campaigns';
 
   @override
-  String get paused => 'Paused';
+  String get paused => 'متوقف مؤقتاً';
 
   @override
   String get pendingApproval => 'Pending Approval';
@@ -4178,16 +4178,16 @@ class AppLocalizationsAr extends AppLocalizations {
   String get type => 'Type';
 
   @override
-  String get impressions => 'Impressions';
+  String get impressions => 'مرات الظهور';
 
   @override
-  String get clicks => 'Clicks';
+  String get clicks => 'النقرات';
 
   @override
   String get ctr => 'CTR';
 
   @override
-  String get spent => 'Spent';
+  String get spent => 'المصروف';
 
   @override
   String get advertiser => 'Advertiser';
@@ -4205,10 +4205,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get edit => 'Edit';
 
   @override
-  String get pause => 'Pause';
+  String get pause => 'إيقاف';
 
   @override
-  String get resume => 'Resume';
+  String get resume => 'استئناف';
 
   @override
   String get model => 'Model';
@@ -4879,4 +4879,215 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get failedToCreateCheckout => 'فشل في إنشاء جلسة الدفع';
+
+  @override
+  String get noContractFound => 'لا يوجد عقد لهذا المشروع';
+
+  @override
+  String get viewActiveContract => 'عرض العقد الحالي';
+
+  @override
+  String get trackProgress => 'تتبع التقدم';
+
+  @override
+  String get generateSOWToCreateContract => 'إنشاء نطاق عمل لإنشاء عقد';
+
+  @override
+  String get contractWaitingSignature => 'العقد بانتظار التوقيع';
+
+  @override
+  String get pleaseGenerateSOWFirst => 'يرجى إنشاء نطاق العمل أولاً';
+
+  @override
+  String get reviewAndSign => 'مراجعة وتوقيع';
+
+  @override
+  String get askGenerateSOW =>
+      'هل تريد إنشاء مستند SOW احترافي أم المتابعة مباشرة إلى العقد؟';
+
+  @override
+  String get skip => 'تخطي';
+
+  @override
+  String get contractCreatedSuccess => 'تم إنشاء العقد بنجاح!';
+
+  @override
+  String get errorAcceptingProposal => 'خطأ في قبول الاقتراح';
+
+  @override
+  String get errorRejectingProposal => 'خطأ في رفض الاقتراح';
+
+  @override
+  String get freelancerNotFound => 'المستقل غير موجود';
+
+  @override
+  String get generate => 'إنشاء';
+
+  @override
+  String get proposalLimitMessage =>
+      'لا يمكنك إرسال المزيد من العروض هذا الشهر. قم بالترقية لإرسال عروض غير محدودة.';
+
+  @override
+  String get later => 'لاحقاً';
+
+  @override
+  String get proposalLimitReachedMessage =>
+      'لا يمكنك إرسال المزيد من العروض هذا الشهر. قم بترقية خطتك لإرسال عروض غير محدودة.';
+
+  @override
+  String get noActiveProjectForHiring =>
+      'لا يوجد مشروع نشط للتوظيف. الرجاء إنشاء مشروع أولاً.';
+
+  @override
+  String get cannotSendOffer => 'لا يمكن إرسال العرض';
+
+  @override
+  String get projectNotOpenForOffers =>
+      'غير متاح للعروض. فقط المشاريع بحالة \'مفتوح\' يمكنها استقبال العروض.';
+
+  @override
+  String get createAdCampaign => 'إنشاء حملة إعلانية';
+
+  @override
+  String get campaignInfo => 'معلومات الحملة';
+
+  @override
+  String get adContent => 'محتوى الإعلان';
+
+  @override
+  String get adSettings => 'إعدادات الإعلان';
+
+  @override
+  String get cpcSettings => 'إعدادات CPC';
+
+  @override
+  String get cpmSettings => 'إعدادات CPM';
+
+  @override
+  String get budgetAndDates => 'الميزانية والتواريخ';
+
+  @override
+  String get imageUrl => 'رابط الصورة';
+
+  @override
+  String get targetUrl => 'الرابط المستهدف';
+
+  @override
+  String get buttonText => 'نص الزر';
+
+  @override
+  String get adType => 'نوع الإعلان';
+
+  @override
+  String get placement => 'موضع الإعلان';
+
+  @override
+  String get pricingModel => 'نموذج التسعير';
+
+  @override
+  String get costPerThousand => 'التكلفة لكل 1000 ظهور';
+
+  @override
+  String get startDate => 'تاريخ البدء';
+
+  @override
+  String get endDate => 'تاريخ الانتهاء';
+
+  @override
+  String get paymentInfoMessage =>
+      'بعد إنشاء الحملة، ستحتاج إلى إكمال الدفع لتفعيلها.';
+
+  @override
+  String get campaignCreated => 'تم إنشاء الحملة! انتقل إلى الدفع لتفعيلها';
+
+  @override
+  String get failedToCreate => 'فشل إنشاء الحملة';
+
+  @override
+  String get selectStartDate => 'اختر تاريخ البدء';
+
+  @override
+  String get selectEndDate => 'اختر تاريخ الانتهاء';
+
+  @override
+  String get banner => 'بانر';
+
+  @override
+  String get sidebar => 'الشريط الجانبي';
+
+  @override
+  String get popup => 'نافذة منبثقة';
+
+  @override
+  String get native => 'إعلان مدمج';
+
+  @override
+  String get homeTop => 'أعلى الصفحة الرئيسية';
+
+  @override
+  String get homeBottom => 'أسفل الصفحة الرئيسية';
+
+  @override
+  String get sidebarTop => 'أعلى الشريط الجانبي';
+
+  @override
+  String get sidebarBottom => 'أسفل الشريط الجانبي';
+
+  @override
+  String get searchResults => 'نتائج البحث';
+
+  @override
+  String get projectPage => 'صفحة المشروع';
+
+  @override
+  String get cpc => 'CPC (التكلفة لكل نقرة)';
+
+  @override
+  String get cpm => 'CPM (التكلفة لكل 1000 ظهور)';
+
+  @override
+  String get flat => 'سعر ثابت';
+
+  @override
+  String get required => 'مطلوب';
+
+  @override
+  String get adCampaigns => 'الحملات الإعلانية';
+
+  @override
+  String get newCampaign => 'حملة جديدة';
+
+  @override
+  String get noAdCampaigns => 'لا توجد حملات إعلانية بعد';
+
+  @override
+  String get createFirstCampaign =>
+      'أنشئ أول حملة إعلانية للوصول إلى المزيد من العملاء';
+
+  @override
+  String get campaignPaused => 'تم إيقاف الحملة مؤقتاً';
+
+  @override
+  String get campaignActivated => 'تم تفعيل الحملة';
+
+  @override
+  String get failedToActivate => 'فشل تفعيل الحملة';
+
+  @override
+  String get cpcShort => 'CPC';
+
+  @override
+  String get cpmShort => 'CPM';
+
+  @override
+  String get flatShort => 'ثابت';
+
+  @override
+  String get activateAndPay => 'تفعيل ودفع';
+
+  @override
+  String get stats => 'الإحصائيات';
+
+  @override
+  String get avgCpc => 'متوسط CPC';
 }

@@ -2047,8 +2047,10 @@ class _ClientDashboardState extends State<ClientDashboard> {
       t.myProjects,
       t.proposals,
       t.contracts,
+      t.disputes,
       t.interviews,
       t.myWallet,
+      t.ads,
       t.findWork,
       t.analytics,
     ];
@@ -2076,7 +2078,6 @@ class _ClientDashboardState extends State<ClientDashboard> {
           ),
           const Spacer(),
 
-          _topBarBtn(Icons.search, () {}),
           _topBarBtn(
             Icons.star_border,
             () => Navigator.pushNamed(context, '/subscription/plans'),
@@ -3600,7 +3601,76 @@ class _ClientDashboardState extends State<ClientDashboard> {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
+
+          Container(
+            margin: const EdgeInsets.only(bottom: 16),
+            child: Row(
+              children: [
+                Container(
+                  width: 4,
+                  height: 20,
+                  decoration: BoxDecoration(
+                    color: AppColors.accent,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  'My Projects',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: isDark
+                        ? AppColors.darkTextPrimary
+                        : AppColors.lightTextPrimary,
+                  ),
+                ),
+                const Spacer(),
+                InkWell(
+                  onTap: _navigateToCreateProject,
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 10,
+                    ),
+                    decoration: BoxDecoration(
+                      gradient: AppColors.primaryGradient,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.accent.withOpacity(0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.add_circle_outline,
+                          size: 18,
+                          color: Colors.white,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          t.postNewProject,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
           if (_myProjects.isEmpty)
             _buildEmptyState()
           else

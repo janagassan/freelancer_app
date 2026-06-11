@@ -29,6 +29,11 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
   @override
   void initState() {
     super.initState();
+  }
+
+   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
     _loadPlans();
   }
 

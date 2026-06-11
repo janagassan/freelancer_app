@@ -6,12 +6,14 @@ import '../../theme/app_theme.dart';
 class HireFreelancerDialog extends StatefulWidget {
   final int freelancerId;
   final String freelancerName;
+  final int? preselectedProjectId;
   final VoidCallback? onSuccess;
 
   const HireFreelancerDialog({
     super.key,
     required this.freelancerId,
     required this.freelancerName,
+    this.preselectedProjectId,
     this.onSuccess,
   });
 
@@ -36,18 +38,68 @@ class _HireFreelancerDialogState extends State<HireFreelancerDialog> {
   Future<void> _loadProjects() async {
     setState(() => _loading = true);
     try {
-      final result = await ApiService.getOpenProjectsForHiring();
+      final result = await ApiService.getOpenProjectsForHiring(
+        currentProjectId: widget.preselectedProjectId,
+      );
+
+      debugPrint('📦 Projects API response: $result');
+      debugPrint('🎯 Preselected project ID: ${widget.preselectedProjectId}');
 
       if (result['success'] == true) {
         setState(() {
-          _projects = List<Map<String, dynamic>>.from(result['projects'] ?? []);
+          List<Map<String, dynamic>> allProjects =
+              List<Map<String, dynamic>>.from(result['projects'] ?? []);
+
+          final openProjects = allProjects
+              .where((p) => p['status'] == 'open')
+              .toList();
+
+          if (widget.preselectedProjectId != null) {
+            final preselectedProject = allProjects.firstWhere(
+              (p) => p['id'] == widget.preselectedProjectId,
+              orElse: () => <String, dynamic>{},
+            );
+
+            if (preselectedProject.isNotEmpty &&
+                preselectedProject['status'] != 'open') {
+              preselectedProject['is_not_open'] = true;
+              openProjects.insert(0, preselectedProject);
+              debugPrint(
+                '⚠️ Preselected project ${widget.preselectedProjectId} is not open (status: ${preselectedProject['status']})',
+              );
+            }
+          }
+
+          _projects = openProjects;
+
+          debugPrint('📋 Loaded projects count: ${_projects.length}');
+          debugPrint(
+            '📋 Project IDs: ${_projects.map((p) => p['id']).toList()}',
+          );
+
+          if (widget.preselectedProjectId != null) {
+            final exists = _projects.any(
+              (p) => p['id'] == widget.preselectedProjectId,
+            );
+            if (exists) {
+              _selectedProjectId = widget.preselectedProjectId;
+              debugPrint('✅ Selected project: $_selectedProjectId');
+            } else if (_projects.isNotEmpty) {
+              _selectedProjectId = _projects.first['id'];
+              debugPrint('🔄 Fallback to first project: $_selectedProjectId');
+            }
+          } else if (_projects.isNotEmpty && _selectedProjectId == null) {
+            _selectedProjectId = _projects.first['id'];
+            debugPrint('🔄 Default to first project: $_selectedProjectId');
+          }
+
           _loading = false;
         });
       } else {
         setState(() => _loading = false);
       }
     } catch (e) {
-      debugPrint('Error loading projects: $e');
+      debugPrint('❌ Error loading projects: $e');
       if (mounted) setState(() => _loading = false);
     }
   }
@@ -57,6 +109,25 @@ class _HireFreelancerDialogState extends State<HireFreelancerDialog> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Please select a project')));
+      return;
+    }
+
+    final selectedProject = _projects.firstWhere(
+      (p) => p['id'] == _selectedProjectId,
+      orElse: () => <String, dynamic>{},
+    );
+
+    if (selectedProject.isNotEmpty && selectedProject['status'] != 'open') {
+      final t = AppLocalizations.of(context)!;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            '❌ ${t.cannotSendOffer}: "${selectedProject['title']}" ${t.projectNotOpenForOffers}',
+          ),
+          backgroundColor: AppColors.danger,
+          duration: const Duration(seconds: 4),
+        ),
+      );
       return;
     }
 
@@ -84,13 +155,20 @@ class _HireFreelancerDialogState extends State<HireFreelancerDialog> {
           );
         }
       } else {
-        throw Exception(result['message'] ?? 'Failed to send offer');
+        final errorMsg = result['message'] ?? 'Failed to send offer';
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('❌ $errorMsg'),
+            backgroundColor: AppColors.danger,
+            duration: const Duration(seconds: 4),
+          ),
+        );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('${AppLocalizations.of(context)!.error}: $e'),
+            content: Text('❌ ${AppLocalizations.of(context)!.error}: $e'),
             backgroundColor: AppColors.danger,
           ),
         );
@@ -212,6 +290,9 @@ class _HireFreelancerDialogState extends State<HireFreelancerDialog> {
                               ),
                             ),
                             items: _projects.map((project) {
+                              final isNotOpen = project['is_not_open'] == true;
+                              final status = project['status'] ?? 'open';
+
                               return DropdownMenuItem<int>(
                                 value: project['id'],
                                 child: Container(
@@ -223,27 +304,68 @@ class _HireFreelancerDialogState extends State<HireFreelancerDialog> {
                                         MainAxisAlignment.spaceBetween,
                                     children: [
                                       Expanded(
-                                        child: Text(
-                                          project['title'] ?? 'Untitled',
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.w500,
-                                            color: isDark
-                                                ? AppColors.darkTextPrimary
-                                                : AppColors.lightTextPrimary,
-                                          ),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
+                                        child: Row(
+                                          children: [
+                                            if (isNotOpen)
+                                              Icon(
+                                                Icons.warning_amber,
+                                                size: 16,
+                                                color: AppColors.warning,
+                                              ),
+                                            if (isNotOpen)
+                                              const SizedBox(width: 6),
+                                            Expanded(
+                                              child: Text(
+                                                project['title'] ?? 'Untitled',
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.w500,
+                                                  color: isNotOpen
+                                                      ? AppColors.warning
+                                                      : (isDark
+                                                            ? AppColors
+                                                                  .darkTextPrimary
+                                                            : AppColors
+                                                                  .lightTextPrimary),
+                                                ),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ),
                                       const SizedBox(width: 8),
-                                      Text(
-                                        '\$${project['budget']}',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.bold,
-                                          color: AppColors.accent,
+                                      if (!isNotOpen)
+                                        Text(
+                                          '\$${project['budget']}',
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.bold,
+                                            color: AppColors.accent,
+                                          ),
                                         ),
-                                      ),
+                                      if (isNotOpen)
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 6,
+                                            vertical: 2,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: AppColors.warning
+                                                .withOpacity(0.2),
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
+                                          ),
+                                          child: Text(
+                                            status,
+                                            style: TextStyle(
+                                              fontSize: 10,
+                                              color: AppColors.warning,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
                                     ],
                                   ),
                                 ),
@@ -252,6 +374,52 @@ class _HireFreelancerDialogState extends State<HireFreelancerDialog> {
                             onChanged: (value) =>
                                 setState(() => _selectedProjectId = value),
                           ),
+
+                    if (_selectedProjectId != null)
+                      Builder(
+                        builder: (context) {
+                          final selectedProject = _projects.firstWhere(
+                            (p) => p['id'] == _selectedProjectId,
+                            orElse: () => <String, dynamic>{},
+                          );
+                          if (selectedProject.isNotEmpty &&
+                              selectedProject['status'] != 'open') {
+                            return Padding(
+                              padding: const EdgeInsets.only(top: 12),
+                              child: Container(
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: AppColors.warning.withOpacity(0.15),
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(
+                                    color: AppColors.warning.withOpacity(0.3),
+                                  ),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.warning,
+                                      color: AppColors.warning,
+                                      size: 18,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        '⚠️ ${t.projectNotOpenForOffers}',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: AppColors.warning,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          }
+                          return const SizedBox.shrink();
+                        },
+                      ),
 
                     const SizedBox(height: 16),
 

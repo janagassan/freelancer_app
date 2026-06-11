@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../services/api_service.dart';
-import '../../widgets/ad_banner.dart';
+import '../../l10n/app_localizations.dart';
+import '../../theme/app_theme.dart';
 import 'create_ad_campaign_screen.dart';
 import 'payment_screen.dart';
 
@@ -42,33 +43,39 @@ class _AdsManagementScreenState extends State<AdsManagementScreen>
       });
     } catch (e) {
       setState(() => _loading = false);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error loading campaigns: $e')));
+      final t = AppLocalizations.of(context)!;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${t.error}: $e'),
+          backgroundColor: AppColors.danger,
+        ),
+      );
     }
   }
 
   Future<void> _pauseCampaign(int id) async {
+    final t = AppLocalizations.of(context)!;
     final response = await ApiService.pauseAdCampaign(id);
     if (response['success'] == true) {
       _loadCampaigns();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Campaign paused'),
-          backgroundColor: Colors.orange,
+        SnackBar(
+          content: Text(t.campaignPaused),
+          backgroundColor: AppColors.warning,
         ),
       );
     }
   }
 
   Future<void> _activateCampaign(int id) async {
+    final t = AppLocalizations.of(context)!;
     final response = await ApiService.activateAdCampaign(id);
     if (response['success'] == true) {
       _loadCampaigns();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Campaign activated'),
-          backgroundColor: Colors.green,
+        SnackBar(
+          content: Text(t.campaignActivated),
+          backgroundColor: AppColors.success,
         ),
       );
     } else if (response['requiresPayment'] == true) {
@@ -86,8 +93,8 @@ class _AdsManagementScreenState extends State<AdsManagementScreen>
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(response['message'] ?? 'Failed to activate'),
-          backgroundColor: Colors.red,
+          content: Text(response['message'] ?? t.failedToActivate),
+          backgroundColor: AppColors.danger,
         ),
       );
     }
@@ -96,13 +103,13 @@ class _AdsManagementScreenState extends State<AdsManagementScreen>
   Color _getStatusColor(String status) {
     switch (status) {
       case 'active':
-        return Colors.green;
+        return AppColors.success;
       case 'paused':
-        return Colors.orange;
+        return AppColors.warning;
       case 'completed':
-        return Colors.blue;
+        return AppColors.info;
       case 'cancelled':
-        return Colors.red;
+        return AppColors.danger;
       case 'draft':
         return Colors.grey;
       default:
@@ -110,20 +117,33 @@ class _AdsManagementScreenState extends State<AdsManagementScreen>
     }
   }
 
-  String _getStatusText(String status) {
+  String _getStatusText(String status, AppLocalizations t) {
     switch (status) {
       case 'active':
-        return 'Active';
+        return t.active;
       case 'paused':
-        return 'Paused';
+        return t.paused;
       case 'completed':
-        return 'Completed';
+        return t.completed;
       case 'cancelled':
-        return 'Cancelled';
+        return t.cancelled;
       case 'draft':
-        return 'Draft';
+        return t.draft;
       default:
         return status;
+    }
+  }
+
+  String _getPricingModelText(String? model, AppLocalizations t) {
+    switch (model) {
+      case 'cpc':
+        return t.cpcShort;
+      case 'cpm':
+        return t.cpmShort;
+      case 'flat':
+        return t.flatShort;
+      default:
+        return model?.toUpperCase() ?? 'CPC';
     }
   }
 
@@ -136,32 +156,27 @@ class _AdsManagementScreenState extends State<AdsManagementScreen>
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F6F8),
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text('Ad Campaigns'),
-        backgroundColor: Colors.white,
+        backgroundColor: theme.scaffoldBackgroundColor,
+        automaticallyImplyLeading: false,
         elevation: 0,
-        foregroundColor: Colors.black,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const CreateAdCampaignScreen()),
-            ).then((_) => _loadCampaigns()),
-            tooltip: 'New Campaign',
-          ),
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _loadCampaigns,
-          ),
-        ],
+        foregroundColor: isDark
+            ? AppColors.darkTextPrimary
+            : AppColors.lightTextPrimary,
         bottom: TabBar(
           controller: _tabController,
-          indicatorColor: Colors.purple,
-          labelColor: Colors.purple,
-          unselectedLabelColor: Colors.grey,
+          indicatorColor: AppColors.accent,
+          labelColor: AppColors.accent,
+          unselectedLabelColor: isDark
+              ? AppColors.darkTextSecondary
+              : AppColors.lightTextSecondary,
+          indicatorSize: TabBarIndicatorSize.label,
           onTap: (index) {
             setState(() {
               if (index == 0)
@@ -173,49 +188,112 @@ class _AdsManagementScreenState extends State<AdsManagementScreen>
               _loadCampaigns();
             });
           },
-          tabs: const [
-            Tab(text: 'All', icon: Icon(Icons.list)),
-            Tab(text: 'Active', icon: Icon(Icons.play_circle)),
-            Tab(text: 'Completed', icon: Icon(Icons.check_circle)),
+          tabs: [
+            Tab(text: t.all, icon: Icon(Icons.list, size: 18)),
+            Tab(text: t.active, icon: Icon(Icons.play_circle, size: 18)),
+            Tab(text: t.completed, icon: Icon(Icons.check_circle, size: 18)),
           ],
         ),
       ),
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    width: 40,
+                    height: 40,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 3,
+                      color: AppColors.accent,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    t.loading,
+                    style: TextStyle(
+                      color: isDark
+                          ? AppColors.darkTextSecondary
+                          : AppColors.lightTextSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            )
           : _campaigns.isEmpty
           ? _buildEmptyState()
-          : ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: _campaigns.length,
-              itemBuilder: (_, i) => _buildCampaignCard(_campaigns[i]),
+          : RefreshIndicator(
+              onRefresh: _loadCampaigns,
+              color: AppColors.accent,
+              child: ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: _campaigns.length,
+                itemBuilder: (_, i) => _buildCampaignCard(_campaigns[i]),
+              ),
             ),
     );
   }
 
   Widget _buildEmptyState() {
+    final t = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.campaign_outlined, size: 80, color: Colors.grey.shade300),
-          const SizedBox(height: 16),
-          const Text('No ad campaigns yet', style: TextStyle(fontSize: 18)),
+          Container(
+            width: 100,
+            height: 100,
+            decoration: BoxDecoration(
+              color: AppColors.accent.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.campaign_outlined,
+              size: 50,
+              color: AppColors.accent.withOpacity(0.5),
+            ),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            t.noAdCampaigns,
+            style: theme.textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: isDark
+                  ? AppColors.darkTextPrimary
+                  : AppColors.lightTextPrimary,
+            ),
+          ),
           const SizedBox(height: 8),
-          const Text('Create your first campaign to reach more clients'),
+          Text(
+            t.createFirstCampaign,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: isDark
+                  ? AppColors.darkTextSecondary
+                  : AppColors.lightTextSecondary,
+            ),
+            textAlign: TextAlign.center,
+          ),
           const SizedBox(height: 24),
           ElevatedButton.icon(
             onPressed: () {
-              print('🖱️ Create Campaign button pressed');
               Navigator.pushNamed(
                 context,
                 '/create-ad-campaign',
               ).then((_) => _loadCampaigns());
             },
-            icon: const Icon(Icons.add),
-            label: const Text('Create Campaign'),
+            icon: const Icon(Icons.add, size: 18),
+            label: Text(t.createCampaign),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.purple,
-              foregroundColor: Colors.white,
+              backgroundColor: AppColors.accent,
+              foregroundColor: AppColors.primaryDark,
+              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30),
+              ),
+              elevation: 0,
             ),
           ),
         ],
@@ -224,262 +302,412 @@ class _AdsManagementScreenState extends State<AdsManagementScreen>
   }
 
   Widget _buildCampaignCard(dynamic campaign) {
+    final t = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     final statusColor = _getStatusColor(campaign['status']);
     final spent = _toDouble(campaign['spent_amount']);
     final budget = _toDouble(campaign['total_budget']);
     final progress = budget > 0 ? spent / budget : 0.0;
     final startDate = campaign['start_date'] != null
-        ? DateFormat(
-            'MMM d, yyyy',
+        ? DateFormat.yMMMd(
+            t.localeName,
           ).format(DateTime.parse(campaign['start_date']))
         : 'N/A';
     final endDate = campaign['end_date'] != null
-        ? DateFormat('MMM d, yyyy').format(DateTime.parse(campaign['end_date']))
+        ? DateFormat.yMMMd(
+            t.localeName,
+          ).format(DateTime.parse(campaign['end_date']))
         : 'N/A';
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(isDark ? 0.3 : 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => _showStatsDialog(campaign),
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  width: 8,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: statusColor,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        campaign['name'],
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
+                Row(
+                  children: [
+                    Container(
+                      width: 4,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: statusColor,
+                        borderRadius: BorderRadius.circular(2),
                       ),
-                      Text(
-                        campaign['ad_type'] ?? 'banner',
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            campaign['name'],
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: isDark
+                                  ? AppColors.darkTextPrimary
+                                  : AppColors.lightTextPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            campaign['ad_type'] ?? t.banner,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: isDark
+                                  ? AppColors.darkTextHint
+                                  : AppColors.lightTextHint,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: statusColor.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        _getStatusText(campaign['status'], t),
                         style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey.shade600,
+                          fontSize: 11,
+                          color: statusColor,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
-                    ],
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: statusColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    _getStatusText(campaign['status']),
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: statusColor,
-                      fontWeight: FontWeight.w600,
                     ),
-                  ),
+                  ],
                 ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                _infoChip(Icons.visibility, '${campaign['impressions'] ?? 0}'),
-                const SizedBox(width: 8),
-                _infoChip(Icons.touch_app, '${campaign['clicks'] ?? 0}'),
-                const SizedBox(width: 8),
-                _infoChip(
-                  Icons.attach_money,
-                  campaign['pricing_model']?.toUpperCase() ?? 'CPC',
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    _infoChip(
+                      Icons.visibility,
+                      '${campaign['impressions'] ?? 0}',
+                      isDark,
+                    ),
+                    _infoChip(
+                      Icons.touch_app,
+                      '${campaign['clicks'] ?? 0}',
+                      isDark,
+                    ),
+                    _infoChip(
+                      Icons.attach_money,
+                      _getPricingModelText(campaign['pricing_model'], t),
+                      isDark,
+                    ),
+                    _infoChip(
+                      Icons.calendar_today,
+                      '$startDate - $endDate',
+                      isDark,
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                _infoChip(
-                  Icons.calendar_today,
-                  '$startDate - $endDate',
-                  small: true,
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(4),
-              child: LinearProgressIndicator(
-                value: progress,
-                backgroundColor: Colors.grey.shade200,
-                valueColor: AlwaysStoppedAnimation(statusColor),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Spent: \$${spent.toStringAsFixed(2)}',
-                  style: const TextStyle(fontSize: 12),
-                ),
-                Text(
-                  'Budget: \$${budget.toStringAsFixed(2)}',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            if (campaign['status'] == 'draft')
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: () => _activateCampaign(campaign['id']),
-                      icon: const Icon(Icons.play_arrow, size: 16),
-                      label: const Text('Activate & Pay'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        foregroundColor: Colors.white,
+                const SizedBox(height: 12),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          t.spent,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: isDark
+                                ? AppColors.darkTextHint
+                                : AppColors.lightTextHint,
+                          ),
+                        ),
+                        Text(
+                          t.budget,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: isDark
+                                ? AppColors.darkTextHint
+                                : AppColors.lightTextHint,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          '\$${spent.toStringAsFixed(2)}',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: isDark
+                                ? AppColors.darkTextPrimary
+                                : AppColors.lightTextPrimary,
+                          ),
+                        ),
+                        Text(
+                          '\$${budget.toStringAsFixed(2)}',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.accent,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: LinearProgressIndicator(
+                        value: progress,
+                        backgroundColor: isDark
+                            ? Colors.grey.shade800
+                            : Colors.grey.shade200,
+                        valueColor: AlwaysStoppedAnimation<Color>(statusColor),
+                        minHeight: 6,
                       ),
                     ),
-                  ),
-                ],
-              ),
-            if (campaign['status'] == 'active')
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () => _pauseCampaign(campaign['id']),
-                      icon: const Icon(Icons.pause, size: 16),
-                      label: const Text('Pause'),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.orange,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () => _showStatsDialog(campaign),
-                      icon: const Icon(Icons.bar_chart, size: 16),
-                      label: const Text('Stats'),
-                    ),
-                  ),
-                ],
-              ),
-            if (campaign['status'] == 'paused')
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: () => _activateCampaign(campaign['id']),
-                      icon: const Icon(Icons.play_arrow, size: 16),
-                      label: const Text('Resume'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-          ],
+                  ],
+                ),
+                const SizedBox(height: 16),
+                _buildActionButtons(campaign, statusColor),
+              ],
+            ),
+          ),
         ),
       ),
     );
   }
 
-  Widget _infoChip(IconData icon, String label, {bool small = false}) {
+  Widget _buildActionButtons(dynamic campaign, Color statusColor) {
+    final t = AppLocalizations.of(context)!;
+
+    if (campaign['status'] == 'draft') {
+      return Row(
+        children: [
+          Expanded(
+            child: ElevatedButton.icon(
+              onPressed: () => _activateCampaign(campaign['id']),
+              icon: const Icon(Icons.play_arrow, size: 18),
+              label: Text(t.activateAndPay),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.success,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 0,
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    if (campaign['status'] == 'active') {
+      return Row(
+        children: [
+          Expanded(
+            child: OutlinedButton.icon(
+              onPressed: () => _pauseCampaign(campaign['id']),
+              icon: const Icon(Icons.pause, size: 18),
+              label: Text(t.pause),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.warning,
+                side: BorderSide(color: AppColors.warning.withOpacity(0.5)),
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: OutlinedButton.icon(
+              onPressed: () => _showStatsDialog(campaign),
+              icon: const Icon(Icons.bar_chart, size: 18),
+              label: Text(t.stats),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.accent,
+                side: BorderSide(color: AppColors.accent.withOpacity(0.5)),
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    if (campaign['status'] == 'paused') {
+      return Row(
+        children: [
+          Expanded(
+            child: ElevatedButton.icon(
+              onPressed: () => _activateCampaign(campaign['id']),
+              icon: const Icon(Icons.play_arrow, size: 18),
+              label: Text(t.resume),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.success,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 0,
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    return const SizedBox.shrink();
+  }
+
+  Widget _infoChip(IconData icon, String label, bool isDark) {
     return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: small ? 8 : 10,
-        vertical: small ? 3 : 5,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: Colors.grey.shade100,
+        color: isDark ? AppColors.darkCard : Colors.grey.shade100,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: small ? 12 : 14, color: Colors.grey.shade600),
+          Icon(
+            icon,
+            size: 14,
+            color: isDark ? AppColors.darkTextHint : Colors.grey.shade600,
+          ),
           const SizedBox(width: 4),
-          Text(label, style: TextStyle(fontSize: small ? 10 : 11)),
-        ],
-      ),
-    );
-  }
-
-  void _showStatsDialog(dynamic campaign) {
-    final ctr = campaign['clicks'] ?? 0;
-    final impr = campaign['impressions'] ?? 0;
-    final ctrPercent = impr > 0 ? (ctr / impr * 100).toStringAsFixed(2) : '0';
-    final spent = (campaign['spent_amount'] ?? 0).toDouble();
-    final avgCpc = ctr > 0 ? spent / ctr : 0;
-
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Row(
-          children: [
-            Icon(Icons.bar_chart, color: Colors.purple),
-            const SizedBox(width: 8),
-            Text(campaign['name']),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _statRow('Impressions', impr.toString()),
-            const Divider(),
-            _statRow('Clicks', ctr.toString()),
-            const Divider(),
-            _statRow('CTR', '$ctrPercent%'),
-            const Divider(),
-            _statRow('Total Spent', '\$${spent.toStringAsFixed(2)}'),
-            const Divider(),
-            _statRow('Avg CPC', '\$${avgCpc.toStringAsFixed(3)}'),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Close'),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              color: isDark
+                  ? AppColors.darkTextSecondary
+                  : Colors.grey.shade700,
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _statRow(String label, String value) {
+  void _showStatsDialog(dynamic campaign) {
+    final t = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    final clicks = campaign['clicks'] ?? 0;
+    final impressions = campaign['impressions'] ?? 0;
+    final ctrPercent = impressions > 0
+        ? (clicks / impressions * 100).toStringAsFixed(2)
+        : '0';
+    final spent = _toDouble(campaign['spent_amount']);
+    final avgCpc = clicks > 0 ? spent / clicks : 0;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: theme.cardColor,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppColors.accent.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(Icons.bar_chart, color: AppColors.accent, size: 20),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                campaign['name'],
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: isDark
+                      ? AppColors.darkTextPrimary
+                      : AppColors.lightTextPrimary,
+                ),
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _statRow(t.impressions, impressions.toString(), isDark),
+            const Divider(height: 1),
+            _statRow(t.clicks, clicks.toString(), isDark),
+            const Divider(height: 1),
+            _statRow(t.ctr, '$ctrPercent%', isDark),
+            const Divider(height: 1),
+            _statRow(t.totalSpent, '\$${spent.toStringAsFixed(2)}', isDark),
+            const Divider(height: 1),
+            _statRow(t.avgCpc, '\$${avgCpc.toStringAsFixed(3)}', isDark),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(t.close, style: TextStyle(color: AppColors.accent)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _statRow(String label, String value, bool isDark) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: const TextStyle(fontSize: 14)),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 14,
+              color: isDark
+                  ? AppColors.darkTextSecondary
+                  : AppColors.lightTextSecondary,
+            ),
+          ),
           Text(
             value,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: isDark
+                  ? AppColors.darkTextPrimary
+                  : AppColors.lightTextPrimary,
+            ),
           ),
         ],
       ),

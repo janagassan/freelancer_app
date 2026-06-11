@@ -383,8 +383,6 @@ export const updateProposalStatus = async (req, res) => {
       });
     }
 
-    await proposal.update({ status });
-
     if (status === "accepted") {
       await Proposal.update(
         { status: "rejected" },
@@ -396,6 +394,8 @@ export const updateProposalStatus = async (req, res) => {
           },
         },
       );
+
+      await proposal.update({ status: "contracted" });
 
       const proposedMilestones = Array.isArray(proposal.milestones)
         ? proposal.milestones
@@ -435,7 +435,7 @@ export const updateProposalStatus = async (req, res) => {
       return res.json({
         success: true,
         message: "✅ Proposal accepted. Please review and sign the contract.",
-        proposal: { ...proposal.toJSON(), status: "accepted" },
+        proposal: { ...proposal.toJSON(), status: "contracted" },
         contract: {
           id: contract.id,
           agreed_amount: contract.agreed_amount,
@@ -448,23 +448,28 @@ export const updateProposalStatus = async (req, res) => {
       });
     }
 
-    await NotificationService.createNotification({
-      userId: proposal.UserId,
-      type: "proposal_rejected",
-      title: "Proposal Update",
-      body: `Your proposal for "${proposal.Project.title}" was not selected this time.`,
-      data: {
-        projectId: proposal.ProjectId,
-        proposalId: proposal.id,
-        screen: "my_proposals",
-      },
-    });
+    if (status === "rejected") {
+      await proposal.update({ status: "rejected" });
+      
+      await NotificationService.createNotification({
+        userId: proposal.UserId,
+        type: "proposal_rejected",
+        title: "Proposal Update",
+        body: `Your proposal for "${proposal.Project.title}" was not selected this time.`,
+        data: {
+          projectId: proposal.ProjectId,
+          proposalId: proposal.id,
+          screen: "my_proposals",
+        },
+      });
 
-    res.json({
-      success: true,
-      message: "✅ Proposal rejected",
-      proposal,
-    });
+      return res.json({
+        success: true,
+        message: "✅ Proposal rejected",
+        proposal,
+      });
+    }
+
   } catch (err) {
     console.error("❌ Error in updateProposalStatus:", err);
     res.status(500).json({
@@ -1797,11 +1802,66 @@ export const sendOfferToFreelancer = async (req, res) => {
   }
 };
 
+export const getContractByProjectId = async (req, res) => {
+  try {
+    const { projectId } = req.params;
+    const userId = req.user.id;
+
+    const contract = await Contract.findOne({
+      where: {
+        ProjectId: projectId,
+        ClientId: userId,
+      },
+      include: [
+        {
+          model: Project,
+          attributes: ['id', 'title'],
+        },
+        {
+          model: User,
+          as: 'freelancer',
+          attributes: ['id', 'name', 'avatar', 'email'],
+        },
+      ],
+    });
+
+    if (!contract) {
+      return res.status(404).json({
+        success: false,
+        message: 'Contract not found for this project',
+      });
+    }
+
+    res.json({
+      success: true,
+      contract: {
+        id: contract.id,
+        status: contract.status,
+        agreed_amount: contract.agreed_amount,
+        escrow_status: contract.escrow_status,
+        payment_status: contract.payment_status,
+        project: contract.Project,
+        freelancer: contract.freelancer,
+        created_at: contract.createdAt,
+      },
+    });
+  } catch (err) {
+    console.error('Error in getContractByProjectId:', err);
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+      error: err.message,
+    });
+  }
+};
+
 export const getOpenProjectsForHiring = async (req, res) => {
   try {
     const clientId = req.user.id;
+    const { currentProjectId } = req.query; 
 
     console.log("🔍 Client ID:", clientId);
+    console.log("🎯 Current Project ID:", currentProjectId);
 
     const allClientProjects = await Project.findAll({
       where: { UserId: clientId },
@@ -1818,15 +1878,33 @@ export const getOpenProjectsForHiring = async (req, res) => {
       });
     }
 
-    const openProjects = allClientProjects.filter((p) => p.status === "open");
+    let openProjects = allClientProjects.filter((p) => p.status === "open");
 
-    console.log(`📊 Open projects: ${openProjects.length}`);
+    if (currentProjectId) {
+      const currentProject = allClientProjects.find(
+        (p) => p.id == currentProjectId
+      );
+      
+      if (currentProject) {
+        const existsInOpen = openProjects.some((p) => p.id == currentProjectId);
+        
+        if (!existsInOpen) {
+          console.log(`📌 Adding current project (ID: ${currentProjectId}, Status: ${currentProject.status}) to list`);
+          openProjects.unshift(currentProject); 
+        }
+      } else {
+        console.log(`⚠️ Current project ID ${currentProjectId} not found for this client`);
+      }
+    }
+
+    console.log(`📊 Final projects count: ${openProjects.length}`);
+    console.log(`📊 Project IDs: ${openProjects.map(p => p.id).join(', ')}`);
 
     res.json({
       success: true,
       projects: openProjects,
       totalProjects: allClientProjects.length,
-      openCount: openProjects.length,
+      openCount: openProjects.filter(p => p.status === "open").length,
     });
   } catch (error) {
     console.error("❌ Error:", error);

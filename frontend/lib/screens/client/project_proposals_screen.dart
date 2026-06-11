@@ -1,8 +1,8 @@
-// screens/client/project_proposals_screen.dart
 import 'package:flutter/material.dart';
 import 'package:freelancer_platform/models/project_model.dart';
 import 'package:freelancer_platform/models/usage_limits_model.dart';
 import 'package:freelancer_platform/models/user_model.dart';
+import 'package:freelancer_platform/screens/client/hire_freelancer_dialog.dart';
 import 'package:freelancer_platform/screens/client/sow_generator_screen.dart';
 import '../../services/api_service.dart';
 import '../../models/proposal_model.dart';
@@ -25,8 +25,6 @@ class _ProjectProposalsScreenState extends State<ProjectProposalsScreen> {
   List<Map<String, dynamic>> suggestedFreelancers = [];
   bool loading = true;
   bool loadingSuggestions = true;
-  bool _isSendingInterview = false;
-  bool _loadingSuggestions = false;
   bool _isProcessing = false;
   bool _isGeneratingSOW = false;
   UsageLimits? _usage;
@@ -147,32 +145,32 @@ class _ProjectProposalsScreenState extends State<ProjectProposalsScreen> {
     });
   }
 
-  Future<void> handleProposalStatus(
-    int proposalId,
-    String status,
+  Future<void> handleAcceptProposal(
+    Proposal proposal,
     AppLocalizations t,
   ) async {
     setState(() => _isProcessing = true);
 
     try {
       final result = await ApiService.updateProposalStatus(
-        proposalId: proposalId,
-        status: status,
+        proposalId: proposal.id!,
+        status: 'accepted',
       );
 
-      if (result['success'] == true || result['proposal'] != null) {
-        Fluttertoast.showToast(msg: t.proposalStatusUpdated(status));
+      if (result['success'] == true && result['contract'] != null) {
+        final contractId = result['contract']['id'];
 
-        if (status == 'accepted' && result['contract'] != null) {
-          final contractId = result['contract']['id'];
-          await _handleAcceptedProposal(proposalId, contractId, t);
+        final shouldGenerateSOW = await _showSOWDialog(t);
+
+        if (shouldGenerateSOW) {
+          await _generateAndSaveSOW(proposal, contractId, t);
         } else {
-          fetchProposals();
-          fetchSuggestedFreelancers();
+          Fluttertoast.showToast(msg: t.contractCreatedSuccess);
+          _navigateToContract(contractId);
         }
       } else {
         Fluttertoast.showToast(
-          msg: result['message'] ?? t.errorUpdatingProposal,
+          msg: result['message'] ?? t.errorAcceptingProposal,
           backgroundColor: AppColors.danger,
         );
       }
@@ -186,50 +184,52 @@ class _ProjectProposalsScreenState extends State<ProjectProposalsScreen> {
     }
   }
 
-  Future<void> _handleAcceptedProposal(
-    int proposalId,
+  Future<bool> _showSOWDialog(AppLocalizations t) async {
+    return await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Row(
+              children: [
+                Icon(Icons.auto_awesome, color: AppColors.accent),
+                const SizedBox(width: 8),
+                Text(t.generateSOW),
+              ],
+            ),
+            content: Text(t.askGenerateSOW),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: Text(t.skip),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context, true),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.accent,
+                ),
+                child: Text(t.generate),
+              ),
+            ],
+          ),
+        ) ??
+        false;
+  }
+
+  Future<void> _generateAndSaveSOW(
+    Proposal proposal,
     int contractId,
     AppLocalizations t,
   ) async {
+    setState(() => _isGeneratingSOW = true);
+
     try {
-      final proposalsData = await ApiService.getProjectProposals(
-        widget.projectId,
-      );
-      final proposalJson = proposalsData.firstWhere(
-        (p) => p['id'] == proposalId,
-        orElse: () => null,
-      );
+      final projectResponse = await ApiService.getProjectById(widget.projectId);
+      if (projectResponse['project'] == null)
+        throw Exception(t.projectNotFound);
 
-      if (proposalJson == null) throw Exception(t.proposalDataNotFound);
+      final projectData = Project.fromJson(projectResponse['project']);
 
-      final proposal = Proposal.fromJson(proposalJson);
-
-      Project? projectData;
-      User? freelancerData;
-
-      if (proposal.project != null) {
-        projectData = proposal.project;
-      } else if (proposal.projectId != null) {
-        final projectResponse = await ApiService.getProjectById(
-          proposal.projectId!,
-        );
-        if (projectResponse['project'] != null) {
-          projectData = Project.fromJson(projectResponse['project']);
-        }
-      }
-
-      if (projectData == null) {
-        final projectResponse = await ApiService.getProjectById(
-          widget.projectId,
-        );
-        if (projectResponse['project'] != null) {
-          projectData = Project.fromJson(projectResponse['project']);
-        }
-      }
-
-      if (proposal.freelancer != null) {
-        freelancerData = proposal.freelancer;
-      } else if (proposal.userId != null) {
+      User? freelancerData = proposal.freelancer;
+      if (freelancerData == null && proposal.userId != null) {
         final freelancerResponse = await ApiService.getFreelancerPublicProfile(
           proposal.userId!,
         );
@@ -237,70 +237,66 @@ class _ProjectProposalsScreenState extends State<ProjectProposalsScreen> {
           freelancerData = User.fromJson(freelancerResponse['user']);
         }
       }
+      if (freelancerData == null) throw Exception(t.freelancerNotFound);
 
-      if (projectData == null || freelancerData == null) {
-        throw Exception(t.missingProjectOrFreelancerData);
-      }
-
-      final completeProposal = Proposal(
-        id: proposal.id,
-        projectId: proposal.projectId,
-        userId: proposal.userId,
-        price: proposal.price,
-        deliveryTime: proposal.deliveryTime,
-        proposalText: proposal.proposalText,
-        status: proposal.status,
-        createdAt: proposal.createdAt,
-        project: projectData,
-        freelancer: freelancerData,
-        freelancerProfile: proposal.freelancerProfile,
-        milestones: proposal.milestones,
-        contractId: proposal.contractId,
+      final result = await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => SOWGeneratorScreen(
+            project: projectData,
+            freelancer: freelancerData!,
+            agreedAmount: proposal.price ?? 0,
+            contractId: contractId,
+            proposalId: proposal.id!,
+          ),
+        ),
       );
 
-      await _navigateToSOWGenerator(completeProposal, contractId, t);
+      if (result == true) {
+        _navigateToContract(contractId);
+      }
     } catch (e) {
       Fluttertoast.showToast(
         msg: '${t.error}: $e',
         backgroundColor: AppColors.danger,
       );
+    } finally {
+      setState(() => _isGeneratingSOW = false);
     }
   }
 
-  Future<void> _navigateToSOWGenerator(
-    Proposal proposal,
-    int contractId,
-    AppLocalizations t,
-  ) async {
-    if (proposal.project == null ||
-        proposal.freelancer == null ||
-        proposal.price == null) {
+  void _navigateToContract(int contractId) {
+    Navigator.pushNamed(
+      context,
+      '/contract',
+      arguments: {'contractId': contractId, 'userRole': 'client'},
+    );
+  }
+
+  Future<void> handleRejectProposal(int proposalId, AppLocalizations t) async {
+    setState(() => _isProcessing = true);
+    try {
+      final result = await ApiService.updateProposalStatus(
+        proposalId: proposalId,
+        status: 'rejected',
+      );
+      if (result['success'] == true) {
+        Fluttertoast.showToast(msg: t.proposalRejected);
+        fetchProposals();
+        fetchSuggestedFreelancers();
+      } else {
+        Fluttertoast.showToast(
+          msg: result['message'] ?? t.errorRejectingProposal,
+          backgroundColor: AppColors.danger,
+        );
+      }
+    } catch (e) {
       Fluttertoast.showToast(
-        msg: t.missingProjectOrFreelancerData,
+        msg: '${t.error}: $e',
         backgroundColor: AppColors.danger,
       );
-      return;
-    }
-
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => SOWGeneratorScreen(
-          project: proposal.project!,
-          freelancer: proposal.freelancer!,
-          agreedAmount: proposal.price!,
-          contractId: contractId,
-          proposalId: proposal.id!,
-        ),
-      ),
-    );
-
-    if (result == true) {
-      Navigator.pushNamed(
-        context,
-        '/contract',
-        arguments: {'contractId': contractId, 'userRole': 'client'},
-      );
+    } finally {
+      setState(() => _isProcessing = false);
     }
   }
 
@@ -317,10 +313,7 @@ class _ProjectProposalsScreenState extends State<ProjectProposalsScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          t.projectProposals,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
+        title: const Text('Project Proposals'),
         backgroundColor: isDark ? AppColors.darkSurface : Colors.white,
         foregroundColor: isDark ? AppColors.darkTextPrimary : Colors.black,
         elevation: 0,
@@ -352,13 +345,13 @@ class _ProjectProposalsScreenState extends State<ProjectProposalsScreen> {
                 }
               },
               itemBuilder: (context) => [
-                PopupMenuItem(
+                const PopupMenuItem(
                   value: 'compare',
                   child: Row(
                     children: [
                       Icon(Icons.compare_arrows, color: AppColors.accent),
-                      const SizedBox(width: 8),
-                      Text(t.compareFreelancers),
+                      SizedBox(width: 8),
+                      Text('Compare Freelancers'),
                     ],
                   ),
                 ),
@@ -380,27 +373,23 @@ class _ProjectProposalsScreenState extends State<ProjectProposalsScreen> {
           : CustomScrollView(
               slivers: [
                 SliverToBoxAdapter(child: _interviewUsageStrip(t)),
-
                 if (!loadingSuggestions)
                   SliverToBoxAdapter(child: _buildAIProjectHint(t, isDark)),
-
                 if (!loadingSuggestions && suggestedFreelancers.isNotEmpty)
                   SliverToBoxAdapter(
                     child: _buildSuggestedFreelancersSection(t, isDark),
                   ),
-
                 if (!loadingSuggestions && suggestedFreelancers.isEmpty)
                   SliverToBoxAdapter(
                     child: _buildNoAISuggestionsNotice(t, isDark),
                   ),
-
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                     child: Row(
                       children: [
                         Text(
-                          t.proposals,
+                          'Proposals',
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
@@ -424,7 +413,6 @@ class _ProjectProposalsScreenState extends State<ProjectProposalsScreen> {
                             style: TextStyle(
                               color: AppColors.accent,
                               fontWeight: FontWeight.bold,
-                              fontSize: 12,
                             ),
                           ),
                         ),
@@ -432,7 +420,6 @@ class _ProjectProposalsScreenState extends State<ProjectProposalsScreen> {
                     ),
                   ),
                 ),
-
                 if (proposals.isEmpty)
                   SliverFillRemaining(child: _buildEmptyState(t, isDark))
                 else
@@ -478,7 +465,7 @@ class _ProjectProposalsScreenState extends State<ProjectProposalsScreen> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    t.aiRecommendedFreelancers,
+                    'AI Recommended Freelancers',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -505,7 +492,7 @@ class _ProjectProposalsScreenState extends State<ProjectProposalsScreen> {
                       );
                     },
                     icon: const Icon(Icons.compare_arrows),
-                    label: Text(t.compareFreelancers),
+                    label: const Text('Compare'),
                   ),
               ],
             ),
@@ -514,13 +501,12 @@ class _ProjectProposalsScreenState extends State<ProjectProposalsScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Text(
-              'These AI recommendations are based on this project only. Compare top matches to choose the best freelancer for this job.',
+              'These AI recommendations are based on this project only.',
               style: TextStyle(
                 fontSize: 12,
                 color: isDark
                     ? AppColors.darkTextSecondary
                     : Colors.grey.shade600,
-                height: 1.4,
               ),
             ),
           ),
@@ -550,6 +536,9 @@ class _ProjectProposalsScreenState extends State<ProjectProposalsScreen> {
   ) {
     final matchScore = f['matchScore'] ?? 0;
     final matchColor = _getMatchColor(matchScore);
+    final freelancerId = f['id'] as int;
+    final freelancerName = f['name'] as String? ?? t.freelancer;
+    final freelancerAvatar = f['avatar'] as String?;
 
     return Container(
       width: 260,
@@ -606,12 +595,14 @@ class _ProjectProposalsScreenState extends State<ProjectProposalsScreen> {
                       backgroundColor: isDark
                           ? AppColors.primaryDark
                           : Colors.blueGrey.shade100,
-                      backgroundImage: f['avatar'] != null
-                          ? NetworkImage('http://localhost:5000${f['avatar']}')
+                      backgroundImage: freelancerAvatar != null
+                          ? NetworkImage(
+                              'http://localhost:5000$freelancerAvatar',
+                            )
                           : null,
-                      child: f['avatar'] == null
+                      child: freelancerAvatar == null
                           ? Text(
-                              f['name']?[0].toUpperCase() ?? 'F',
+                              freelancerName[0].toUpperCase(),
                               style: const TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
@@ -626,7 +617,7 @@ class _ProjectProposalsScreenState extends State<ProjectProposalsScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            f['name'] ?? t.unknown,
+                            freelancerName,
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 15,
@@ -703,11 +694,10 @@ class _ProjectProposalsScreenState extends State<ProjectProposalsScreen> {
                 SizedBox(
                   width: double.infinity,
                   child: OutlinedButton(
-                    onPressed: () {
-                      Fluttertoast.showToast(
-                        msg: '${t.invitationSent} ${f['name']}',
-                      );
-                    },
+                    onPressed: () => _showHireDialogFromSuggestion(
+                      freelancerId: freelancerId,
+                      freelancerName: freelancerName,
+                    ),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppColors.success,
                       side: BorderSide(color: AppColors.success),
@@ -717,7 +707,7 @@ class _ProjectProposalsScreenState extends State<ProjectProposalsScreen> {
                       padding: const EdgeInsets.symmetric(vertical: 8),
                     ),
                     child: Text(
-                      t.inviteToProject,
+                      t.hireForProject,
                       style: const TextStyle(fontSize: 12),
                     ),
                   ),
@@ -741,7 +731,7 @@ class _ProjectProposalsScreenState extends State<ProjectProposalsScreen> {
         ),
         const SizedBox(height: 16),
         Text(
-          t.noProposalsYet,
+          'No proposals yet',
           style: TextStyle(
             color: isDark ? AppColors.darkTextSecondary : Colors.grey.shade600,
             fontSize: 16,
@@ -750,7 +740,7 @@ class _ProjectProposalsScreenState extends State<ProjectProposalsScreen> {
         ),
         const SizedBox(height: 8),
         Text(
-          t.whenFreelancersSubmitProposals,
+          'When freelancers submit proposals, they\'ll appear here',
           textAlign: TextAlign.center,
           style: TextStyle(
             color: isDark ? AppColors.darkTextHint : Colors.grey.shade500,
@@ -809,7 +799,7 @@ class _ProjectProposalsScreenState extends State<ProjectProposalsScreen> {
           const SizedBox(width: 10),
           Expanded(
             child: Text(
-              t.aiRecommendationsProjectHint,
+              'AI analyzes your project to recommend the best-matched freelancers.',
               style: TextStyle(
                 fontSize: 13,
                 height: 1.5,
@@ -842,7 +832,7 @@ class _ProjectProposalsScreenState extends State<ProjectProposalsScreen> {
           const SizedBox(width: 10),
           Expanded(
             child: Text(
-              t.noAiFreelancerSuggestions,
+              'AI suggestions will appear here. Check back later or browse all freelancers.',
               style: TextStyle(
                 fontSize: 13,
                 height: 1.5,
@@ -850,35 +840,6 @@ class _ProjectProposalsScreenState extends State<ProjectProposalsScreen> {
                     ? AppColors.darkTextSecondary
                     : Colors.grey.shade700,
               ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildInfoChip({
-    required IconData icon,
-    required String value,
-    required Color color,
-  }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 12, color: color),
-          const SizedBox(width: 2),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 10,
-              color: color,
-              fontWeight: FontWeight.w600,
             ),
           ),
         ],
@@ -898,22 +859,23 @@ class _ProjectProposalsScreenState extends State<ProjectProposalsScreen> {
     switch (proposal.status) {
       case 'pending':
         statusColor = AppColors.warning;
-        statusText = t.pending;
+        statusText = 'Pending';
         statusIcon = Icons.hourglass_empty;
         break;
+      case 'contracted':
       case 'accepted':
         statusColor = AppColors.success;
-        statusText = t.accepted;
+        statusText = 'Contract Created';
         statusIcon = Icons.check_circle;
         break;
       case 'rejected':
         statusColor = AppColors.danger;
-        statusText = t.rejected;
+        statusText = 'Rejected';
         statusIcon = Icons.cancel;
         break;
       default:
         statusColor = AppColors.gray;
-        statusText = proposal.status ?? t.unknown;
+        statusText = proposal.status ?? 'Unknown';
         statusIcon = Icons.help;
     }
 
@@ -935,7 +897,9 @@ class _ProjectProposalsScreenState extends State<ProjectProposalsScreen> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: proposal.status == 'accepted'
+              color:
+                  proposal.status == 'accepted' ||
+                      proposal.status == 'contracted'
                   ? AppColors.successBg.withOpacity(isDark ? 0.15 : 1)
                   : proposal.status == 'rejected'
                   ? AppColors.dangerBg.withOpacity(isDark ? 0.15 : 1)
@@ -975,7 +939,7 @@ class _ProjectProposalsScreenState extends State<ProjectProposalsScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            proposal.freelancer?.name ?? t.unknown,
+                            proposal.freelancer?.name ?? 'Unknown',
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
@@ -999,7 +963,7 @@ class _ProjectProposalsScreenState extends State<ProjectProposalsScreen> {
                           const SizedBox(height: 4),
                           Row(
                             children: [
-                              _buildInfoChip(
+                              _buildStatChip(
                                 icon: Icons.star,
                                 value:
                                     proposal.freelancerProfile?.rating
@@ -1008,10 +972,10 @@ class _ProjectProposalsScreenState extends State<ProjectProposalsScreen> {
                                 color: Colors.amber,
                               ),
                               const SizedBox(width: 8),
-                              _buildInfoChip(
+                              _buildStatChip(
                                 icon: Icons.work_outline,
                                 value:
-                                    '${proposal.freelancerProfile?.experienceYears ?? 0} ${t.years}',
+                                    '${proposal.freelancerProfile?.experienceYears ?? 0} years',
                                 color: Colors.blue,
                               ),
                             ],
@@ -1049,7 +1013,163 @@ class _ProjectProposalsScreenState extends State<ProjectProposalsScreen> {
                 ),
                 if (proposal.status == 'pending') ...[
                   const SizedBox(height: 16),
-                  _buildActionButtons(proposal, t, isDark),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () {
+                            Navigator.pushNamed(
+                              context,
+                              '/negotiation',
+                              arguments: proposal,
+                            );
+                          },
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: AppColors.info,
+                            side: BorderSide(color: AppColors.info),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.handshake, size: 18),
+                              SizedBox(width: 8),
+                              Text('Negotiate'),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: PopupMenuButton<String>(
+                          onSelected: (value) {
+                            if (value == 'manual') {
+                              _showInterviewTimePicker(proposal, t);
+                            } else if (value == 'smart') {
+                              _sendSmartInterviewInvitation(proposal, t);
+                            }
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            decoration: BoxDecoration(
+                              color: AppColors.accent,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.interpreter_mode,
+                                  size: 18,
+                                  color: AppColors.primaryDark,
+                                ),
+                                SizedBox(width: 8),
+                                Text(
+                                  'Interview',
+                                  style: TextStyle(
+                                    color: AppColors.primaryDark,
+                                  ),
+                                ),
+                                Icon(
+                                  Icons.arrow_drop_down,
+                                  color: AppColors.primaryDark,
+                                ),
+                              ],
+                            ),
+                          ),
+                          itemBuilder: (context) => [
+                            const PopupMenuItem(
+                              value: 'manual',
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.calendar_today,
+                                    size: 18,
+                                    color: AppColors.info,
+                                  ),
+                                  SizedBox(width: 8),
+                                  Text('Manual choose times'),
+                                ],
+                              ),
+                            ),
+                            const PopupMenuItem(
+                              value: 'smart',
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.auto_awesome,
+                                    size: 18,
+                                    color: AppColors.accent,
+                                  ),
+                                  SizedBox(width: 8),
+                                  Text('Smart AI optimized'),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: _isProcessing
+                              ? null
+                              : () => handleAcceptProposal(proposal, t),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.success,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: _isProcessing
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : const Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.check_circle, size: 18),
+                                    SizedBox(width: 8),
+                                    Text('Accept'),
+                                  ],
+                                ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: _isProcessing
+                              ? null
+                              : () => handleRejectProposal(proposal.id!, t),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: AppColors.danger,
+                            side: BorderSide(color: AppColors.danger),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.cancel, size: 18),
+                              SizedBox(width: 8),
+                              Text('Reject'),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ],
             ),
@@ -1057,144 +1177,6 @@ class _ProjectProposalsScreenState extends State<ProjectProposalsScreen> {
           _buildProposalContent(proposal, t, isDark, statusColor),
         ],
       ),
-    );
-  }
-
-  Widget _buildActionButtons(
-    Proposal proposal,
-    AppLocalizations t,
-    bool isDark,
-  ) {
-    return Row(
-      children: [
-        Expanded(
-          child: OutlinedButton(
-            onPressed: () {
-              Navigator.pushNamed(context, '/negotiation', arguments: proposal);
-            },
-            style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.info,
-              side: BorderSide(color: AppColors.info),
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.handshake, size: 18),
-                const SizedBox(width: 8),
-                Text(t.negotiate),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: PopupMenuButton<String>(
-            onSelected: (value) {
-              if (value == 'manual') {
-                _showInterviewTimePicker(proposal, t);
-              } else if (value == 'smart') {
-                _sendSmartInterviewInvitation(proposal, t);
-              }
-            },
-            child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              decoration: BoxDecoration(
-                color: AppColors.accent,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(
-                    Icons.interpreter_mode,
-                    size: 18,
-                    color: AppColors.primaryDark,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    t.interview,
-                    style: const TextStyle(color: AppColors.primaryDark),
-                  ),
-                  const Icon(
-                    Icons.arrow_drop_down,
-                    color: AppColors.primaryDark,
-                  ),
-                ],
-              ),
-            ),
-            itemBuilder: (context) => [
-              PopupMenuItem(
-                value: 'manual',
-                child: Row(
-                  children: [
-                    Icon(Icons.calendar_today, size: 18, color: AppColors.info),
-                    const SizedBox(width: 8),
-                    Text(t.manualChooseTimes),
-                  ],
-                ),
-              ),
-              PopupMenuItem(
-                value: 'smart',
-                child: Row(
-                  children: [
-                    Icon(Icons.auto_awesome, size: 18, color: AppColors.accent),
-                    const SizedBox(width: 8),
-                    Text(t.smartAIOptimized),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: ElevatedButton(
-            onPressed: () => handleProposalStatus(proposal.id!, 'accepted', t),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.success,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: const Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.check_circle, size: 18),
-                SizedBox(width: 8),
-                Text("Accept"),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: OutlinedButton(
-            onPressed: () => handleProposalStatus(proposal.id!, 'rejected', t),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.danger,
-              side: BorderSide(color: AppColors.danger),
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: const Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.cancel, size: 18),
-                SizedBox(width: 8),
-                Text("Reject"),
-              ],
-            ),
-          ),
-        ),
-      ],
     );
   }
 
@@ -1216,7 +1198,7 @@ class _ProjectProposalsScreenState extends State<ProjectProposalsScreen> {
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
-              proposal.proposalText ?? t.noDescriptionProvided,
+              proposal.proposalText ?? 'No description provided',
               style: TextStyle(
                 fontSize: 14,
                 height: 1.5,
@@ -1240,7 +1222,7 @@ class _ProjectProposalsScreenState extends State<ProjectProposalsScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        t.budget,
+                        'Budget',
                         style: TextStyle(
                           fontSize: 11,
                           color: isDark
@@ -1282,7 +1264,7 @@ class _ProjectProposalsScreenState extends State<ProjectProposalsScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        t.delivery,
+                        'Delivery',
                         style: TextStyle(
                           fontSize: 11,
                           color: isDark
@@ -1300,7 +1282,7 @@ class _ProjectProposalsScreenState extends State<ProjectProposalsScreen> {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            '${proposal.deliveryTime ?? 0} ${t.days}',
+                            '${proposal.deliveryTime ?? 0} days',
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
@@ -1315,58 +1297,10 @@ class _ProjectProposalsScreenState extends State<ProjectProposalsScreen> {
               ),
             ],
           ),
-          if (proposal.status == 'accepted') ...[
+          if (proposal.status == 'contracted' ||
+              proposal.status == 'accepted') ...[
             const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: _isGeneratingSOW
-                        ? null
-                        : () => _showSOWGenerator(proposal),
-                    icon: _isGeneratingSOW
-                        ? SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
-                            ),
-                          )
-                        : const Icon(Icons.description, size: 18),
-                    label: Text(_isGeneratingSOW ? t.creating : t.generateSOW),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.accent,
-                      foregroundColor: AppColors.primaryDark,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () {
-                      Fluttertoast.showToast(msg: t.viewContractComingSoon);
-                    },
-                    icon: const Icon(Icons.visibility, size: 18),
-                    label: Text(t.viewContract),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.info,
-                      side: BorderSide(color: AppColors.info),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
             Container(
-              margin: const EdgeInsets.only(top: 16),
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: AppColors.successBg.withOpacity(isDark ? 0.15 : 1),
@@ -1382,14 +1316,14 @@ class _ProjectProposalsScreenState extends State<ProjectProposalsScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          t.proposalAccepted,
+                          'Contract Created ✓',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: AppColors.success,
                           ),
                         ),
                         Text(
-                          t.contractCreatedMessage,
+                          'The contract has been created. Click below to view details.',
                           style: TextStyle(
                             fontSize: 12,
                             color: AppColors.success.withOpacity(0.8),
@@ -1398,13 +1332,26 @@ class _ProjectProposalsScreenState extends State<ProjectProposalsScreen> {
                       ],
                     ),
                   ),
+                  OutlinedButton.icon(
+                    onPressed: () => _navigateToContractFromProposal(proposal),
+                    icon: const Icon(Icons.visibility, size: 18),
+                    label: const Text('View Contract'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.info,
+                      side: BorderSide(color: AppColors.info),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
           ],
-          if (proposal.status == 'rejected')
+          if (proposal.status == 'rejected') ...[
+            const SizedBox(height: 16),
             Container(
-              margin: const EdgeInsets.only(top: 16),
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: AppColors.dangerBg.withOpacity(isDark ? 0.15 : 1),
@@ -1420,14 +1367,14 @@ class _ProjectProposalsScreenState extends State<ProjectProposalsScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          t.proposalRejected,
+                          'Proposal Rejected',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: AppColors.danger,
                           ),
                         ),
                         Text(
-                          t.proposalRejectedMessage,
+                          'This proposal was not selected for this project.',
                           style: TextStyle(
                             fontSize: 12,
                             color: AppColors.danger.withOpacity(0.8),
@@ -1439,89 +1386,26 @@ class _ProjectProposalsScreenState extends State<ProjectProposalsScreen> {
                 ],
               ),
             ),
+          ],
         ],
       ),
     );
   }
 
-  Future<void> _showSOWGenerator(Proposal proposal) async {
-    setState(() => _isGeneratingSOW = true);
-    final t = AppLocalizations.of(context)!;
-
+  Future<void> _navigateToContractFromProposal(Proposal proposal) async {
     try {
-      Project? projectData;
-      User? freelancerData;
-
-      final actualProjectId = proposal.projectId ?? widget.projectId;
-      final projectResponse = await ApiService.getProjectById(actualProjectId);
-
-      if (projectResponse['project'] != null) {
-        projectData = Project.fromJson(projectResponse['project']);
+      final result = await ApiService.getContractByProjectId(widget.projectId);
+      if (result['success'] == true && result['contract'] != null) {
+        _navigateToContract(result['contract']['id']);
       } else {
-        final allProjects = await ApiService.getMyProjects2();
-        final foundProject = allProjects.firstWhere(
-          (p) => p['id'] == actualProjectId,
-          orElse: () => null,
-        );
-        if (foundProject != null) projectData = Project.fromJson(foundProject);
-      }
-
-      if (proposal.freelancer != null) {
-        freelancerData = proposal.freelancer;
-      } else if (proposal.userId != null) {
-        final freelancerResponse = await ApiService.getFreelancerPublicProfile(
-          proposal.userId!,
-        );
-        if (freelancerResponse['user'] != null) {
-          freelancerData = User.fromJson(freelancerResponse['user']);
-        }
-      }
-
-      if (projectData == null || freelancerData == null)
-        throw Exception(t.missingProjectOrFreelancerData);
-
-      final contractResult = await ApiService.createContractDirectly(
-        proposalId: proposal.id!,
-        agreedAmount: proposal.price ?? 0,
-        milestones: proposal.milestones,
-      );
-
-      if (contractResult['success'] == true &&
-          contractResult['contract'] != null) {
-        final contractId = contractResult['contract']['id'];
-        setState(() => _isGeneratingSOW = false);
-
-        final result = await Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => SOWGeneratorScreen(
-              project: projectData!,
-              freelancer: freelancerData!,
-              agreedAmount: proposal.price!,
-              contractId: contractId,
-              proposalId: proposal.id!,
-            ),
-          ),
-        );
-
-        if (result == true) {
-          Navigator.pushNamed(
-            context,
-            '/contract',
-            arguments: {'contractId': contractId, 'userRole': 'client'},
-          );
-        }
-      } else {
-        setState(() => _isGeneratingSOW = false);
         Fluttertoast.showToast(
-          msg: contractResult['message'] ?? t.failedToCreateContract,
+          msg: 'Contract not found',
           backgroundColor: AppColors.danger,
         );
       }
     } catch (e) {
-      setState(() => _isGeneratingSOW = false);
       Fluttertoast.showToast(
-        msg: '${t.error}: $e',
+        msg: 'Error: $e',
         backgroundColor: AppColors.danger,
       );
     }
@@ -1531,21 +1415,15 @@ class _ProjectProposalsScreenState extends State<ProjectProposalsScreen> {
     Proposal proposal,
     AppLocalizations t,
   ) async {
-    setState(() => _isSendingInterview = true);
-
+    setState(() => _isProcessing = true);
     final result = await ApiService.createSmartInterviewInvitation(
       proposalId: proposal.id!,
-      message: t.aiInterviewInvitationMessage,
+      message: 'AI-suggested interview times based on availability analysis.',
       durationMinutes: 30,
     );
-
-    setState(() => _isSendingInterview = false);
-
+    setState(() => _isProcessing = false);
     if (result['success'] == true) {
-      Fluttertoast.showToast(
-        msg: t.smartInterviewInvitationSent,
-        backgroundColor: AppColors.accent,
-      );
+      Fluttertoast.showToast(msg: 'Smart interview invitation sent!');
       final suggestedTimes = result['suggestedTimes'] as List?;
       if (suggestedTimes != null && suggestedTimes.isNotEmpty) {
         _showSuggestedTimesDialog(suggestedTimes, t);
@@ -1557,7 +1435,7 @@ class _ProjectProposalsScreenState extends State<ProjectProposalsScreen> {
     } else {
       if (!_consumeInterviewLimit(Map<String, dynamic>.from(result), t)) {
         Fluttertoast.showToast(
-          msg: result['message'] ?? t.errorSendingInvitation,
+          msg: result['message'] ?? 'Error sending invitation',
           backgroundColor: AppColors.danger,
         );
       }
@@ -1572,15 +1450,14 @@ class _ProjectProposalsScreenState extends State<ProjectProposalsScreen> {
           children: [
             Icon(Icons.auto_awesome, color: AppColors.accent),
             const SizedBox(width: 8),
-            Text(t.aiSuggestedTimesSent),
+            Text('AI Suggested Times Sent'),
           ],
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              t.aiTimesSentDescription,
-              style: const TextStyle(fontSize: 13),
+            const Text(
+              'Suggested interview times have been sent to the freelancer.',
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
@@ -1610,7 +1487,7 @@ class _ProjectProposalsScreenState extends State<ProjectProposalsScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text(t.gotIt),
+            child: Text('Got it'),
           ),
         ],
       ),
@@ -1622,7 +1499,6 @@ class _ProjectProposalsScreenState extends State<ProjectProposalsScreen> {
     AppLocalizations t,
   ) async {
     final List<DateTime> selectedTimes = [];
-
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => StatefulBuilder(
@@ -1632,7 +1508,7 @@ class _ProjectProposalsScreenState extends State<ProjectProposalsScreen> {
               children: [
                 Icon(Icons.calendar_month, color: AppColors.accent),
                 const SizedBox(width: 8),
-                Text(t.scheduleInterview),
+                Text('Schedule Interview'),
               ],
             ),
             content: SizedBox(
@@ -1640,10 +1516,7 @@ class _ProjectProposalsScreenState extends State<ProjectProposalsScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    t.selectPreferredTimes,
-                    style: const TextStyle(fontSize: 13, color: Colors.grey),
-                  ),
+                  const Text('Select preferred times for the interview'),
                   const SizedBox(height: 16),
                   ...selectedTimes.asMap().entries.map((entry) {
                     final index = entry.key;
@@ -1709,7 +1582,7 @@ class _ProjectProposalsScreenState extends State<ProjectProposalsScreen> {
                         }
                       },
                       icon: const Icon(Icons.add),
-                      label: Text(t.addTime),
+                      label: const Text('Add Time'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.accentBg,
                         foregroundColor: AppColors.accent,
@@ -1718,9 +1591,9 @@ class _ProjectProposalsScreenState extends State<ProjectProposalsScreen> {
                   const SizedBox(height: 16),
                   TextField(
                     maxLines: 2,
-                    decoration: InputDecoration(
-                      hintText: t.optionalMessageHint,
-                      border: const OutlineInputBorder(),
+                    decoration: const InputDecoration(
+                      hintText: 'Optional message',
+                      border: OutlineInputBorder(),
                     ),
                   ),
                 ],
@@ -1729,7 +1602,7 @@ class _ProjectProposalsScreenState extends State<ProjectProposalsScreen> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: Text(t.cancel),
+                child: Text('Cancel'),
               ),
               ElevatedButton(
                 onPressed: selectedTimes.isEmpty
@@ -1738,17 +1611,48 @@ class _ProjectProposalsScreenState extends State<ProjectProposalsScreen> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.accent,
                 ),
-                child: Text(t.sendInvitation),
+                child: const Text('Send Invitation'),
               ),
             ],
           );
         },
       ),
     );
-
     if (result == true && selectedTimes.isNotEmpty) {
       await _sendInterviewInvitation(proposal, selectedTimes, t);
     }
+  }
+
+  void _showHireDialogFromSuggestion({
+    required int freelancerId,
+    required String freelancerName,
+  }) {
+    final t = AppLocalizations.of(context)!;
+
+    if (widget.projectId == null) {
+      Fluttertoast.showToast(
+        msg: t.noActiveProjectForHiring,
+        backgroundColor: AppColors.danger,
+      );
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) => HireFreelancerDialog(
+        freelancerId: freelancerId,
+        freelancerName: freelancerName,
+        preselectedProjectId: widget.projectId,
+        onSuccess: () {
+          Fluttertoast.showToast(
+            msg: t.offerSentSuccessfully,
+            backgroundColor: AppColors.success,
+          );
+          fetchProposals();
+          fetchSuggestedFreelancers();
+        },
+      ),
+    );
   }
 
   Future<void> _sendInterviewInvitation(
@@ -1756,19 +1660,17 @@ class _ProjectProposalsScreenState extends State<ProjectProposalsScreen> {
     List<DateTime> times,
     AppLocalizations t,
   ) async {
-    setState(() => _isSendingInterview = true);
-
+    setState(() => _isProcessing = true);
     final result = await ApiService.createInterviewInvitation(
       proposalId: proposal.id!,
       suggestedTimes: times,
-      message: t.interviewInvitationMessage,
+      message:
+          'Interview invitation for project: ${proposal.project?.title ?? "Project"}',
       durationMinutes: 30,
     );
-
-    setState(() => _isSendingInterview = false);
-
+    setState(() => _isProcessing = false);
     if (result['success'] == true) {
-      Fluttertoast.showToast(msg: t.interviewInvitationSent);
+      Fluttertoast.showToast(msg: 'Interview invitation sent!');
       Navigator.push(
         context,
         MaterialPageRoute(builder: (_) => const InterviewsScreen()),
@@ -1776,7 +1678,7 @@ class _ProjectProposalsScreenState extends State<ProjectProposalsScreen> {
     } else {
       if (!_consumeInterviewLimit(Map<String, dynamic>.from(result), t)) {
         Fluttertoast.showToast(
-          msg: result['message'] ?? t.errorSendingInvitation,
+          msg: result['message'] ?? 'Error sending invitation',
           backgroundColor: AppColors.danger,
         );
       }
@@ -1784,6 +1686,6 @@ class _ProjectProposalsScreenState extends State<ProjectProposalsScreen> {
   }
 
   String _formatDateTime(DateTime date, AppLocalizations t) {
-    return '${date.day}/${date.month}/${date.year} ${t.at} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+    return '${date.day}/${date.month}/${date.year} at ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
   }
 }

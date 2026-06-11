@@ -905,7 +905,7 @@ abstract class AppLocalizations {
   /// Label for budget
   ///
   /// In en, this message translates to:
-  /// **'budget'**
+  /// **'Budget'**
   String get budget;
 
   /// No description provided for @deleteFilter.
@@ -1811,7 +1811,7 @@ abstract class AppLocalizations {
   /// No description provided for @proposalLimitReached.
   ///
   /// In en, this message translates to:
-  /// **'Proposal limit reached'**
+  /// **'Proposal Limit Reached'**
   String get proposalLimitReached;
 
   /// No description provided for @proposalsRemaining.
@@ -5975,7 +5975,7 @@ abstract class AppLocalizations {
   /// No description provided for @hireForProject.
   ///
   /// In en, this message translates to:
-  /// **'Hire for project'**
+  /// **'Hire for this project'**
   String get hireForProject;
 
   /// No description provided for @contact.
@@ -8015,7 +8015,7 @@ abstract class AppLocalizations {
   /// No description provided for @costPerClick.
   ///
   /// In en, this message translates to:
-  /// **'Cost Per Click'**
+  /// **'Cost per Click'**
   String get costPerClick;
 
   /// No description provided for @costPerImpression.
@@ -9517,6 +9517,414 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to create checkout session'**
   String get failedToCreateCheckout;
+
+  /// No description provided for @noContractFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No contract found for this project'**
+  String get noContractFound;
+
+  /// No description provided for @viewActiveContract.
+  ///
+  /// In en, this message translates to:
+  /// **'View Active Contract'**
+  String get viewActiveContract;
+
+  /// No description provided for @trackProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Track Progress'**
+  String get trackProgress;
+
+  /// No description provided for @generateSOWToCreateContract.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate SOW to create contract'**
+  String get generateSOWToCreateContract;
+
+  /// No description provided for @contractWaitingSignature.
+  ///
+  /// In en, this message translates to:
+  /// **'Contract waiting for signature'**
+  String get contractWaitingSignature;
+
+  /// No description provided for @pleaseGenerateSOWFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Please generate SOW first'**
+  String get pleaseGenerateSOWFirst;
+
+  /// No description provided for @reviewAndSign.
+  ///
+  /// In en, this message translates to:
+  /// **'Review and Sign'**
+  String get reviewAndSign;
+
+  /// No description provided for @askGenerateSOW.
+  ///
+  /// In en, this message translates to:
+  /// **'Would you like to generate a professional SOW (Statement of Work) or proceed directly to the contract?'**
+  String get askGenerateSOW;
+
+  /// No description provided for @skip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get skip;
+
+  /// No description provided for @contractCreatedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Contract created successfully!'**
+  String get contractCreatedSuccess;
+
+  /// No description provided for @errorAcceptingProposal.
+  ///
+  /// In en, this message translates to:
+  /// **'Error accepting proposal'**
+  String get errorAcceptingProposal;
+
+  /// No description provided for @errorRejectingProposal.
+  ///
+  /// In en, this message translates to:
+  /// **'Error rejecting proposal'**
+  String get errorRejectingProposal;
+
+  /// No description provided for @freelancerNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Freelancer not found'**
+  String get freelancerNotFound;
+
+  /// No description provided for @generate.
+  ///
+  /// In en, this message translates to:
+  /// **'generate'**
+  String get generate;
+
+  /// No description provided for @proposalLimitMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You cannot submit any more proposals this month. Upgrade your plan to send unlimited proposals.'**
+  String get proposalLimitMessage;
+
+  /// No description provided for @later.
+  ///
+  /// In en, this message translates to:
+  /// **'Later'**
+  String get later;
+
+  /// No description provided for @proposalLimitReachedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You cannot submit any more proposals this month. Upgrade your plan to send unlimited proposals.'**
+  String get proposalLimitReachedMessage;
+
+  /// No description provided for @noActiveProjectForHiring.
+  ///
+  /// In en, this message translates to:
+  /// **'No active project available for hiring. Please create a project first.'**
+  String get noActiveProjectForHiring;
+
+  /// No description provided for @cannotSendOffer.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot send offer'**
+  String get cannotSendOffer;
+
+  /// No description provided for @projectNotOpenForOffers.
+  ///
+  /// In en, this message translates to:
+  /// **'is not open for offers. Only projects with \'Open\' status can receive offers.'**
+  String get projectNotOpenForOffers;
+
+  /// No description provided for @createAdCampaign.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Ad Campaign'**
+  String get createAdCampaign;
+
+  /// No description provided for @campaignInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Campaign Info'**
+  String get campaignInfo;
+
+  /// No description provided for @adContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Ad Content'**
+  String get adContent;
+
+  /// No description provided for @adSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Ad Settings'**
+  String get adSettings;
+
+  /// No description provided for @cpcSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'CPC Settings'**
+  String get cpcSettings;
+
+  /// No description provided for @cpmSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'CPM Settings'**
+  String get cpmSettings;
+
+  /// No description provided for @budgetAndDates.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget & Dates'**
+  String get budgetAndDates;
+
+  /// No description provided for @imageUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Image URL'**
+  String get imageUrl;
+
+  /// No description provided for @targetUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Target URL'**
+  String get targetUrl;
+
+  /// No description provided for @buttonText.
+  ///
+  /// In en, this message translates to:
+  /// **'Button Text'**
+  String get buttonText;
+
+  /// No description provided for @adType.
+  ///
+  /// In en, this message translates to:
+  /// **'Ad Type'**
+  String get adType;
+
+  /// No description provided for @placement.
+  ///
+  /// In en, this message translates to:
+  /// **'Placement'**
+  String get placement;
+
+  /// No description provided for @pricingModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Pricing Model'**
+  String get pricingModel;
+
+  /// No description provided for @costPerThousand.
+  ///
+  /// In en, this message translates to:
+  /// **'Cost per 1000 Impressions'**
+  String get costPerThousand;
+
+  /// No description provided for @startDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Date'**
+  String get startDate;
+
+  /// No description provided for @endDate.
+  ///
+  /// In en, this message translates to:
+  /// **'End Date'**
+  String get endDate;
+
+  /// No description provided for @paymentInfoMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'After creating the campaign, you will need to complete payment to activate it.'**
+  String get paymentInfoMessage;
+
+  /// No description provided for @campaignCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Campaign created! Go to payment to activate'**
+  String get campaignCreated;
+
+  /// No description provided for @failedToCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to create campaign'**
+  String get failedToCreate;
+
+  /// No description provided for @selectStartDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Select start date'**
+  String get selectStartDate;
+
+  /// No description provided for @selectEndDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Select end date'**
+  String get selectEndDate;
+
+  /// No description provided for @banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Banner'**
+  String get banner;
+
+  /// No description provided for @sidebar.
+  ///
+  /// In en, this message translates to:
+  /// **'Sidebar'**
+  String get sidebar;
+
+  /// No description provided for @popup.
+  ///
+  /// In en, this message translates to:
+  /// **'Popup'**
+  String get popup;
+
+  /// No description provided for @native.
+  ///
+  /// In en, this message translates to:
+  /// **'Native'**
+  String get native;
+
+  /// No description provided for @homeTop.
+  ///
+  /// In en, this message translates to:
+  /// **'Home Top'**
+  String get homeTop;
+
+  /// No description provided for @homeBottom.
+  ///
+  /// In en, this message translates to:
+  /// **'Home Bottom'**
+  String get homeBottom;
+
+  /// No description provided for @sidebarTop.
+  ///
+  /// In en, this message translates to:
+  /// **'Sidebar Top'**
+  String get sidebarTop;
+
+  /// No description provided for @sidebarBottom.
+  ///
+  /// In en, this message translates to:
+  /// **'Sidebar Bottom'**
+  String get sidebarBottom;
+
+  /// No description provided for @searchResults.
+  ///
+  /// In en, this message translates to:
+  /// **'Search Results'**
+  String get searchResults;
+
+  /// No description provided for @projectPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Project Page'**
+  String get projectPage;
+
+  /// No description provided for @cpc.
+  ///
+  /// In en, this message translates to:
+  /// **'CPC (Cost per click)'**
+  String get cpc;
+
+  /// No description provided for @cpm.
+  ///
+  /// In en, this message translates to:
+  /// **'CPM (Cost per 1000 impressions)'**
+  String get cpm;
+
+  /// No description provided for @flat.
+  ///
+  /// In en, this message translates to:
+  /// **'Flat Rate'**
+  String get flat;
+
+  /// No description provided for @required.
+  ///
+  /// In en, this message translates to:
+  /// **'Required'**
+  String get required;
+
+  /// No description provided for @adCampaigns.
+  ///
+  /// In en, this message translates to:
+  /// **'Ad Campaigns'**
+  String get adCampaigns;
+
+  /// No description provided for @newCampaign.
+  ///
+  /// In en, this message translates to:
+  /// **'New Campaign'**
+  String get newCampaign;
+
+  /// No description provided for @noAdCampaigns.
+  ///
+  /// In en, this message translates to:
+  /// **'No ad campaigns yet'**
+  String get noAdCampaigns;
+
+  /// No description provided for @createFirstCampaign.
+  ///
+  /// In en, this message translates to:
+  /// **'Create your first campaign to reach more clients'**
+  String get createFirstCampaign;
+
+  /// No description provided for @campaignPaused.
+  ///
+  /// In en, this message translates to:
+  /// **'Campaign paused'**
+  String get campaignPaused;
+
+  /// No description provided for @campaignActivated.
+  ///
+  /// In en, this message translates to:
+  /// **'Campaign activated'**
+  String get campaignActivated;
+
+  /// No description provided for @failedToActivate.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to activate campaign'**
+  String get failedToActivate;
+
+  /// No description provided for @cpcShort.
+  ///
+  /// In en, this message translates to:
+  /// **'CPC'**
+  String get cpcShort;
+
+  /// No description provided for @cpmShort.
+  ///
+  /// In en, this message translates to:
+  /// **'CPM'**
+  String get cpmShort;
+
+  /// No description provided for @flatShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Flat'**
+  String get flatShort;
+
+  /// No description provided for @activateAndPay.
+  ///
+  /// In en, this message translates to:
+  /// **'Activate & Pay'**
+  String get activateAndPay;
+
+  /// No description provided for @stats.
+  ///
+  /// In en, this message translates to:
+  /// **'Stats'**
+  String get stats;
+
+  /// No description provided for @avgCpc.
+  ///
+  /// In en, this message translates to:
+  /// **'Avg CPC'**
+  String get avgCpc;
 }
 
 class _AppLocalizationsDelegate

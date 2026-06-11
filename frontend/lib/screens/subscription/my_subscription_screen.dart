@@ -31,8 +31,13 @@ class _MySubscriptionScreenState extends State<MySubscriptionScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    _loadData();
   }
+
+  @override
+void didChangeDependencies() {
+  super.didChangeDependencies();
+  _loadData(); 
+}
 
   @override
   void dispose() {

@@ -30,6 +30,8 @@ import {
   createWallet,
   sendOfferToFreelancer,
   getOpenProjectsForHiring,
+  getContractByProjectId
+
 } from "../controllers/clientController.js";
 
 const router = express.Router();
@@ -71,6 +73,7 @@ router.post(
 router.get("/wallet", getWallet);
 router.post("/wallet/withdraw", requestWithdrawal);
 router.post("/wallet/create", createWallet);
+router.get('/contract/by-project/:projectId', protect, authorizeRoles("client"), getContractByProjectId);
 
 router.post("/contracts/:contractId/create-checkout", createCheckoutSession);
 router.get("/payment/success", handlePaymentSuccess);

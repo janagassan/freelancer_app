@@ -35,6 +35,7 @@ const Proposal = sequelize.define("Proposal", {
       "rejected",
       "negotiating",
       "interviewing",
+      "contracted",
     ),
     defaultValue: "pending",
   },

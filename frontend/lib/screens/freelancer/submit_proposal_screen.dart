@@ -509,14 +509,39 @@ class _SubmitProposalScreenState extends State<SubmitProposalScreen> {
     if (usageResponse['usage'] != null) {
       final usage = UsageLimits.fromJson(usageResponse['usage']);
       if (!usage.canSubmitProposal) {
-        Fluttertoast.showToast(
-          msg: t.proposalLimitReachedUpgrade,
-          timeInSecForIosWeb: 3,
-          backgroundColor: AppColors.danger,
-        );
-        setState(() => loading = false);
-        return;
-      }
+  setState(() => loading = false);
+
+  showDialog(
+    context: context,
+    builder: (BuildContext context) => AlertDialog(
+      title: Row(
+        children: [
+          Icon(Icons.block, color: AppColors.danger),
+          const SizedBox(width: 12),
+          Text(t.proposalLimitReached),
+        ],
+      ),
+      content: Text(t.proposalLimitReachedMessage),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(t.maybeLater),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            Navigator.pop(context);
+            Navigator.pushNamed(context, '/subscription/plans');
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.secondary,
+          ),
+          child: Text(t.upgradeNow),
+        ),
+      ],
+    ),
+  );
+  return;
+}
     }
 
     try {

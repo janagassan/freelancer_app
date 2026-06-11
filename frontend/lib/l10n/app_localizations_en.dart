@@ -412,7 +412,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get any => 'Any';
 
   @override
-  String get budget => 'budget';
+  String get budget => 'Budget';
 
   @override
   String get deleteFilter => 'Delete Filter';
@@ -875,7 +875,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get proposalsThisMonth => 'Proposals This Month';
 
   @override
-  String get proposalLimitReached => 'Proposal limit reached';
+  String get proposalLimitReached => 'Proposal Limit Reached';
 
   @override
   String proposalsRemaining(int count) {
@@ -3090,7 +3090,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get done => 'done';
 
   @override
-  String get hireForProject => 'Hire for project';
+  String get hireForProject => 'Hire for this project';
 
   @override
   String get contact => 'Contact';
@@ -4131,7 +4131,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dailyBudget => 'Daily Budget';
 
   @override
-  String get costPerClick => 'Cost Per Click';
+  String get costPerClick => 'Cost per Click';
 
   @override
   String get costPerImpression => 'Cost Per Impression';
@@ -4920,4 +4920,215 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get failedToCreateCheckout => 'Failed to create checkout session';
+
+  @override
+  String get noContractFound => 'No contract found for this project';
+
+  @override
+  String get viewActiveContract => 'View Active Contract';
+
+  @override
+  String get trackProgress => 'Track Progress';
+
+  @override
+  String get generateSOWToCreateContract => 'Generate SOW to create contract';
+
+  @override
+  String get contractWaitingSignature => 'Contract waiting for signature';
+
+  @override
+  String get pleaseGenerateSOWFirst => 'Please generate SOW first';
+
+  @override
+  String get reviewAndSign => 'Review and Sign';
+
+  @override
+  String get askGenerateSOW =>
+      'Would you like to generate a professional SOW (Statement of Work) or proceed directly to the contract?';
+
+  @override
+  String get skip => 'Skip';
+
+  @override
+  String get contractCreatedSuccess => 'Contract created successfully!';
+
+  @override
+  String get errorAcceptingProposal => 'Error accepting proposal';
+
+  @override
+  String get errorRejectingProposal => 'Error rejecting proposal';
+
+  @override
+  String get freelancerNotFound => 'Freelancer not found';
+
+  @override
+  String get generate => 'generate';
+
+  @override
+  String get proposalLimitMessage =>
+      'You cannot submit any more proposals this month. Upgrade your plan to send unlimited proposals.';
+
+  @override
+  String get later => 'Later';
+
+  @override
+  String get proposalLimitReachedMessage =>
+      'You cannot submit any more proposals this month. Upgrade your plan to send unlimited proposals.';
+
+  @override
+  String get noActiveProjectForHiring =>
+      'No active project available for hiring. Please create a project first.';
+
+  @override
+  String get cannotSendOffer => 'Cannot send offer';
+
+  @override
+  String get projectNotOpenForOffers =>
+      'is not open for offers. Only projects with \'Open\' status can receive offers.';
+
+  @override
+  String get createAdCampaign => 'Create Ad Campaign';
+
+  @override
+  String get campaignInfo => 'Campaign Info';
+
+  @override
+  String get adContent => 'Ad Content';
+
+  @override
+  String get adSettings => 'Ad Settings';
+
+  @override
+  String get cpcSettings => 'CPC Settings';
+
+  @override
+  String get cpmSettings => 'CPM Settings';
+
+  @override
+  String get budgetAndDates => 'Budget & Dates';
+
+  @override
+  String get imageUrl => 'Image URL';
+
+  @override
+  String get targetUrl => 'Target URL';
+
+  @override
+  String get buttonText => 'Button Text';
+
+  @override
+  String get adType => 'Ad Type';
+
+  @override
+  String get placement => 'Placement';
+
+  @override
+  String get pricingModel => 'Pricing Model';
+
+  @override
+  String get costPerThousand => 'Cost per 1000 Impressions';
+
+  @override
+  String get startDate => 'Start Date';
+
+  @override
+  String get endDate => 'End Date';
+
+  @override
+  String get paymentInfoMessage =>
+      'After creating the campaign, you will need to complete payment to activate it.';
+
+  @override
+  String get campaignCreated => 'Campaign created! Go to payment to activate';
+
+  @override
+  String get failedToCreate => 'Failed to create campaign';
+
+  @override
+  String get selectStartDate => 'Select start date';
+
+  @override
+  String get selectEndDate => 'Select end date';
+
+  @override
+  String get banner => 'Banner';
+
+  @override
+  String get sidebar => 'Sidebar';
+
+  @override
+  String get popup => 'Popup';
+
+  @override
+  String get native => 'Native';
+
+  @override
+  String get homeTop => 'Home Top';
+
+  @override
+  String get homeBottom => 'Home Bottom';
+
+  @override
+  String get sidebarTop => 'Sidebar Top';
+
+  @override
+  String get sidebarBottom => 'Sidebar Bottom';
+
+  @override
+  String get searchResults => 'Search Results';
+
+  @override
+  String get projectPage => 'Project Page';
+
+  @override
+  String get cpc => 'CPC (Cost per click)';
+
+  @override
+  String get cpm => 'CPM (Cost per 1000 impressions)';
+
+  @override
+  String get flat => 'Flat Rate';
+
+  @override
+  String get required => 'Required';
+
+  @override
+  String get adCampaigns => 'Ad Campaigns';
+
+  @override
+  String get newCampaign => 'New Campaign';
+
+  @override
+  String get noAdCampaigns => 'No ad campaigns yet';
+
+  @override
+  String get createFirstCampaign =>
+      'Create your first campaign to reach more clients';
+
+  @override
+  String get campaignPaused => 'Campaign paused';
+
+  @override
+  String get campaignActivated => 'Campaign activated';
+
+  @override
+  String get failedToActivate => 'Failed to activate campaign';
+
+  @override
+  String get cpcShort => 'CPC';
+
+  @override
+  String get cpmShort => 'CPM';
+
+  @override
+  String get flatShort => 'Flat';
+
+  @override
+  String get activateAndPay => 'Activate & Pay';
+
+  @override
+  String get stats => 'Stats';
+
+  @override
+  String get avgCpc => 'Avg CPC';
 }

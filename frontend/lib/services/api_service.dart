@@ -4164,17 +4164,28 @@ class ApiService {
     }
   }
 
-  static Future<Map<String, dynamic>> getOpenProjectsForHiring() async {
-    try {
-      final response = await http.get(
-        Uri.parse('$baseUrl/client/projects/open'),
-        headers: await headers,
-      );
-      return jsonDecode(response.body);
-    } catch (e) {
-      return {'success': false, 'message': e.toString(), 'projects': []};
+  static Future<Map<String, dynamic>> getOpenProjectsForHiring({int? currentProjectId}) async {
+  try {
+    String url = '$baseUrl/client/projects/open';
+    if (currentProjectId != null) {
+      url += '?currentProjectId=$currentProjectId';
     }
+    
+    print('📡 GET $url'); 
+    
+    final response = await http.get(
+      Uri.parse(url),
+      headers: await headers,
+    );
+    
+    print('📦 Response: ${response.body}');
+    
+    return jsonDecode(response.body);
+  } catch (e) {
+    print('❌ Error getting open projects: $e');
+    return {'success': false, 'message': e.toString(), 'projects': []};
   }
+}
 
   static Future<Map<String, dynamic>> getMyOffers() async {
     try {
@@ -4845,6 +4856,27 @@ static Future<Map<String, dynamic>> changePassword({
   }
 }
 
+static Future<Map<String, dynamic>> createContractFromProposal({
+  required int proposalId,
+  required double agreedAmount,
+  List<Map<String, dynamic>>? milestones,
+}) async {
+  try {
+    final response = await http.post(
+      Uri.parse('$BASE_URL/client/contract/create-from-proposal'),
+      headers: headers,
+      body: jsonEncode({
+        'proposalId': proposalId,
+        'agreedAmount': agreedAmount,
+        'milestones': milestones ?? [],
+      }),
+    );
+    return jsonDecode(response.body);
+  } catch (e) {
+    print('❌ Error creating contract from proposal: $e');
+    return {'success': false, 'message': 'Connection error'};
+  }
+}
 }
 
 class FinancialStatsResponse {
