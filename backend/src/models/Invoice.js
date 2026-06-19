@@ -23,9 +23,9 @@ const Invoice = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: "UserSubscriptions",
-        key: "id",
-      },
+  model: "usersubscriptions",
+  key: "id",
+}
     },
     invoice_number: {
       type: DataTypes.STRING(50),
