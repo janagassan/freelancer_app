@@ -136,7 +136,7 @@ class _OffersScreenState extends State<OffersScreen>
     if (avatar == null || avatar.isEmpty) return '';
     if (avatar.startsWith('http')) return avatar;
     if (avatar.startsWith('/uploads')) {
-      return 'http://localhost:5001$avatar';
+      return 'https://freelancer-app-h6os.onrender.com$avatar';
     }
     return avatar;
   }
