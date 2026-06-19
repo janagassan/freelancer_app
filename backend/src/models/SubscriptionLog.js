@@ -23,17 +23,17 @@ const SubscriptionLog = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: true,
       references: {
-        model: "SubscriptionPlans",
-        key: "id",
-      },
+  model: "subscriptionplans",
+  key: "id"
+},
     },
     new_plan_id: {
       type: DataTypes.INTEGER,
       allowNull: true,
       references: {
-        model: "SubscriptionPlans",
-        key: "id",
-      },
+  model: "subscriptionplans",
+  key: "id"
+},
     },
     action: {
       type: DataTypes.ENUM(
