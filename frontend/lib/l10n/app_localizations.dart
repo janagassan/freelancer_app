@@ -8903,7 +8903,7 @@ abstract class AppLocalizations {
   /// No description provided for @more.
   ///
   /// In en, this message translates to:
-  /// **'more'**
+  /// **'More'**
   String get more;
 
   /// No description provided for @milestonesRemindersInterviews.
@@ -9925,6 +9925,228 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Avg CPC'**
   String get avgCpc;
+
+  /// No description provided for @contactOptions.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact Options'**
+  String get contactOptions;
+
+  /// No description provided for @addToFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to Favorites'**
+  String get addToFavorites;
+
+  /// No description provided for @loading_profile.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading Profile...'**
+  String get loading_profile;
+
+  /// No description provided for @verified_business.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified Business'**
+  String get verified_business;
+
+  /// No description provided for @individual_client.
+  ///
+  /// In en, this message translates to:
+  /// **'Individual Client'**
+  String get individual_client;
+
+  /// No description provided for @total_spent.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Spent'**
+  String get total_spent;
+
+  /// No description provided for @hire_rate.
+  ///
+  /// In en, this message translates to:
+  /// **'Hire Rate'**
+  String get hire_rate;
+
+  /// No description provided for @since.
+  ///
+  /// In en, this message translates to:
+  /// **'Since'**
+  String get since;
+
+  /// No description provided for @follow.
+  ///
+  /// In en, this message translates to:
+  /// **'Follow'**
+  String get follow;
+
+  /// No description provided for @achievements.
+  ///
+  /// In en, this message translates to:
+  /// **'Achievements'**
+  String get achievements;
+
+  /// No description provided for @top_client.
+  ///
+  /// In en, this message translates to:
+  /// **'Top Client'**
+  String get top_client;
+
+  /// No description provided for @badge.
+  ///
+  /// In en, this message translates to:
+  /// **'Badge'**
+  String get badge;
+
+  /// No description provided for @company_information.
+  ///
+  /// In en, this message translates to:
+  /// **'Company Information'**
+  String get company_information;
+
+  /// No description provided for @company_size.
+  ///
+  /// In en, this message translates to:
+  /// **'Company Size'**
+  String get company_size;
+
+  /// No description provided for @not_specified.
+  ///
+  /// In en, this message translates to:
+  /// **'Not specified'**
+  String get not_specified;
+
+  /// No description provided for @founded.
+  ///
+  /// In en, this message translates to:
+  /// **'Founded'**
+  String get founded;
+
+  /// No description provided for @hiring_statistics.
+  ///
+  /// In en, this message translates to:
+  /// **'Hiring Statistics'**
+  String get hiring_statistics;
+
+  /// No description provided for @avg_budget.
+  ///
+  /// In en, this message translates to:
+  /// **'Avg Budget'**
+  String get avg_budget;
+
+  /// No description provided for @active_contracts.
+  ///
+  /// In en, this message translates to:
+  /// **'Active Contracts'**
+  String get active_contracts;
+
+  /// No description provided for @client_rating.
+  ///
+  /// In en, this message translates to:
+  /// **'Client Rating'**
+  String get client_rating;
+
+  /// No description provided for @repeat_hire_rate.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat Hire Rate'**
+  String get repeat_hire_rate;
+
+  /// No description provided for @jobs.
+  ///
+  /// In en, this message translates to:
+  /// **'Jobs'**
+  String get jobs;
+
+  /// No description provided for @about_company.
+  ///
+  /// In en, this message translates to:
+  /// **'About Company'**
+  String get about_company;
+
+  /// No description provided for @preferred_skills.
+  ///
+  /// In en, this message translates to:
+  /// **'Preferred Skills'**
+  String get preferred_skills;
+
+  /// No description provided for @currently_hiring_for.
+  ///
+  /// In en, this message translates to:
+  /// **'Currently Hiring For'**
+  String get currently_hiring_for;
+
+  /// No description provided for @communication_methods.
+  ///
+  /// In en, this message translates to:
+  /// **'Communication Methods'**
+  String get communication_methods;
+
+  /// No description provided for @project_management_tools.
+  ///
+  /// In en, this message translates to:
+  /// **'Project Management Tools'**
+  String get project_management_tools;
+
+  /// No description provided for @no_active_jobs.
+  ///
+  /// In en, this message translates to:
+  /// **'No active jobs'**
+  String get no_active_jobs;
+
+  /// No description provided for @post_job_to_start.
+  ///
+  /// In en, this message translates to:
+  /// **'Post a job to start hiring freelancers'**
+  String get post_job_to_start;
+
+  /// No description provided for @client_no_jobs.
+  ///
+  /// In en, this message translates to:
+  /// **'This client hasn\'t posted any jobs yet'**
+  String get client_no_jobs;
+
+  /// No description provided for @job_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Job Title'**
+  String get job_title;
+
+  /// No description provided for @no_reviews_yet.
+  ///
+  /// In en, this message translates to:
+  /// **'No reviews yet'**
+  String get no_reviews_yet;
+
+  /// No description provided for @reviews_will_appear.
+  ///
+  /// In en, this message translates to:
+  /// **'Reviews from freelancers will appear here'**
+  String get reviews_will_appear;
+
+  /// No description provided for @profile_views.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile Views'**
+  String get profile_views;
+
+  /// No description provided for @jobs_posted.
+  ///
+  /// In en, this message translates to:
+  /// **'Jobs Posted'**
+  String get jobs_posted;
+
+  /// No description provided for @invitations_sent.
+  ///
+  /// In en, this message translates to:
+  /// **'Invitations Sent'**
+  String get invitations_sent;
+
+  /// No description provided for @applications_received.
+  ///
+  /// In en, this message translates to:
+  /// **'Applications Received'**
+  String get applications_received;
 }
 
 class _AppLocalizationsDelegate

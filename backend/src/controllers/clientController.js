@@ -1483,6 +1483,7 @@ export const getClientDashboardOverview = async (req, res) => {
         proposalText: p.proposal_text,
         projectTitle: p.Project?.title,
         projectId: p.Project?.id,
+        freelancerId: p.freelancer?.id, 
         freelancerName: p.freelancer?.name,
         freelancerAvatar: p.freelancer?.avatar,
         freelancerTitle: p.profile?.title,
@@ -1518,6 +1519,7 @@ export const getClientDashboardOverview = async (req, res) => {
     });
   }
 };
+
 
 export const getClientProfile = async (req, res) => {
   try {

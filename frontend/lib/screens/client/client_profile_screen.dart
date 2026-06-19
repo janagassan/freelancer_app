@@ -1,15 +1,23 @@
+// lib/screens/client/client_profile_screen.dart
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import '../../l10n/app_localizations.dart';
 import '../../services/profile_api_service.dart';
 import '../../services/api_service.dart';
+import '../../theme/app_theme.dart';
+
+// ─────────────────────────────────────────────────────────────
+//  VIEW SCREEN
+// ─────────────────────────────────────────────────────────────
 
 class ClientProfileScreen extends StatefulWidget {
   final int? targetUserId;
   const ClientProfileScreen({super.key, this.targetUserId});
+
   @override
   State<ClientProfileScreen> createState() => _ClientProfileScreenState();
 }
@@ -20,16 +28,6 @@ class _ClientProfileScreenState extends State<ClientProfileScreen>
   bool _loading = true;
   bool _isOwnProfile = false;
   late TabController _tabController;
-
-  static const Color _bg = Color(0xFFF5F7FB);
-  static const Color _card = Colors.white;
-  static const Color _primary = Color(0xFF0A66C2);
-  static const Color _green = Color(0xFF14A800);
-  static const Color _textDark = Color(0xFF1A1A2E);
-  static const Color _textMid = Color(0xFF4A5568);
-  static const Color _textLight = Color(0xFF8FA3BF);
-  static const Color _border = Color(0xFFE8EDF5);
-  static const Color _gold = Color(0xFFFFB800);
 
   @override
   void initState() {
@@ -85,36 +83,55 @@ class _ClientProfileScreenState extends State<ClientProfileScreen>
     final dt = DateTime.tryParse(iso);
     if (dt == null) return '';
     const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
     ];
     return '${months[dt.month - 1]} ${dt.year}';
   }
 
-  Widget _avatar(String? url, String name, double size, {Color bg = _primary}) {
+  String _formatMoney(dynamic v) {
+    final n = (v ?? 0) as num;
+    if (n >= 1000) return '${(n / 1000).toStringAsFixed(1)}K';
+    return n.toStringAsFixed(0);
+  }
+
+  String _formatContractType(String t) =>
+      {
+        'hourly': 'Hourly contracts',
+        'fixed': 'Fixed-price projects',
+        'both': 'Both hourly & fixed',
+      }[t] ??
+      t;
+
+  // ── Avatar widget matching dashboard style ──
+  Widget _avatarWidget(String name, String url, double size) {
+    final colors = [
+      AppColors.accent,
+      AppColors.info,
+      AppColors.success,
+      AppColors.warning,
+      const Color(0xFF7C3AED),
+    ];
+    final color = name.isNotEmpty
+        ? colors[name.codeUnitAt(0) % colors.length]
+        : AppColors.accent;
     final imgUrl = _img(url);
     return Container(
       width: size,
       height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: imgUrl.isEmpty ? bg : null,
-        border: Border.all(color: Colors.white, width: 3),
+        gradient: LinearGradient(
+          colors: [color, color.withOpacity(0.7)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        border: Border.all(color: Colors.white, width: 2.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.12),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
+            color: AppColors.primary.withOpacity(0.18),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -126,7 +143,7 @@ class _ClientProfileScreenState extends State<ClientProfileScreen>
                   style: TextStyle(
                     fontSize: size * 0.32,
                     fontWeight: FontWeight.w800,
-                    color: Colors.white,
+                    color: AppColors.primaryDark,
                   ),
                 ),
               )
@@ -139,7 +156,7 @@ class _ClientProfileScreenState extends State<ClientProfileScreen>
                     style: TextStyle(
                       fontSize: size * 0.32,
                       fontWeight: FontWeight.w800,
-                      color: Colors.white,
+                      color: AppColors.primaryDark,
                     ),
                   ),
                 ),
@@ -148,12 +165,50 @@ class _ClientProfileScreenState extends State<ClientProfileScreen>
     );
   }
 
+  // ── Logo widget ──
+  Widget _logoWidget(String? logo, String name, double size) {
+    final imgUrl = _img(logo);
+    if (imgUrl.isNotEmpty) {
+      return Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(size * 0.22),
+          color: Colors.white,
+          border: Border.all(color: Colors.white, width: 2.5),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primary.withOpacity(0.18),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(size * 0.2),
+          child: CachedNetworkImage(
+            imageUrl: imgUrl,
+            fit: BoxFit.contain,
+            errorWidget: (_, __, ___) => _avatarWidget(name, '', size),
+          ),
+        ),
+      );
+    }
+    return _avatarWidget(name, '', size);
+  }
+
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     if (_loading)
       return Scaffold(
-        backgroundColor: _bg,
-        body: const Center(child: CircularProgressIndicator(color: _primary)),
+        backgroundColor: isDark
+            ? AppColors.darkBackground
+            : AppColors.lightBackground,
+        body: const Center(
+          child: CircularProgressIndicator(color: AppColors.accent),
+        ),
       );
 
     final user = Map<String, dynamic>.from(_data['user'] ?? {});
@@ -176,415 +231,83 @@ class _ClientProfileScreenState extends State<ClientProfileScreen>
     final memberSince = _memberSince(user['member_since']?.toString());
     final strength = (profile['profile_strength'] ?? 0) as num;
     final paymentVerified = profile['payment_verified'] ?? false;
-    final preferredSkills = List<String>.from(
-      profile['preferred_skills'] ?? [],
-    );
+    final preferredSkills =
+        List<String>.from(profile['preferred_skills'] ?? []);
     final hiringFor = List<String>.from(profile['hiring_for'] ?? []);
     final logo = profile['company_logo'];
+    final avatarUrl = ProfileApiService.fullImageUrl(user['avatar']);
 
     return Scaffold(
-      backgroundColor: _bg,
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            expandedHeight: 200,
-            pinned: true,
-            backgroundColor: _primary,
-            leading: IconButton(
-              icon: Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: Colors.black26,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.arrow_back,
-                  color: Colors.white,
-                  size: 18,
-                ),
-              ),
-              onPressed: () => Navigator.pop(context),
-            ),
-            actions: [
-              if (_isOwnProfile)
-                IconButton(
-                  icon: Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: Colors.black26,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.edit,
-                      color: Colors.white,
-                      size: 18,
-                    ),
-                  ),
-                  onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const EditClientProfileScreen(),
-                    ),
-                  ).then((_) => _load()),
-                )
-              else
-                IconButton(
-                  icon: Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: Colors.black26,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.share,
-                      color: Colors.white,
-                      size: 18,
-                    ),
-                  ),
-                  onPressed: () {},
-                ),
-              const SizedBox(width: 8),
-            ],
-            flexibleSpace: FlexibleSpaceBar(
-              background: Stack(
-                fit: StackFit.expand,
-                children: [
-                  user['cover_image'] != null &&
-                          user['cover_image'].toString().isNotEmpty
-                      ? CachedNetworkImage(
-                          imageUrl: _img(user['cover_image']),
-                          fit: BoxFit.cover,
-                        )
-                      : Container(
-                          decoration: const BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                Color(0xFF0A3D6B),
-                                Color(0xFF0A66C2),
-                                Color(0xFF1DA1F2),
-                              ],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                          ),
-                        ),
-                  Container(color: Colors.black.withOpacity(0.2)),
-                ],
-              ),
-            ),
-          ),
-
-          SliverToBoxAdapter(
+      backgroundColor: isDark
+          ? AppColors.darkBackground
+          : AppColors.lightBackground,
+      body: Row(
+        children: [
+          // ── Left content area ──
+          Expanded(
             child: Column(
               children: [
-                Transform.translate(
-                  offset: const Offset(0, -40),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: _card,
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.08),
-                            blurRadius: 20,
-                            offset: const Offset(0, 4),
+                // ── Top Bar ──
+                _buildTopBar(isDark, name),
+                // ── Body ──
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(20),
+                    child: LayoutBuilder(builder: (ctx, constraints) {
+                      final wide = constraints.maxWidth > 800;
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // ── Profile Header Card ──
+                          _buildHeaderCard(
+                            isDark: isDark,
+                            user: user,
+                            profile: profile,
+                            stats: stats,
+                            name: name,
+                            companyName: companyName,
+                            displayTitle: displayTitle,
+                            industry: industry,
+                            bio: bio,
+                            location: location,
+                            memberSince: memberSince,
+                            strength: strength,
+                            paymentVerified: paymentVerified,
+                            preferredSkills: preferredSkills,
+                            hiringFor: hiringFor,
+                            logo: logo,
+                            avatarUrl: avatarUrl,
                           ),
-                        ],
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(0),
-                        child: Column(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-                              child: Column(
-                                children: [
-                                  Row(
-                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                    children: [
-                                      Transform.translate(
-                                        offset: const Offset(0, -30),
-                                        child: Stack(
-                                          children: [
-                                            logo != null &&
-                                                    logo.toString().isNotEmpty
-                                                ? Container(
-                                                    width: 88,
-                                                    height: 88,
-                                                    decoration: BoxDecoration(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                            12,
-                                                          ),
-                                                      border: Border.all(
-                                                        color: Colors.white,
-                                                        width: 3,
-                                                      ),
-                                                      boxShadow: [
-                                                        BoxShadow(
-                                                          color: Colors.black
-                                                              .withOpacity(0.1),
-                                                          blurRadius: 8,
-                                                        ),
-                                                      ],
-                                                    ),
-                                                    child: ClipRRect(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                            10,
-                                                          ),
-                                                      child: CachedNetworkImage(
-                                                        imageUrl: _img(logo),
-                                                        fit: BoxFit.contain,
-                                                      ),
-                                                    ),
-                                                  )
-                                                : _avatar(
-                                                    user['avatar'],
-                                                    name,
-                                                    88,
-                                                    bg: _primary,
-                                                  ),
-                                          ],
-                                        ),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      Expanded(
-                                        child: Padding(
-                                          padding: const EdgeInsets.only(
-                                            top: 12,
-                                          ),
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Row(
-                                                children: [
-                                                  Expanded(
-                                                    child: Text(
-                                                      displayTitle,
-                                                      style: const TextStyle(
-                                                        fontSize: 20,
-                                                        fontWeight:
-                                                            FontWeight.w800,
-                                                        color: _textDark,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  if (paymentVerified)
-                                                    _badge(
-                                                      'Payment Verified',
-                                                      const Color(0xFF36B37E),
-                                                      Icons.verified,
-                                                    ),
-                                                ],
-                                              ),
-                                              if (companyName.isNotEmpty &&
-                                                  companyName != name)
-                                                Text(
-                                                  name,
-                                                  style: const TextStyle(
-                                                    fontSize: 12,
-                                                    color: _textLight,
-                                                  ),
-                                                ),
-                                              if (industry.isNotEmpty)
-                                                Text(
-                                                  industry,
-                                                  style: const TextStyle(
-                                                    fontSize: 13,
-                                                    color: _textMid,
-                                                    fontWeight: FontWeight.w500,
-                                                  ),
-                                                ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-
-                                  _clientStatsRow(stats),
-                                  const SizedBox(height: 14),
-
-                                  Wrap(
-                                    spacing: 16,
-                                    runSpacing: 6,
-                                    children: [
-                                      if (location.isNotEmpty)
-                                        _meta(
-                                          Icons.location_on_outlined,
-                                          location,
-                                        ),
-                                      if (memberSince.isNotEmpty)
-                                        _meta(
-                                          Icons.calendar_today_outlined,
-                                          'Member since $memberSince',
-                                        ),
-                                      if (profile['company_size'] != null)
-                                        _meta(
-                                          Icons.people_outline,
-                                          '${profile['company_size']} employees',
-                                        ),
-                                      if (profile['founded_year'] != null)
-                                        _meta(
-                                          Icons.business_outlined,
-                                          'Founded ${profile['founded_year']}',
-                                        ),
-                                    ],
-                                  ),
-
-                                  if (bio.isNotEmpty) ...[
-                                    const SizedBox(height: 14),
-                                    _ExpandableText(text: bio),
-                                  ],
-
-                                  if (hiringFor.isNotEmpty) ...[
-                                    const SizedBox(height: 14),
-                                    Align(
-                                      alignment: Alignment.centerLeft,
-                                      child: Text(
-                                        'Hiring for',
-                                        style: const TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w700,
-                                          color: _textMid,
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 6),
-                                    Wrap(
-                                      spacing: 8,
-                                      runSpacing: 6,
-                                      children: hiringFor
-                                          .map((s) => _hiringChip(s))
-                                          .toList(),
-                                    ),
-                                  ],
-
-                                  if (preferredSkills.isNotEmpty) ...[
-                                    const SizedBox(height: 14),
-                                    Align(
-                                      alignment: Alignment.centerLeft,
-                                      child: Text(
-                                        'Looking for skills',
-                                        style: const TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w700,
-                                          color: _textMid,
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 6),
-                                    Wrap(
-                                      spacing: 8,
-                                      runSpacing: 6,
-                                      children: preferredSkills
-                                          .take(8)
-                                          .map((s) => _skillChip(s))
-                                          .toList(),
-                                    ),
-                                  ],
-
-                                  _clientSocialRow(profile, user),
-
-                                  if (!_isOwnProfile) ...[
-                                    const SizedBox(height: 16),
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          child: _actionBtn(
-                                            'View Projects',
-                                            Icons.folder_open_outlined,
-                                            _primary,
-                                            Colors.white,
-                                            () {},
-                                          ),
-                                        ),
-                                        const SizedBox(width: 10),
-                                        Expanded(
-                                          child: _actionBtn(
-                                            'Message',
-                                            Icons.chat_bubble_outline,
-                                            Colors.transparent,
-                                            _primary,
-                                            () {},
-                                            border: Border.all(
-                                              color: _primary,
-                                              width: 1.5,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-
-                                  if (_isOwnProfile) ...[
-                                    const SizedBox(height: 16),
-                                    _profileStrengthBar(strength.toInt()),
-                                  ],
-                                ],
-                              ),
-                            ),
+                          const SizedBox(height: 16),
+                          // ── Tabs ──
+                          if (wide)
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  flex: 3,
+                                  child: _buildProjectsSectionCard(
+                                      projects, isDark),
+                                ),
+                                const SizedBox(width: 14),
+                                Expanded(
+                                  flex: 2,
+                                  child:
+                                      _buildAboutSectionCard(profile, stats, isDark),
+                                ),
+                              ],
+                            )
+                          else ...[
+                            _buildProjectsSectionCard(projects, isDark),
+                            const SizedBox(height: 14),
+                            _buildAboutSectionCard(profile, stats, isDark),
                           ],
-                        ),
-                      ),
-                    ),
+                          const SizedBox(height: 30),
+                        ],
+                      );
+                    }),
                   ),
                 ),
-
-                Transform.translate(
-                  offset: const Offset(0, -20),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Column(
-                      children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            color: _card,
-                            borderRadius: BorderRadius.circular(14),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.04),
-                                blurRadius: 8,
-                              ),
-                            ],
-                          ),
-                          child: TabBar(
-                            controller: _tabController,
-                            labelColor: _primary,
-                            unselectedLabelColor: _textLight,
-                            indicatorColor: _primary,
-                            indicatorSize: TabBarIndicatorSize.label,
-                            labelStyle: const TextStyle(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 13,
-                            ),
-                            tabs: const [
-                              Tab(text: 'Projects'),
-                              Tab(text: 'About'),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-
-                        SizedBox(
-                          height: 600,
-                          child: TabBarView(
-                            controller: _tabController,
-                            children: [
-                              _projectsTab(projects),
-                              _aboutTab(profile, stats),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 40),
               ],
             ),
           ),
@@ -593,190 +316,507 @@ class _ClientProfileScreenState extends State<ClientProfileScreen>
     );
   }
 
-  Widget _clientStatsRow(Map stats) {
+  // ── Top Bar ──
+  Widget _buildTopBar(bool isDark, String name) {
     return Container(
-      margin: const EdgeInsets.only(top: 12),
-      padding: const EdgeInsets.symmetric(vertical: 14),
+      height: 52,
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       decoration: BoxDecoration(
-        color: const Color(0xFFF0F7FF),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: _border),
+        color: isDark ? AppColors.darkSurface : AppColors.lightCard,
+        border: Border(
+          bottom: BorderSide(color: AppColors.border, width: 0.5),
+        ),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          _statItem(
-            '${stats['total_projects'] ?? 0}',
-            'Projects',
-            icon: Icons.folder_open,
+          IconButton(
+            icon: Icon(
+              Icons.arrow_back,
+              color: isDark
+                  ? AppColors.darkTextPrimary
+                  : AppColors.lightTextPrimary,
+              size: 20,
+            ),
+            onPressed: () => Navigator.pop(context),
+            constraints:
+                const BoxConstraints(minWidth: 36, minHeight: 36),
+            padding: const EdgeInsets.all(6),
+            splashRadius: 18,
           ),
-          _divider(),
-          _statItem(
-            '${stats['completed_contracts'] ?? 0}',
-            'Hired',
-            icon: Icons.check_circle_outline,
+          const SizedBox(width: 8),
+          Text(
+            name,
+            style: TextStyle(
+              fontSize: 17,
+              fontWeight: FontWeight.w700,
+              color: isDark
+                  ? AppColors.darkTextPrimary
+                  : AppColors.lightTextPrimary,
+            ),
           ),
-          _divider(),
-          _statItem(
-            '\$${_formatMoney(stats['total_spent'])}',
-            'Spent',
-            icon: Icons.payments_outlined,
+          const Spacer(),
+          if (_isOwnProfile)
+            _topBarIconBtn(
+              Icons.edit_outlined,
+              isDark,
+              () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const EditClientProfileScreen(),
+                ),
+              ).then((_) => _load()),
+            )
+          else
+            _topBarIconBtn(Icons.share_outlined, isDark, () {}),
+        ],
+      ),
+    );
+  }
+
+  Widget _topBarIconBtn(
+      IconData icon, bool isDark, VoidCallback onTap) {
+    return IconButton(
+      icon: Icon(
+        icon,
+        size: 20,
+        color: isDark ? AppColors.darkTextSecondary : AppColors.gray,
+      ),
+      onPressed: onTap,
+      padding: const EdgeInsets.all(6),
+      constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+      splashRadius: 18,
+    );
+  }
+
+  // ── Header Card ──
+  Widget _buildHeaderCard({
+    required bool isDark,
+    required Map user,
+    required Map profile,
+    required Map stats,
+    required String name,
+    required String companyName,
+    required String displayTitle,
+    required String industry,
+    required String bio,
+    required String location,
+    required String memberSince,
+    required num strength,
+    required bool paymentVerified,
+    required List<String> preferredSkills,
+    required List<String> hiringFor,
+    required dynamic logo,
+    required String avatarUrl,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.darkCard : AppColors.lightCard,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: isDark ? AppColors.primaryDark : AppColors.borderLight,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: isDark
+                ? Colors.black.withOpacity(0.25)
+                : const Color(0x0A000000),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
           ),
-          _divider(),
-          _statItem(
-            '${stats['active_projects'] ?? 0}',
-            'Active',
-            icon: Icons.work_outline,
+        ],
+      ),
+      child: Column(
+        children: [
+          // ── Cover ──
+          ClipRRect(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
+            child: SizedBox(
+              height: 130,
+              width: double.infinity,
+              child: user['cover_image'] != null &&
+                      user['cover_image'].toString().isNotEmpty
+                  ? CachedNetworkImage(
+                      imageUrl: _img(user['cover_image']),
+                      fit: BoxFit.cover,
+                    )
+                  : Container(
+                      decoration: const BoxDecoration(
+                        gradient: AppColors.primaryGradient,
+                      ),
+                    ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // ── Avatar + Name row ──
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Transform.translate(
+                      offset: const Offset(0, -30),
+                      child: logo != null && logo.toString().isNotEmpty
+                          ? _logoWidget(logo.toString(), name, 80)
+                          : _avatarWidget(name, avatarUrl, 80),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 10),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    displayTitle,
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.w800,
+                                      color: isDark
+                                          ? AppColors.darkTextPrimary
+                                          : AppColors.lightTextPrimary,
+                                    ),
+                                  ),
+                                ),
+                                if (paymentVerified)
+                                  _badgeChip(
+                                    'Payment Verified',
+                                    AppColors.success,
+                                    Icons.verified,
+                                  ),
+                              ],
+                            ),
+                            if (companyName.isNotEmpty && companyName != name)
+                              Text(
+                                name,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: isDark
+                                      ? AppColors.darkTextSecondary
+                                      : AppColors.gray,
+                                ),
+                              ),
+                            if (industry.isNotEmpty)
+                              Text(
+                                industry,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: isDark
+                                      ? AppColors.darkTextSecondary
+                                      : AppColors.lightTextSecondary,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                // ── Stats row ──
+                _statsRow(stats, isDark),
+                const SizedBox(height: 14),
+                // ── Meta info ──
+                Wrap(
+                  spacing: 16,
+                  runSpacing: 6,
+                  children: [
+                    if (location.isNotEmpty)
+                      _metaItem(
+                          Icons.location_on_outlined, location, isDark),
+                    if (memberSince.isNotEmpty)
+                      _metaItem(Icons.calendar_today_outlined,
+                          'Member since $memberSince', isDark),
+                    if (profile['company_size'] != null)
+                      _metaItem(Icons.people_outline,
+                          '${profile['company_size']} employees', isDark),
+                    if (profile['founded_year'] != null)
+                      _metaItem(Icons.business_outlined,
+                          'Founded ${profile['founded_year']}', isDark),
+                  ],
+                ),
+                // ── Bio ──
+                if (bio.isNotEmpty) ...[
+                  const SizedBox(height: 14),
+                  _ExpandableText(text: bio, isDark: isDark),
+                ],
+                // ── Hiring for ──
+                if (hiringFor.isNotEmpty) ...[
+                  const SizedBox(height: 14),
+                  Text(
+                    'Hiring for',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: isDark
+                          ? AppColors.darkTextSecondary
+                          : AppColors.lightTextSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 6,
+                    children:
+                        hiringFor.map((s) => _hiringChip(s, isDark)).toList(),
+                  ),
+                ],
+                // ── Skills ──
+                if (preferredSkills.isNotEmpty) ...[
+                  const SizedBox(height: 14),
+                  Text(
+                    'Looking for skills',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: isDark
+                          ? AppColors.darkTextSecondary
+                          : AppColors.lightTextSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 6,
+                    children: preferredSkills
+                        .take(8)
+                        .map((s) => _skillChip(s, isDark))
+                        .toList(),
+                  ),
+                ],
+                // ── Social links ──
+                _socialRow(profile, user, isDark),
+                // ── Action buttons (public view) ──
+                if (!_isOwnProfile) ...[
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(child: _actionBtn('View Projects', Icons.folder_open_outlined, true, isDark, () {})),
+                      const SizedBox(width: 10),
+                      Expanded(child: _actionBtn('Message', Icons.chat_bubble_outline, false, isDark, () {})),
+                    ],
+                  ),
+                ],
+                // ── Profile strength (own profile) ──
+                if (_isOwnProfile) ...[
+                  const SizedBox(height: 16),
+                  _profileStrengthWidget(strength.toInt(), isDark),
+                ],
+              ],
+            ),
           ),
         ],
       ),
     );
   }
 
-  String _formatMoney(dynamic v) {
-    final n = (v ?? 0) as num;
-    if (n >= 1000) return '${(n / 1000).toStringAsFixed(1)}K';
-    return n.toStringAsFixed(0);
+  Widget _statsRow(Map stats, bool isDark) {
+    return Container(
+      margin: const EdgeInsets.only(top: 10),
+      padding: const EdgeInsets.symmetric(vertical: 14),
+      decoration: BoxDecoration(
+        color: isDark
+            ? AppColors.primaryDark.withOpacity(0.5)
+            : const Color(0xFFF0F7FF),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isDark ? AppColors.primaryDark : AppColors.borderLight,
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          _statItem('${stats['total_projects'] ?? 0}', 'Projects',
+              Icons.folder_open, isDark),
+          _vDivider(isDark),
+          _statItem('${stats['completed_contracts'] ?? 0}', 'Hired',
+              Icons.check_circle_outline, isDark),
+          _vDivider(isDark),
+          _statItem('\$${_formatMoney(stats['total_spent'])}', 'Spent',
+              Icons.payments_outlined, isDark),
+          _vDivider(isDark),
+          _statItem('${stats['active_projects'] ?? 0}', 'Active',
+              Icons.work_outline, isDark),
+        ],
+      ),
+    );
   }
 
   Widget _statItem(
-    String value,
-    String label, {
-    IconData? icon,
-    Color iconColor = _textMid,
-  }) => Column(
-    mainAxisSize: MainAxisSize.min,
-    children: [
-      if (icon != null) Icon(icon, size: 14, color: iconColor),
-      const SizedBox(height: 2),
-      Text(
-        value,
-        style: const TextStyle(
-          fontSize: 15,
-          fontWeight: FontWeight.w800,
-          color: _textDark,
-        ),
-      ),
-      Text(label, style: const TextStyle(fontSize: 10, color: _textLight)),
-    ],
-  );
-
-  Widget _divider() => Container(width: 1, height: 30, color: _border);
-
-  Widget _meta(IconData icon, String text, {Color color = _textMid}) => Row(
-    mainAxisSize: MainAxisSize.min,
-    children: [
-      Icon(icon, size: 13, color: color),
-      const SizedBox(width: 3),
-      Text(text, style: TextStyle(fontSize: 12, color: color)),
-    ],
-  );
-
-  Widget _badge(String t, Color c, IconData icon) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-    decoration: BoxDecoration(
-      color: c.withOpacity(0.12),
-      borderRadius: BorderRadius.circular(20),
-    ),
-    child: Row(
+      String value, String label, IconData icon, bool isDark) {
+    return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 11, color: c),
-        const SizedBox(width: 3),
+        Icon(icon, size: 14,
+            color: isDark ? AppColors.darkTextSecondary : AppColors.gray),
+        const SizedBox(height: 3),
         Text(
-          t,
-          style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: c),
+          value,
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w800,
+            color: isDark
+                ? AppColors.darkTextPrimary
+                : AppColors.lightTextPrimary,
+          ),
+        ),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 10,
+            color: isDark ? AppColors.darkTextSecondary : AppColors.gray,
+          ),
         ),
       ],
-    ),
-  );
+    );
+  }
 
-  Widget _skillChip(String label) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-    decoration: BoxDecoration(
-      color: const Color(0xFFE8F5FF),
-      borderRadius: BorderRadius.circular(20),
-      border: Border.all(color: const Color(0xFFBBDEFB)),
-    ),
-    child: Text(
-      label,
-      style: const TextStyle(
-        fontSize: 12,
-        color: _primary,
-        fontWeight: FontWeight.w600,
-      ),
-    ),
-  );
-
-  Widget _hiringChip(String label) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-    decoration: BoxDecoration(
-      color: const Color(0xFFFFF8E1),
-      borderRadius: BorderRadius.circular(20),
-      border: Border.all(color: const Color(0xFFFFE082)),
-    ),
-    child: Text(
-      label,
-      style: const TextStyle(
-        fontSize: 12,
-        color: Color(0xFFFF8F00),
-        fontWeight: FontWeight.w600,
-      ),
-    ),
-  );
-
-  Widget _clientSocialRow(Map profile, Map user) {
-    final links = <MapEntry<String, String>>[];
-    if ((profile['company_website'] ?? user['website'] ?? '')
-        .toString()
-        .isNotEmpty)
-      links.add(
-        MapEntry('website', profile['company_website'] ?? user['website']),
+  Widget _vDivider(bool isDark) => Container(
+        width: 1,
+        height: 32,
+        color: isDark ? AppColors.primaryDark : AppColors.border,
       );
-    if ((profile['linkedin'] ?? user['linkedin'] ?? '').toString().isNotEmpty)
-      links.add(MapEntry('linkedin', profile['linkedin'] ?? user['linkedin']));
-    if ((profile['twitter'] ?? user['twitter'] ?? '').toString().isNotEmpty)
-      links.add(MapEntry('twitter', profile['twitter'] ?? user['twitter']));
+
+  Widget _metaItem(IconData icon, String text, bool isDark) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 13,
+            color: isDark ? AppColors.darkTextSecondary : AppColors.gray),
+        const SizedBox(width: 4),
+        Text(
+          text,
+          style: TextStyle(
+            fontSize: 12,
+            color: isDark ? AppColors.darkTextSecondary : AppColors.gray,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _badgeChip(String label, Color color, IconData icon) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.12),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 11, color: color),
+          const SizedBox(width: 3),
+          Text(
+            label,
+            style: TextStyle(
+                fontSize: 10, fontWeight: FontWeight.w700, color: color),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _skillChip(String label, bool isDark) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: AppColors.accentBg,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.accentDark.withOpacity(0.3)),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(
+          fontSize: 12,
+          color: AppColors.accentDark,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+
+  Widget _hiringChip(String label, bool isDark) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: AppColors.warningBg,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.warning.withOpacity(0.35)),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(
+          fontSize: 12,
+          color: AppColors.warning,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+
+  Widget _socialRow(Map profile, Map user, bool isDark) {
+    final links = <MapEntry<String, String>>[];
+    final website =
+        (profile['company_website'] ?? user['website'] ?? '').toString();
+    final linkedin =
+        (profile['linkedin'] ?? user['linkedin'] ?? '').toString();
+    final twitter =
+        (profile['twitter'] ?? user['twitter'] ?? '').toString();
+    if (website.isNotEmpty) links.add(MapEntry('website', website));
+    if (linkedin.isNotEmpty) links.add(MapEntry('linkedin', linkedin));
+    if (twitter.isNotEmpty) links.add(MapEntry('twitter', twitter));
     if (links.isEmpty) return const SizedBox.shrink();
 
     return Padding(
       padding: const EdgeInsets.only(top: 14),
       child: Row(
         children: [
-          const Text(
-            'Links ',
-            style: TextStyle(fontSize: 12, color: _textLight),
+          Text(
+            'Links',
+            style: TextStyle(
+              fontSize: 12,
+              color: isDark ? AppColors.darkTextSecondary : AppColors.gray,
+            ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 10),
           ...links.map(
             (e) => Padding(
               padding: const EdgeInsets.only(right: 8),
               child: GestureDetector(
-                onTap: () => launchUrl(
-                  Uri.parse(
-                    e.value.startsWith('http') ? e.value : 'https://${e.value}',
-                  ),
-                ),
+                onTap: () => launchUrl(Uri.parse(
+                    e.value.startsWith('http')
+                        ? e.value
+                        : 'https://${e.value}')),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 5,
-                  ),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   decoration: BoxDecoration(
-                    color: _bg,
+                    color: isDark
+                        ? AppColors.primaryDark
+                        : AppColors.lightBackground,
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: _border),
+                    border: Border.all(
+                      color: isDark
+                          ? AppColors.primaryLight.withOpacity(0.3)
+                          : AppColors.borderLight,
+                    ),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(_icon(e.key), size: 13, color: _primary),
+                      Icon(_socialIcon(e.key), size: 13, color: AppColors.accent),
                       const SizedBox(width: 4),
                       Text(
-                        _label(e.key),
+                        _socialLabel(e.key),
                         style: const TextStyle(
                           fontSize: 11,
-                          color: _primary,
+                          color: AppColors.accent,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -791,66 +831,75 @@ class _ClientProfileScreenState extends State<ClientProfileScreen>
     );
   }
 
-  IconData _icon(String k) =>
-      {
-        'linkedin': Icons.work,
-        'twitter': Icons.chat,
-        'website': Icons.public,
-      }[k] ??
+  IconData _socialIcon(String k) =>
+      {'linkedin': Icons.work, 'twitter': Icons.chat, 'website': Icons.public}[
+          k] ??
       Icons.link;
-  String _label(String k) =>
+  String _socialLabel(String k) =>
       {'linkedin': 'LinkedIn', 'twitter': 'Twitter', 'website': 'Website'}[k] ??
       k;
 
   Widget _actionBtn(
-    String label,
-    IconData icon,
-    Color bg,
-    Color fg,
-    VoidCallback onTap, {
-    Border? border,
-  }) => GestureDetector(
-    onTap: onTap,
-    child: Container(
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(10),
-        border: border,
-        boxShadow: bg != Colors.transparent
-            ? [
-                BoxShadow(
-                  color: _primary.withOpacity(0.2),
-                  blurRadius: 8,
-                  offset: const Offset(0, 3),
+      String label, IconData icon, bool filled, bool isDark, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          gradient: filled ? AppColors.primaryGradient : null,
+          color: filled ? null : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+          border: filled
+              ? null
+              : Border.all(
+                  color: isDark ? AppColors.primaryLight : AppColors.primary,
+                  width: 1.5,
                 ),
-              ]
-            : null,
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, size: 16, color: fg),
-          const SizedBox(width: 6),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w700,
-              color: fg,
+          boxShadow: filled
+              ? [
+                  BoxShadow(
+                    color: AppColors.primary.withOpacity(0.25),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
+                  ),
+                ]
+              : null,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon,
+                size: 16,
+                color: filled
+                    ? AppColors.accent
+                    : (isDark
+                        ? AppColors.darkTextPrimary
+                        : AppColors.lightTextPrimary)),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                color: filled
+                    ? AppColors.accent
+                    : (isDark
+                        ? AppColors.darkTextPrimary
+                        : AppColors.lightTextPrimary),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
-    ),
-  );
+    );
+  }
 
-  Widget _profileStrengthBar(int s) {
+  Widget _profileStrengthWidget(int s, bool isDark) {
     final color = s < 40
-        ? Colors.red
+        ? AppColors.danger
         : s < 70
-        ? Colors.orange
-        : _green;
+            ? AppColors.warning
+            : AppColors.success;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -860,18 +909,12 @@ class _ClientProfileScreenState extends State<ClientProfileScreen>
             Text(
               'Profile Strength',
               style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: color,
-              ),
+                  fontSize: 12, fontWeight: FontWeight.w600, color: color),
             ),
             Text(
               '$s%',
               style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w800,
-                color: color,
-              ),
+                  fontSize: 12, fontWeight: FontWeight.w800, color: color),
             ),
           ],
         ),
@@ -881,7 +924,9 @@ class _ClientProfileScreenState extends State<ClientProfileScreen>
           child: LinearProgressIndicator(
             value: s / 100,
             minHeight: 6,
-            backgroundColor: Colors.grey.shade200,
+            backgroundColor: isDark
+                ? AppColors.primaryDark
+                : AppColors.border,
             valueColor: AlwaysStoppedAnimation(color),
           ),
         ),
@@ -890,7 +935,12 @@ class _ClientProfileScreenState extends State<ClientProfileScreen>
             padding: const EdgeInsets.only(top: 4),
             child: Text(
               'Add ${_tip(s)}',
-              style: const TextStyle(fontSize: 11, color: _textLight),
+              style: TextStyle(
+                fontSize: 11,
+                color: isDark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.gray,
+              ),
             ),
           ),
       ],
@@ -903,34 +953,35 @@ class _ClientProfileScreenState extends State<ClientProfileScreen>
     return 'preferred skills and social links';
   }
 
-  Widget _projectsTab(List<Map<String, dynamic>> projects) {
-    if (projects.isEmpty)
-      return _emptyState(
-        Icons.folder_open,
-        'No projects yet',
-        'Projects posted will appear here',
-      );
-    return Column(
-      children: projects
-          .map(
-            (p) => Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: _projectCard(p),
+  // ── Projects section card ──
+  Widget _buildProjectsSectionCard(
+      List<Map<String, dynamic>> projects, bool isDark) {
+    return _SectionCard(
+      title: 'Projects',
+      icon: Icons.folder_open_outlined,
+      isDark: isDark,
+      child: projects.isEmpty
+          ? _emptyState(Icons.folder_open, 'No projects yet',
+              'Projects posted will appear here', isDark)
+          : Column(
+              children: projects
+                  .map((p) => Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: _projectCard(p, isDark),
+                      ))
+                  .toList(),
             ),
-          )
-          .toList(),
     );
   }
 
-  Widget _projectCard(Map p) {
+  Widget _projectCard(Map p, bool isDark) {
     final status = p['status'] ?? '';
     Color statusColor = status == 'open'
-        ? _green
+        ? AppColors.success
         : status == 'in_progress'
-        ? const Color(0xFFFF8F00)
-        : _textLight;
-    String statusText =
-        {
+            ? AppColors.warning
+            : AppColors.gray;
+    String statusText = {
           'open': 'Open',
           'in_progress': 'In Progress',
           'completed': 'Completed',
@@ -940,11 +991,13 @@ class _ClientProfileScreenState extends State<ClientProfileScreen>
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: _card,
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8),
-        ],
+        color: isDark
+            ? AppColors.primaryDark.withOpacity(0.4)
+            : const Color(0xFFFAFAFA),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isDark ? AppColors.primaryDark : AppColors.borderLight,
+        ),
       ),
       child: Row(
         children: [
@@ -952,10 +1005,11 @@ class _ClientProfileScreenState extends State<ClientProfileScreen>
             width: 42,
             height: 42,
             decoration: BoxDecoration(
-              color: _primary.withOpacity(0.08),
+              color: AppColors.accentBg,
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Icon(Icons.work_outline, size: 20, color: _primary),
+            child: const Icon(Icons.work_outline,
+                size: 20, color: AppColors.accentDark),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -964,10 +1018,12 @@ class _ClientProfileScreenState extends State<ClientProfileScreen>
               children: [
                 Text(
                   p['title'] ?? '',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w700,
                     fontSize: 13,
-                    color: _textDark,
+                    color: isDark
+                        ? AppColors.darkTextPrimary
+                        : AppColors.lightTextPrimary,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -977,16 +1033,28 @@ class _ClientProfileScreenState extends State<ClientProfileScreen>
                     if (p['category'] != null)
                       Text(
                         p['category'],
-                        style: const TextStyle(fontSize: 11, color: _textLight),
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: isDark
+                              ? AppColors.darkTextSecondary
+                              : AppColors.gray,
+                        ),
                       ),
                     if (p['category'] != null && p['budget'] != null)
-                      const Text(' · ', style: TextStyle(color: _textLight)),
+                      Text(
+                        ' · ',
+                        style: TextStyle(
+                          color: isDark
+                              ? AppColors.darkTextSecondary
+                              : AppColors.gray,
+                        ),
+                      ),
                     if (p['budget'] != null)
                       Text(
                         '\$${p['budget']}',
                         style: const TextStyle(
                           fontSize: 11,
-                          color: _green,
+                          color: AppColors.success,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -996,7 +1064,8 @@ class _ClientProfileScreenState extends State<ClientProfileScreen>
             ),
           ),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
               color: statusColor.withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),
@@ -1015,154 +1084,161 @@ class _ClientProfileScreenState extends State<ClientProfileScreen>
     );
   }
 
-  Widget _aboutTab(Map profile, Map stats) {
+  // ── About section card ──
+  Widget _buildAboutSectionCard(Map profile, Map stats, bool isDark) {
     return Column(
       children: [
         if (profile['company_description'] != null &&
             profile['company_description'].toString().isNotEmpty)
-          _infoCard('About the Company', Icons.business, [
-            _ExpandableText(text: profile['company_description']),
-          ]),
-        const SizedBox(height: 12),
-        _infoCard('Hiring Details', Icons.work, [
-          if (profile['preferred_contract_type'] != null)
-            _infoRow(
-              Icons.handshake_outlined,
-              'Prefers',
-              _formatContractType(profile['preferred_contract_type']),
+          _SectionCard(
+            title: 'About the Company',
+            icon: Icons.business_outlined,
+            isDark: isDark,
+            child: _ExpandableText(
+              text: profile['company_description'],
+              isDark: isDark,
             ),
-          if (profile['budget_range_min'] != null ||
-              profile['budget_range_max'] != null)
-            _infoRow(
-              Icons.attach_money,
-              'Budget Range',
-              '\$${profile['budget_range_min'] ?? 0} - \$${profile['budget_range_max'] ?? '∞'}',
-            ),
-          if (profile['timezone'] != null)
-            _infoRow(Icons.schedule, 'Timezone', profile['timezone']),
-          _infoRow(
-            Icons.check_circle_outline,
-            'Total Hired',
-            '${stats['completed_contracts'] ?? 0} freelancers',
           ),
-          _infoRow(Icons.repeat, 'Hire Rate', '${profile['hire_rate'] ?? 0}%'),
-        ]),
+        const SizedBox(height: 14),
+        _SectionCard(
+          title: 'Hiring Details',
+          icon: Icons.work_outline,
+          isDark: isDark,
+          child: Column(
+            children: [
+              if (profile['preferred_contract_type'] != null)
+                _infoRow(
+                  Icons.handshake_outlined,
+                  'Prefers',
+                  _formatContractType(
+                      profile['preferred_contract_type']),
+                  isDark,
+                ),
+              if (profile['budget_range_min'] != null ||
+                  profile['budget_range_max'] != null)
+                _infoRow(
+                  Icons.attach_money,
+                  'Budget Range',
+                  '\$${profile['budget_range_min'] ?? 0} - \$${profile['budget_range_max'] ?? '∞'}',
+                  isDark,
+                ),
+              if (profile['timezone'] != null)
+                _infoRow(Icons.schedule, 'Timezone',
+                    profile['timezone'], isDark),
+              _infoRow(
+                Icons.check_circle_outline,
+                'Total Hired',
+                '${stats['completed_contracts'] ?? 0} freelancers',
+                isDark,
+              ),
+              _infoRow(
+                Icons.repeat,
+                'Hire Rate',
+                '${profile['hire_rate'] ?? 0}%',
+                isDark,
+              ),
+            ],
+          ),
+        ),
       ],
     );
   }
 
-  Widget _infoCard(String title, IconData icon, List<Widget> children) =>
-      Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: _card,
-          borderRadius: BorderRadius.circular(14),
-          boxShadow: [
-            BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(icon, size: 16, color: _primary),
-                const SizedBox(width: 8),
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w800,
-                    color: _textDark,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            ...children,
-          ],
-        ),
-      );
-
-  Widget _infoRow(IconData icon, String label, String value) => Padding(
-    padding: const EdgeInsets.only(bottom: 10),
-    child: Row(
-      children: [
-        Icon(icon, size: 15, color: _textLight),
-        const SizedBox(width: 10),
-        Text(
-          '$label: ',
-          style: const TextStyle(fontSize: 12, color: _textLight),
-        ),
-        Expanded(
-          child: Text(
-            value,
-            style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: _textDark,
-            ),
-          ),
-        ),
-      ],
-    ),
-  );
-
-  String _formatContractType(String t) =>
-      {
-        'hourly': 'Hourly contracts',
-        'fixed': 'Fixed-price projects',
-        'both': 'Both hourly & fixed',
-      }[t] ??
-      t;
-
-  Widget _emptyState(IconData icon, String t, String s) => Center(
-    child: Padding(
-      padding: const EdgeInsets.symmetric(vertical: 40),
-      child: Column(
+  Widget _infoRow(
+      IconData icon, String label, String value, bool isDark) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(
         children: [
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: const BoxDecoration(color: _bg, shape: BoxShape.circle),
-            child: Icon(icon, size: 40, color: _textLight),
-          ),
-          const SizedBox(height: 12),
+          Icon(icon,
+              size: 15,
+              color: isDark ? AppColors.darkTextSecondary : AppColors.gray),
+          const SizedBox(width: 10),
           Text(
-            t,
-            style: const TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w700,
-              color: _textDark,
+            '$label: ',
+            style: TextStyle(
+              fontSize: 12,
+              color: isDark ? AppColors.darkTextSecondary : AppColors.gray,
             ),
           ),
-          const SizedBox(height: 4),
-          Text(
-            s,
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 12, color: _textLight),
+          Expanded(
+            child: Text(
+              value,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: isDark
+                    ? AppColors.darkTextPrimary
+                    : AppColors.lightTextPrimary,
+              ),
+            ),
           ),
         ],
       ),
-    ),
-  );
+    );
+  }
+
+  Widget _emptyState(
+      IconData icon, String title, String sub, bool isDark) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 30),
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                color: isDark
+                    ? AppColors.primaryDark
+                    : AppColors.lightBackground,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon,
+                  size: 36,
+                  color: isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.gray),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                color: isDark
+                    ? AppColors.darkTextPrimary
+                    : AppColors.lightTextPrimary,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              sub,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 12,
+                color: isDark ? AppColors.darkTextSecondary : AppColors.gray,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
+
+// ─────────────────────────────────────────────────────────────
+//  EDIT SCREEN
+// ─────────────────────────────────────────────────────────────
 
 class EditClientProfileScreen extends StatefulWidget {
   const EditClientProfileScreen({super.key});
+
   @override
   State<EditClientProfileScreen> createState() =>
       _EditClientProfileScreenState();
 }
 
 class _EditClientProfileScreenState extends State<EditClientProfileScreen> {
-  static const Color _primary = Color(0xFF0A66C2);
-  static const Color _bg = Color(0xFFF5F7FB);
-  static const Color _card = Colors.white;
-  static const Color _textDark = Color(0xFF1A1A2E);
-  static const Color _textMid = Color(0xFF4A5568);
-  static const Color _textLight = Color(0xFF8FA3BF);
-  static const Color _border = Color(0xFFE8EDF5);
-
   Map<String, dynamic> _data = {};
   bool _loading = true, _saving = false;
 
@@ -1206,24 +1282,10 @@ class _EditClientProfileScreenState extends State<EditClientProfileScreen> {
   @override
   void dispose() {
     for (final c in [
-      _nameCtrl,
-      _taglineCtrl,
-      _bioCtrl,
-      _locationCtrl,
-      _countryCtrl,
-      _phoneCtrl,
-      _companyCtrl,
-      _industryCtrl,
-      _companyDescCtrl,
-      _companyWebCtrl,
-      _linkedinCtrl,
-      _twitterCtrl,
-      _timezoneCtrl,
-      _foundedCtrl,
-      _budgetMinCtrl,
-      _budgetMaxCtrl,
-      _skillInput,
-      _hiringInput,
+      _nameCtrl, _taglineCtrl, _bioCtrl, _locationCtrl, _countryCtrl,
+      _phoneCtrl, _companyCtrl, _industryCtrl, _companyDescCtrl,
+      _companyWebCtrl, _linkedinCtrl, _twitterCtrl, _timezoneCtrl,
+      _foundedCtrl, _budgetMinCtrl, _budgetMaxCtrl, _skillInput, _hiringInput,
     ])
       c.dispose();
     super.dispose();
@@ -1324,249 +1386,461 @@ class _EditClientProfileScreenState extends State<EditClientProfileScreen> {
         res['message']?.toString().contains('✅') == true) {
       Fluttertoast.showToast(
         msg: '✅ Profile updated!',
-        backgroundColor: _primary,
-        textColor: Colors.white,
+        backgroundColor: AppColors.primary,
+        textColor: AppColors.accent,
       );
       Navigator.pop(context, true);
     } else {
       Fluttertoast.showToast(
         msg: res['message'] ?? 'Error',
-        backgroundColor: Colors.red,
+        backgroundColor: AppColors.danger,
         textColor: Colors.white,
       );
     }
   }
 
+  void _addChip(List<String> list, TextEditingController ctrl) {
+    final s = ctrl.text.trim();
+    if (s.isNotEmpty && !list.contains(s))
+      setState(() {
+        list.add(s);
+        ctrl.clear();
+      });
+  }
+
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: _bg,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        title: const Text(
-          'Edit Profile',
-          style: TextStyle(
-            color: _textDark,
-            fontWeight: FontWeight.w800,
-            fontSize: 18,
-          ),
-        ),
-        leading: IconButton(
-          icon: const Icon(Icons.close, color: _textDark),
-          onPressed: () => Navigator.pop(context),
-        ),
-        actions: [
-          _saving
-              ? const Padding(
-                  padding: EdgeInsets.all(16),
-                  child: SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: _primary,
-                    ),
-                  ),
-                )
-              : TextButton(
-                  onPressed: _save,
-                  child: const Text(
-                    'Save',
-                    style: TextStyle(
-                      color: _primary,
-                      fontWeight: FontWeight.w800,
-                      fontSize: 15,
-                    ),
-                  ),
-                ),
-        ],
-      ),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator(color: _primary))
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  _coverAvatarSection(),
-                  const SizedBox(height: 16),
-                  _section('Personal Info', Icons.person_outline, [
-                    _field('Full Name', _nameCtrl, hint: 'Your name'),
-                    _field(
-                      'Tagline',
-                      _taglineCtrl,
-                      hint: 'What you\'re looking for',
-                      maxLength: 160,
-                    ),
-                    _field(
-                      'Bio',
-                      _bioCtrl,
-                      hint: 'Tell freelancers about yourself...',
-                      maxLines: 4,
-                    ),
-                  ]),
-                  const SizedBox(height: 16),
-                  _section('Company Info', Icons.business, [
-                    _field(
-                      'Company Name',
-                      _companyCtrl,
-                      hint: 'Your company name',
-                    ),
-                    _field(
-                      'Industry',
-                      _industryCtrl,
-                      hint: 'e.g. Software, E-commerce',
-                    ),
-                    _field(
-                      'Company Description',
-                      _companyDescCtrl,
-                      hint: 'What does your company do?',
-                      maxLines: 3,
-                    ),
-                    _field(
-                      'Company Website',
-                      _companyWebCtrl,
-                      hint: 'https://company.com',
-                      prefixIcon: Icons.public,
-                    ),
-                    _field(
-                      'Founded Year',
-                      _foundedCtrl,
-                      hint: '2020',
-                      keyboardType: TextInputType.number,
-                    ),
-                    _companySizePicker(),
-                  ]),
-                  const SizedBox(height: 16),
-                  _section('Location & Contact', Icons.location_on_outlined, [
-                    _field('Location', _locationCtrl, hint: 'City, Region'),
-                    _field('Country', _countryCtrl, hint: 'Country'),
-                    _field('Timezone', _timezoneCtrl, hint: 'e.g. GMT+3'),
-                    _field(
-                      'Phone',
-                      _phoneCtrl,
-                      hint: '+1 ···',
-                      keyboardType: TextInputType.phone,
-                    ),
-                  ]),
-                  const SizedBox(height: 16),
-                  _section('Hiring Preferences', Icons.work_outline, [
-                    _contractTypePicker(),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _field(
-                            'Min Budget (\$)',
-                            _budgetMinCtrl,
-                            hint: '100',
-                            keyboardType: TextInputType.number,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: _field(
-                            'Max Budget (\$)',
-                            _budgetMaxCtrl,
-                            hint: '5000',
-                            keyboardType: TextInputType.number,
-                          ),
-                        ),
-                      ],
-                    ),
-                    _chipsEditor(
-                      'Skills Needed',
-                      _preferredSkills,
-                      _skillInput,
-                      'Add skill...',
-                    ),
-                    _chipsEditor(
-                      'Hiring for (Project Types)',
-                      _hiringFor,
-                      _hiringInput,
-                      'e.g. Mobile App, Website...',
-                    ),
-                  ]),
-                  const SizedBox(height: 16),
-                  _section('Social Links', Icons.link, [
-                    _field(
-                      'LinkedIn',
-                      _linkedinCtrl,
-                      hint: 'https://linkedin.com/company/...',
-                      prefixIcon: Icons.work,
-                    ),
-                    _field(
-                      'Twitter',
-                      _twitterCtrl,
-                      hint: 'https://twitter.com/...',
-                      prefixIcon: Icons.chat,
-                    ),
-                  ]),
-                  const SizedBox(height: 32),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 52,
-                    child: ElevatedButton(
-                      onPressed: _saving ? null : _save,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: _primary,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        elevation: 0,
-                      ),
-                      child: _saving
-                          ? const CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 2,
-                            )
-                          : const Text(
-                              'Save Changes',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                    ),
-                  ),
-                  const SizedBox(height: 40),
-                ],
+      backgroundColor: isDark
+          ? AppColors.darkBackground
+          : AppColors.lightBackground,
+      body: Column(
+        children: [
+          // ── Top Bar ──
+          Container(
+            height: 52,
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            decoration: BoxDecoration(
+              color: isDark ? AppColors.darkSurface : AppColors.lightCard,
+              border: Border(
+                bottom: BorderSide(color: AppColors.border, width: 0.5),
               ),
             ),
+            child: Row(
+              children: [
+                IconButton(
+                  icon: Icon(Icons.close,
+                      color: isDark
+                          ? AppColors.darkTextPrimary
+                          : AppColors.lightTextPrimary,
+                      size: 20),
+                  onPressed: () => Navigator.pop(context),
+                  constraints:
+                      const BoxConstraints(minWidth: 36, minHeight: 36),
+                  padding: const EdgeInsets.all(6),
+                  splashRadius: 18,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Edit Profile',
+                  style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w700,
+                    color: isDark
+                        ? AppColors.darkTextPrimary
+                        : AppColors.lightTextPrimary,
+                  ),
+                ),
+                const Spacer(),
+                _saving
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: AppColors.accent,
+                        ),
+                      )
+                    : GestureDetector(
+                        onTap: _save,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 7),
+                          decoration: BoxDecoration(
+                            gradient: AppColors.primaryGradient,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Text(
+                            'Save',
+                            style: const TextStyle(
+                              color: AppColors.accent,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
+                      ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: _loading
+                ? const Center(
+                    child: CircularProgressIndicator(color: AppColors.accent),
+                  )
+                : SingleChildScrollView(
+                    padding: const EdgeInsets.all(20),
+                    child: LayoutBuilder(builder: (ctx, constraints) {
+                      final wide = constraints.maxWidth > 800;
+                      return Column(
+                        children: [
+                          // ── Cover & avatars ──
+                          _coverAvatarSection(isDark),
+                          const SizedBox(height: 16),
+                          if (wide)
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: Column(children: [
+                                    _formSection(
+                                      'Personal Info',
+                                      Icons.person_outline,
+                                      isDark,
+                                      [
+                                        _field('Full Name', _nameCtrl,
+                                            isDark: isDark,
+                                            hint: 'Your name'),
+                                        _field('Tagline', _taglineCtrl,
+                                            isDark: isDark,
+                                            hint:
+                                                "What you're looking for",
+                                            maxLength: 160),
+                                        _field('Bio', _bioCtrl,
+                                            isDark: isDark,
+                                            hint:
+                                                'Tell freelancers about yourself...',
+                                            maxLines: 4),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 16),
+                                    _formSection(
+                                      'Location & Contact',
+                                      Icons.location_on_outlined,
+                                      isDark,
+                                      [
+                                        _field('Location', _locationCtrl,
+                                            isDark: isDark,
+                                            hint: 'City, Region'),
+                                        _field('Country', _countryCtrl,
+                                            isDark: isDark,
+                                            hint: 'Country'),
+                                        _field('Timezone', _timezoneCtrl,
+                                            isDark: isDark,
+                                            hint: 'e.g. GMT+3'),
+                                        _field('Phone', _phoneCtrl,
+                                            isDark: isDark,
+                                            hint: '+1 ···',
+                                            keyboardType:
+                                                TextInputType.phone),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 16),
+                                    _formSection(
+                                      'Social Links',
+                                      Icons.link,
+                                      isDark,
+                                      [
+                                        _field('LinkedIn', _linkedinCtrl,
+                                            isDark: isDark,
+                                            hint:
+                                                'https://linkedin.com/company/...',
+                                            prefixIcon: Icons.work),
+                                        _field('Twitter', _twitterCtrl,
+                                            isDark: isDark,
+                                            hint:
+                                                'https://twitter.com/...',
+                                            prefixIcon: Icons.chat),
+                                      ],
+                                    ),
+                                  ]),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(children: [
+                                    _formSection(
+                                      'Company Info',
+                                      Icons.business,
+                                      isDark,
+                                      [
+                                        _field('Company Name', _companyCtrl,
+                                            isDark: isDark,
+                                            hint: 'Your company name'),
+                                        _field('Industry', _industryCtrl,
+                                            isDark: isDark,
+                                            hint:
+                                                'e.g. Software, E-commerce'),
+                                        _field(
+                                            'Company Description',
+                                            _companyDescCtrl,
+                                            isDark: isDark,
+                                            hint:
+                                                'What does your company do?',
+                                            maxLines: 3),
+                                        _field(
+                                            'Company Website',
+                                            _companyWebCtrl,
+                                            isDark: isDark,
+                                            hint: 'https://company.com',
+                                            prefixIcon: Icons.public),
+                                        _field('Founded Year', _foundedCtrl,
+                                            isDark: isDark,
+                                            hint: '2020',
+                                            keyboardType:
+                                                TextInputType.number),
+                                        _companySizePicker(isDark),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 16),
+                                    _formSection(
+                                      'Hiring Preferences',
+                                      Icons.work_outline,
+                                      isDark,
+                                      [
+                                        _contractTypePicker(isDark),
+                                        Row(children: [
+                                          Expanded(
+                                            child: _field(
+                                                'Min Budget (\$)',
+                                                _budgetMinCtrl,
+                                                isDark: isDark,
+                                                hint: '100',
+                                                keyboardType:
+                                                    TextInputType
+                                                        .number),
+                                          ),
+                                          const SizedBox(width: 12),
+                                          Expanded(
+                                            child: _field(
+                                                'Max Budget (\$)',
+                                                _budgetMaxCtrl,
+                                                isDark: isDark,
+                                                hint: '5000',
+                                                keyboardType:
+                                                    TextInputType
+                                                        .number),
+                                          ),
+                                        ]),
+                                        _chipsEditor(
+                                          'Skills Needed',
+                                          _preferredSkills,
+                                          _skillInput,
+                                          'Add skill...',
+                                          isDark,
+                                        ),
+                                        _chipsEditor(
+                                          'Hiring for (Project Types)',
+                                          _hiringFor,
+                                          _hiringInput,
+                                          'e.g. Mobile App, Website...',
+                                          isDark,
+                                        ),
+                                      ],
+                                    ),
+                                  ]),
+                                ),
+                              ],
+                            )
+                          else ...[
+                            _formSection('Personal Info', Icons.person_outline,
+                                isDark, [
+                              _field('Full Name', _nameCtrl,
+                                  isDark: isDark, hint: 'Your name'),
+                              _field('Tagline', _taglineCtrl,
+                                  isDark: isDark,
+                                  hint: "What you're looking for",
+                                  maxLength: 160),
+                              _field('Bio', _bioCtrl,
+                                  isDark: isDark,
+                                  hint:
+                                      'Tell freelancers about yourself...',
+                                  maxLines: 4),
+                            ]),
+                            const SizedBox(height: 16),
+                            _formSection('Company Info', Icons.business,
+                                isDark, [
+                              _field('Company Name', _companyCtrl,
+                                  isDark: isDark,
+                                  hint: 'Your company name'),
+                              _field('Industry', _industryCtrl,
+                                  isDark: isDark,
+                                  hint: 'e.g. Software, E-commerce'),
+                              _field('Company Description', _companyDescCtrl,
+                                  isDark: isDark,
+                                  hint: 'What does your company do?',
+                                  maxLines: 3),
+                              _field('Company Website', _companyWebCtrl,
+                                  isDark: isDark,
+                                  hint: 'https://company.com',
+                                  prefixIcon: Icons.public),
+                              _field('Founded Year', _foundedCtrl,
+                                  isDark: isDark,
+                                  hint: '2020',
+                                  keyboardType: TextInputType.number),
+                              _companySizePicker(isDark),
+                            ]),
+                            const SizedBox(height: 16),
+                            _formSection(
+                                'Location & Contact',
+                                Icons.location_on_outlined,
+                                isDark, [
+                              _field('Location', _locationCtrl,
+                                  isDark: isDark, hint: 'City, Region'),
+                              _field('Country', _countryCtrl,
+                                  isDark: isDark, hint: 'Country'),
+                              _field('Timezone', _timezoneCtrl,
+                                  isDark: isDark, hint: 'e.g. GMT+3'),
+                              _field('Phone', _phoneCtrl,
+                                  isDark: isDark,
+                                  hint: '+1 ···',
+                                  keyboardType: TextInputType.phone),
+                            ]),
+                            const SizedBox(height: 16),
+                            _formSection(
+                                'Hiring Preferences', Icons.work_outline,
+                                isDark, [
+                              _contractTypePicker(isDark),
+                              Row(children: [
+                                Expanded(
+                                  child: _field('Min Budget (\$)',
+                                      _budgetMinCtrl,
+                                      isDark: isDark,
+                                      hint: '100',
+                                      keyboardType: TextInputType.number),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: _field('Max Budget (\$)',
+                                      _budgetMaxCtrl,
+                                      isDark: isDark,
+                                      hint: '5000',
+                                      keyboardType: TextInputType.number),
+                                ),
+                              ]),
+                              _chipsEditor('Skills Needed', _preferredSkills,
+                                  _skillInput, 'Add skill...', isDark),
+                              _chipsEditor(
+                                  'Hiring for (Project Types)',
+                                  _hiringFor,
+                                  _hiringInput,
+                                  'e.g. Mobile App, Website...',
+                                  isDark),
+                            ]),
+                            const SizedBox(height: 16),
+                            _formSection(
+                                'Social Links', Icons.link, isDark, [
+                              _field('LinkedIn', _linkedinCtrl,
+                                  isDark: isDark,
+                                  hint:
+                                      'https://linkedin.com/company/...',
+                                  prefixIcon: Icons.work),
+                              _field('Twitter', _twitterCtrl,
+                                  isDark: isDark,
+                                  hint: 'https://twitter.com/...',
+                                  prefixIcon: Icons.chat),
+                            ]),
+                          ],
+                          const SizedBox(height: 24),
+                          // ── Save button ──
+                          SizedBox(
+                            width: double.infinity,
+                            height: 50,
+                            child: ElevatedButton(
+                              onPressed: _saving ? null : _save,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.transparent,
+                                shadowColor: Colors.transparent,
+                                padding: EdgeInsets.zero,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                              ),
+                              child: Ink(
+                                decoration: BoxDecoration(
+                                  gradient: AppColors.primaryGradient,
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                child: Center(
+                                  child: _saving
+                                      ? const CircularProgressIndicator(
+                                          color: AppColors.accent,
+                                          strokeWidth: 2,
+                                        )
+                                      : const Text(
+                                          'Save Changes',
+                                          style: TextStyle(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w800,
+                                            color: AppColors.accent,
+                                          ),
+                                        ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 40),
+                        ],
+                      );
+                    }),
+                  ),
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _coverAvatarSection() {
+  // ── Cover / Avatar / Logo section ──
+  Widget _coverAvatarSection(bool isDark) {
     final u = Map<String, dynamic>.from(_data['user'] ?? {});
     final p = Map<String, dynamic>.from(_data['profile'] ?? {});
-    final existingCover = ProfileApiService.fullImageUrl(u['cover_image']);
-    final existingAvatar = ProfileApiService.fullImageUrl(u['avatar']);
-    final existingLogo = ProfileApiService.fullImageUrl(p['company_logo']);
+    final existingCover =
+        ProfileApiService.fullImageUrl(u['cover_image']);
+    final existingAvatar =
+        ProfileApiService.fullImageUrl(u['avatar']);
+    final existingLogo =
+        ProfileApiService.fullImageUrl(p['company_logo']);
     final name = u['name'] ?? 'C';
 
     return Container(
       decoration: BoxDecoration(
-        color: _card,
-        borderRadius: BorderRadius.circular(16),
+        color: isDark ? AppColors.darkCard : AppColors.lightCard,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: isDark ? AppColors.primaryDark : AppColors.borderLight,
+        ),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10),
+          BoxShadow(
+            color: isDark
+                ? Colors.black.withOpacity(0.25)
+                : const Color(0x08000000),
+            blurRadius: 14,
+            offset: const Offset(0, 4),
+          ),
         ],
       ),
       child: Column(
         children: [
+          // ── Cover ──
           GestureDetector(
             onTap: () => _pickImg('cover'),
-            child: Container(
-              height: 130,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(16),
-                ),
-              ),
-              child: ClipRRect(
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(16),
-                ),
+            child: ClipRRect(
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(18)),
+              child: SizedBox(
+                height: 130,
+                width: double.infinity,
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
@@ -1574,35 +1848,31 @@ class _EditClientProfileScreenState extends State<EditClientProfileScreen> {
                       Image.memory(_coverBytes!, fit: BoxFit.cover)
                     else if (existingCover.isNotEmpty)
                       CachedNetworkImage(
-                        imageUrl: existingCover,
-                        fit: BoxFit.cover,
-                      )
+                          imageUrl: existingCover, fit: BoxFit.cover)
                     else
                       Container(
                         decoration: const BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              Color(0xFF0A3D6B),
-                              Color(0xFF0A66C2),
-                              Color(0xFF1DA1F2),
-                            ],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                        ),
+                            gradient: AppColors.primaryGradient),
                       ),
-                    Container(color: Colors.black26),
-                    const Center(
+                    Container(color: Colors.black.withOpacity(0.25)),
+                    Center(
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(
-                            Icons.add_photo_alternate,
-                            color: Colors.white,
-                            size: 26,
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.15),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.add_photo_alternate,
+                              color: Colors.white,
+                              size: 22,
+                            ),
                           ),
-                          SizedBox(height: 4),
-                          Text(
+                          const SizedBox(height: 6),
+                          const Text(
                             'Change Cover',
                             style: TextStyle(
                               color: Colors.white,
@@ -1623,96 +1893,117 @@ class _EditClientProfileScreenState extends State<EditClientProfileScreen> {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // ── Avatar ──
                 GestureDetector(
                   onTap: () => _pickImg('avatar'),
                   child: Stack(
                     children: [
                       Container(
-                        width: 64,
-                        height: 64,
+                        width: 68,
+                        height: 68,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white, width: 2),
-                          color: _primary,
+                          border:
+                              Border.all(color: Colors.white, width: 2.5),
+                          gradient: AppColors.primaryGradient,
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.primary.withOpacity(0.25),
+                              blurRadius: 10,
+                            ),
+                          ],
                         ),
                         child: ClipOval(
                           child: _avatarBytes != null
-                              ? Image.memory(_avatarBytes!, fit: BoxFit.cover)
+                              ? Image.memory(_avatarBytes!,
+                                  fit: BoxFit.cover)
                               : existingAvatar.isNotEmpty
-                              ? CachedNetworkImage(
-                                  imageUrl: existingAvatar,
-                                  fit: BoxFit.cover,
-                                )
-                              : Center(
-                                  child: Text(
-                                    name[0].toUpperCase(),
-                                    style: const TextStyle(
-                                      fontSize: 22,
-                                      fontWeight: FontWeight.w800,
-                                      color: Colors.white,
+                                  ? CachedNetworkImage(
+                                      imageUrl: existingAvatar,
+                                      fit: BoxFit.cover)
+                                  : Center(
+                                      child: Text(
+                                        name[0].toUpperCase(),
+                                        style: const TextStyle(
+                                          fontSize: 24,
+                                          fontWeight: FontWeight.w800,
+                                          color: AppColors.accent,
+                                        ),
+                                      ),
                                     ),
-                                  ),
-                                ),
                         ),
                       ),
                       Positioned(
                         bottom: 0,
                         right: 0,
                         child: Container(
-                          width: 20,
-                          height: 20,
+                          width: 22,
+                          height: 22,
                           decoration: BoxDecoration(
-                            color: _primary,
+                            color: AppColors.accent,
                             shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white, width: 1.5),
+                            border: Border.all(
+                                color: isDark
+                                    ? AppColors.darkCard
+                                    : Colors.white,
+                                width: 1.5),
                           ),
                           child: const Icon(
                             Icons.edit,
-                            size: 10,
-                            color: Colors.white,
+                            size: 12,
+                            color: AppColors.primaryDark,
                           ),
                         ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 14),
+                // ── Logo ──
                 Expanded(
                   child: GestureDetector(
                     onTap: () => _pickImg('logo'),
                     child: Container(
                       padding: const EdgeInsets.all(12),
-                      height: 64,
+                      height: 68,
                       decoration: BoxDecoration(
-                        border: Border.all(color: _border),
-                        borderRadius: BorderRadius.circular(10),
-                        color: _bg,
+                        color: isDark
+                            ? AppColors.primaryDark
+                            : AppColors.lightBackground,
+                        border: Border.all(
+                          color: isDark
+                              ? AppColors.primaryLight.withOpacity(0.3)
+                              : AppColors.borderLight,
+                        ),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                       child: _logoBytes != null
                           ? Image.memory(_logoBytes!, fit: BoxFit.contain)
                           : existingLogo.isNotEmpty
-                          ? CachedNetworkImage(
-                              imageUrl: existingLogo,
-                              fit: BoxFit.contain,
-                            )
-                          : Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: const [
-                                Icon(
-                                  Icons.business,
-                                  color: Color(0xFF8FA3BF),
-                                  size: 18,
+                              ? CachedNetworkImage(
+                                  imageUrl: existingLogo,
+                                  fit: BoxFit.contain)
+                              : Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.business,
+                                        color: isDark
+                                            ? AppColors.darkTextSecondary
+                                            : AppColors.gray,
+                                        size: 18),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      'Upload Company Logo',
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        color: isDark
+                                            ? AppColors.darkTextSecondary
+                                            : AppColors.gray,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                SizedBox(width: 6),
-                                Text(
-                                  'Upload Company Logo',
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    color: Color(0xFF8FA3BF),
-                                  ),
-                                ),
-                              ],
-                            ),
                     ),
                   ),
                 ),
@@ -1724,356 +2015,559 @@ class _EditClientProfileScreenState extends State<EditClientProfileScreen> {
     );
   }
 
-  Widget _section(String title, IconData icon, List<Widget> children) =>
-      Container(
-        decoration: BoxDecoration(
-          color: _card,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10),
-          ],
+  // ── Form section wrapper ──
+  Widget _formSection(
+      String title, IconData icon, bool isDark, List<Widget> children) {
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.darkCard : AppColors.lightCard,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDark ? AppColors.primaryDark : AppColors.borderLight,
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(7),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFE8F0FD),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(icon, size: 16, color: _primary),
+        boxShadow: [
+          BoxShadow(
+            color: isDark
+                ? Colors.black.withOpacity(0.2)
+                : const Color(0x06000000),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(7),
+                  decoration: BoxDecoration(
+                    color: AppColors.accentBg,
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  const SizedBox(width: 10),
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w800,
-                      color: _textDark,
-                    ),
+                  child: Icon(icon, size: 16, color: AppColors.accentDark),
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                    color: isDark
+                        ? AppColors.darkTextPrimary
+                        : AppColors.lightTextPrimary,
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-            const Divider(height: 1, color: _border),
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: children
-                    .map(
-                      (c) => Padding(
+          ),
+          Divider(
+              height: 1,
+              color:
+                  isDark ? AppColors.primaryDark : AppColors.borderLight),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: children
+                  .map((c) => Padding(
                         padding: const EdgeInsets.only(bottom: 12),
                         child: c,
-                      ),
-                    )
-                    .toList(),
-              ),
+                      ))
+                  .toList(),
             ),
-          ],
-        ),
-      );
+          ),
+        ],
+      ),
+    );
+  }
 
+  // ── Field ──
   Widget _field(
     String label,
     TextEditingController ctrl, {
+    required bool isDark,
     String? hint,
     int maxLines = 1,
     TextInputType? keyboardType,
     int? maxLength,
     IconData? prefixIcon,
-  }) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text(
-        label,
-        style: const TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w700,
-          color: _textMid,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+            color: isDark
+                ? AppColors.darkTextSecondary
+                : AppColors.lightTextSecondary,
+          ),
         ),
-      ),
-      const SizedBox(height: 6),
-      TextFormField(
-        controller: ctrl,
-        maxLines: maxLines,
-        keyboardType: keyboardType,
-        maxLength: maxLength,
-        decoration: InputDecoration(
-          hintText: hint,
-          hintStyle: const TextStyle(color: _textLight, fontSize: 13),
-          prefixIcon: prefixIcon != null
-              ? Icon(prefixIcon, size: 16, color: _textLight)
-              : null,
-          filled: true,
-          fillColor: _bg,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 14,
-            vertical: 12,
+        const SizedBox(height: 6),
+        TextFormField(
+          controller: ctrl,
+          maxLines: maxLines,
+          keyboardType: keyboardType,
+          maxLength: maxLength,
+          style: TextStyle(
+            fontSize: 13,
+            color: isDark
+                ? AppColors.darkTextPrimary
+                : AppColors.lightTextPrimary,
           ),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: _border),
+          decoration: InputDecoration(
+            hintText: hint,
+            hintStyle: TextStyle(
+              color: isDark
+                  ? AppColors.darkTextHint
+                  : AppColors.lightTextHint,
+              fontSize: 13,
+            ),
+            prefixIcon: prefixIcon != null
+                ? Icon(prefixIcon,
+                    size: 16,
+                    color: isDark
+                        ? AppColors.darkTextSecondary
+                        : AppColors.gray)
+                : null,
+            filled: true,
+            fillColor: isDark
+                ? AppColors.primaryDark.withOpacity(0.5)
+                : AppColors.lightBackground,
+            contentPadding: const EdgeInsets.symmetric(
+                horizontal: 14, vertical: 12),
+            counterText: '',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: BorderSide(
+                color: isDark
+                    ? AppColors.primaryLight.withOpacity(0.3)
+                    : AppColors.borderLight,
+              ),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: BorderSide(
+                color: isDark
+                    ? AppColors.primaryLight.withOpacity(0.3)
+                    : AppColors.borderLight,
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide:
+                  const BorderSide(color: AppColors.accent, width: 1.5),
+            ),
           ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: _border),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: _primary, width: 1.5),
-          ),
-          counterText: '',
         ),
-        style: const TextStyle(fontSize: 13, color: _textDark),
-      ),
-    ],
-  );
+      ],
+    );
+  }
 
-  Widget _companySizePicker() => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      const Text(
-        'Company Size',
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w700,
-          color: _textMid,
+  // ── Company size picker ──
+  Widget _companySizePicker(bool isDark) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Company Size',
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+            color: isDark
+                ? AppColors.darkTextSecondary
+                : AppColors.lightTextSecondary,
+          ),
         ),
-      ),
-      const SizedBox(height: 8),
-      Wrap(
-        spacing: 8,
-        runSpacing: 6,
-        children: ['1', '2-10', '11-50', '51-200', '201-1000', '1000+']
-            .map(
-              (s) => GestureDetector(
-                onTap: () => setState(() => _companySize = s),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 7,
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 6,
+          children: ['1', '2-10', '11-50', '51-200', '201-1000', '1000+']
+              .map((s) {
+            final sel = _companySize == s;
+            return GestureDetector(
+              onTap: () => setState(() => _companySize = s),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 12, vertical: 7),
+                decoration: BoxDecoration(
+                  gradient: sel ? AppColors.primaryGradient : null,
+                  color: sel
+                      ? null
+                      : (isDark
+                          ? AppColors.primaryDark
+                          : AppColors.lightBackground),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: sel
+                        ? AppColors.accent
+                        : (isDark
+                            ? AppColors.primaryLight.withOpacity(0.3)
+                            : AppColors.borderLight),
                   ),
-                  decoration: BoxDecoration(
-                    color: _companySize == s ? _primary : _bg,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: _companySize == s ? _primary : _border,
-                    ),
-                  ),
-                  child: Text(
-                    s,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: _companySize == s ? Colors.white : _textMid,
-                    ),
+                ),
+                child: Text(
+                  s,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: sel
+                        ? AppColors.accent
+                        : (isDark
+                            ? AppColors.darkTextSecondary
+                            : AppColors.gray),
                   ),
                 ),
               ),
-            )
-            .toList(),
-      ),
-    ],
-  );
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
 
-  Widget _contractTypePicker() => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      const Text(
-        'Preferred Contract Type',
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w700,
-          color: _textMid,
+  // ── Contract type picker ──
+  Widget _contractTypePicker(bool isDark) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Preferred Contract Type',
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+            color: isDark
+                ? AppColors.darkTextSecondary
+                : AppColors.lightTextSecondary,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            _cBtn('Hourly', 'hourly', isDark),
+            const SizedBox(width: 8),
+            _cBtn('Fixed Price', 'fixed', isDark),
+            const SizedBox(width: 8),
+            _cBtn('Both', 'both', isDark),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _cBtn(String label, String val, bool isDark) {
+    final sel = _contractType == val;
+    return GestureDetector(
+      onTap: () => setState(() => _contractType = val),
+      child: Container(
+        padding:
+            const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          gradient: sel ? AppColors.primaryGradient : null,
+          color: sel
+              ? null
+              : (isDark
+                  ? AppColors.primaryDark
+                  : AppColors.lightBackground),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: sel
+                ? AppColors.accent
+                : (isDark
+                    ? AppColors.primaryLight.withOpacity(0.3)
+                    : AppColors.borderLight),
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: sel
+                ? AppColors.accent
+                : (isDark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.gray),
+          ),
         ),
       ),
-      const SizedBox(height: 8),
-      Row(
-        children: [
-          _cBtn('Hourly', 'hourly'),
-          const SizedBox(width: 8),
-          _cBtn('Fixed Price', 'fixed'),
-          const SizedBox(width: 8),
-          _cBtn('Both', 'both'),
-        ],
-      ),
-    ],
-  );
+    );
+  }
 
-  Widget _cBtn(String label, String val) => GestureDetector(
-    onTap: () => setState(() => _contractType = val),
-    child: Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: _contractType == val ? _primary : _bg,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: _contractType == val ? _primary : _border),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          color: _contractType == val ? Colors.white : _textMid,
-        ),
-      ),
-    ),
-  );
-
+  // ── Chips editor ──
   Widget _chipsEditor(
     String label,
     List<String> list,
     TextEditingController ctrl,
     String hint,
-  ) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text(
-        label,
-        style: const TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w700,
-          color: _textMid,
+    bool isDark,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+            color: isDark
+                ? AppColors.darkTextSecondary
+                : AppColors.lightTextSecondary,
+          ),
         ),
-      ),
-      const SizedBox(height: 6),
-      Row(
-        children: [
-          Expanded(
-            child: TextFormField(
-              controller: ctrl,
-              decoration: InputDecoration(
-                hintText: hint,
-                filled: true,
-                fillColor: _bg,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 10,
+        const SizedBox(height: 6),
+        Row(
+          children: [
+            Expanded(
+              child: TextFormField(
+                controller: ctrl,
+                style: TextStyle(
+                  fontSize: 13,
+                  color: isDark
+                      ? AppColors.darkTextPrimary
+                      : AppColors.lightTextPrimary,
                 ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: const BorderSide(color: _border),
+                decoration: InputDecoration(
+                  hintText: hint,
+                  hintStyle: TextStyle(
+                    color: isDark
+                        ? AppColors.darkTextHint
+                        : AppColors.lightTextHint,
+                  ),
+                  filled: true,
+                  fillColor: isDark
+                      ? AppColors.primaryDark.withOpacity(0.5)
+                      : AppColors.lightBackground,
+                  contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 12, vertical: 10),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(
+                      color: isDark
+                          ? AppColors.primaryLight.withOpacity(0.3)
+                          : AppColors.borderLight,
+                    ),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(
+                      color: isDark
+                          ? AppColors.primaryLight.withOpacity(0.3)
+                          : AppColors.borderLight,
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(
+                        color: AppColors.accent),
+                  ),
                 ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: const BorderSide(color: _border),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: const BorderSide(color: _primary),
-                ),
+                onFieldSubmitted: (_) => _addChip(list, ctrl),
               ),
-              style: const TextStyle(fontSize: 13),
-              onFieldSubmitted: (_) => _addChip(list, ctrl),
             ),
-          ),
-          const SizedBox(width: 8),
-          GestureDetector(
-            onTap: () => _addChip(list, ctrl),
-            child: Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: _primary,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: const Icon(Icons.add, color: Colors.white, size: 18),
-            ),
-          ),
-        ],
-      ),
-      const SizedBox(height: 8),
-      Wrap(
-        spacing: 8,
-        runSpacing: 6,
-        children: list
-            .asMap()
-            .entries
-            .map(
-              (e) => Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 5,
-                ),
+            const SizedBox(width: 8),
+            GestureDetector(
+              onTap: () => _addChip(list, ctrl),
+              child: Container(
+                padding: const EdgeInsets.all(11),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFE8F0FD),
-                  borderRadius: BorderRadius.circular(20),
+                  gradient: AppColors.primaryGradient,
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      e.value,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: _primary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    GestureDetector(
-                      onTap: () => setState(() => list.removeAt(e.key)),
-                      child: const Icon(Icons.close, size: 14, color: _primary),
-                    ),
-                  ],
-                ),
+                child: const Icon(Icons.add,
+                    color: AppColors.accent, size: 18),
               ),
-            )
-            .toList(),
-      ),
-    ],
-  );
-
-  void _addChip(List<String> list, TextEditingController ctrl) {
-    final s = ctrl.text.trim();
-    if (s.isNotEmpty && !list.contains(s))
-      setState(() {
-        list.add(s);
-        ctrl.clear();
-      });
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 6,
+          children: list
+              .asMap()
+              .entries
+              .map(
+                (e) => Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: AppColors.accentBg,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                        color:
+                            AppColors.accentDark.withOpacity(0.3)),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        e.value,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppColors.accentDark,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(width: 5),
+                      GestureDetector(
+                        onTap: () =>
+                            setState(() => list.removeAt(e.key)),
+                        child: const Icon(Icons.close,
+                            size: 14, color: AppColors.accentDark),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+              .toList(),
+        ),
+      ],
+    );
   }
 }
 
+// ─────────────────────────────────────────────────────────────
+//  SHARED WIDGETS
+// ─────────────────────────────────────────────────────────────
+
+/// Reusable section card matching dashboard _SectionCard style
+class _SectionCard extends StatelessWidget {
+  final String title;
+  final IconData icon;
+  final bool isDark;
+  final Widget child;
+  final String? action;
+  final VoidCallback? onAction;
+
+  const _SectionCard({
+    required this.title,
+    required this.icon,
+    required this.isDark,
+    required this.child,
+    this.action,
+    this.onAction,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.darkCard : AppColors.lightCard,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDark ? AppColors.primaryDark : AppColors.borderLight,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: isDark
+                ? Colors.black.withOpacity(0.2)
+                : const Color(0x08000000),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(7),
+                    decoration: BoxDecoration(
+                      color: AppColors.accentBg,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child:
+                        Icon(icon, size: 15, color: AppColors.accentDark),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: isDark
+                          ? AppColors.darkTextPrimary
+                          : AppColors.lightTextPrimary,
+                    ),
+                  ),
+                ],
+              ),
+              if (action != null && onAction != null)
+                GestureDetector(
+                  onTap: onAction,
+                  child: const Text(
+                    'See all',
+                    style: TextStyle(
+                        fontSize: 11, color: AppColors.accent),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          child,
+        ],
+      ),
+    );
+  }
+}
+
+/// Expandable bio text
 class _ExpandableText extends StatefulWidget {
   final String text;
-  const _ExpandableText({required this.text});
+  final bool isDark;
+  const _ExpandableText({required this.text, required this.isDark});
+
   @override
   State<_ExpandableText> createState() => _ExpandableTextState();
 }
 
 class _ExpandableTextState extends State<_ExpandableText> {
   bool _exp = false;
+
   @override
-  Widget build(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text(
-        widget.text,
-        maxLines: _exp ? null : 4,
-        overflow: _exp ? null : TextOverflow.ellipsis,
-        style: const TextStyle(
-          fontSize: 13,
-          color: Color(0xFF4A5568),
-          height: 1.6,
-        ),
-      ),
-      if (widget.text.length > 200)
-        GestureDetector(
-          onTap: () => setState(() => _exp = !_exp),
-          child: Text(
-            _exp ? 'Show less' : 'Show more',
-            style: const TextStyle(
-              fontSize: 12,
-              color: Color(0xFF0A66C2),
-              fontWeight: FontWeight.w700,
-            ),
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          widget.text,
+          maxLines: _exp ? null : 4,
+          overflow: _exp ? null : TextOverflow.ellipsis,
+          style: TextStyle(
+            fontSize: 13,
+            color: widget.isDark
+                ? AppColors.darkTextSecondary
+                : AppColors.lightTextSecondary,
+            height: 1.6,
           ),
         ),
-    ],
-  );
+        if (widget.text.length > 200)
+          GestureDetector(
+            onTap: () => setState(() => _exp = !_exp),
+            child: Text(
+              _exp ? 'Show less' : 'Show more',
+              style: const TextStyle(
+                fontSize: 12,
+                color: AppColors.accent,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
 }

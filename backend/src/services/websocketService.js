@@ -14,7 +14,7 @@ export const initWebSocket = (server) => {
       origin: [
         "http://localhost:3000",
         "http://localhost:5000",
-        "http://localhost:5001",
+        "https://spoils-defog-nylon.ngrok-free.dev",
         "http://127.0.0.1:3000",
       ],
       methods: ["GET", "POST"],

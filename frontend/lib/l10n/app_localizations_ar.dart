@@ -48,7 +48,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get profile => 'الملف الشخصي';
 
   @override
-  String get freelancer => 'الفريلانسر';
+  String get freelancer => 'مستقل';
 
   @override
   String get jobSuccessScore => 'نسبة النجاح';
@@ -186,10 +186,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get noImage => 'لا توجد صورة';
 
   @override
-  String get reviews => 'مراجعات';
+  String get reviews => 'تقييم';
 
   @override
-  String get analytics => 'الإحصائيات';
+  String get analytics => 'التحليلات';
 
   @override
   String get noReviewsYet => 'لا توجد تقييمات بعد';
@@ -804,7 +804,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get inProgress => 'قيد التنفيذ';
 
   @override
-  String get completed => 'مكتمل';
+  String get completed => 'مكتملة';
 
   @override
   String get pending => 'معلق';
@@ -4202,7 +4202,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get commission => 'Commission';
 
   @override
-  String get edit => 'Edit';
+  String get edit => 'تعديل';
 
   @override
   String get pause => 'إيقاف';
@@ -5090,4 +5090,115 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get avgCpc => 'متوسط CPC';
+
+  @override
+  String get contactOptions => 'خيارات التواصل';
+
+  @override
+  String get addToFavorites => 'إضافة إلى المفضلة';
+
+  @override
+  String get loading_profile => 'جاري تحميل الملف الشخصي...';
+
+  @override
+  String get verified_business => 'عمل تجاري موثق';
+
+  @override
+  String get individual_client => 'عميل فردي';
+
+  @override
+  String get total_spent => 'إجمالي الإنفاق';
+
+  @override
+  String get hire_rate => 'معدل التوظيف';
+
+  @override
+  String get since => 'منذ';
+
+  @override
+  String get follow => 'متابعة';
+
+  @override
+  String get achievements => 'الإنجازات';
+
+  @override
+  String get top_client => 'أفضل عميل';
+
+  @override
+  String get badge => 'شارة';
+
+  @override
+  String get company_information => 'معلومات الشركة';
+
+  @override
+  String get company_size => 'حجم الشركة';
+
+  @override
+  String get not_specified => 'غير محدد';
+
+  @override
+  String get founded => 'تأسست';
+
+  @override
+  String get hiring_statistics => 'إحصائيات التوظيف';
+
+  @override
+  String get avg_budget => 'متوسط الميزانية';
+
+  @override
+  String get active_contracts => 'العقود النشطة';
+
+  @override
+  String get client_rating => 'تقييم العميل';
+
+  @override
+  String get repeat_hire_rate => 'معدل إعادة التوظيف';
+
+  @override
+  String get jobs => 'الوظائف';
+
+  @override
+  String get about_company => 'عن الشركة';
+
+  @override
+  String get preferred_skills => 'المهارات المفضلة';
+
+  @override
+  String get currently_hiring_for => 'نبحث حالياً عن';
+
+  @override
+  String get communication_methods => 'طرق التواصل';
+
+  @override
+  String get project_management_tools => 'أدوات إدارة المشاريع';
+
+  @override
+  String get no_active_jobs => 'لا توجد وظائف نشطة';
+
+  @override
+  String get post_job_to_start => 'انشر وظيفة لبدء توظيف المستقلين';
+
+  @override
+  String get client_no_jobs => 'لم ينشر هذا العميل أي وظائف حتى الآن';
+
+  @override
+  String get job_title => 'عنوان الوظيفة';
+
+  @override
+  String get no_reviews_yet => 'لا توجد تقييمات بعد';
+
+  @override
+  String get reviews_will_appear => 'ستظهر تقييمات المستقلين هنا';
+
+  @override
+  String get profile_views => 'مشاهدات الملف';
+
+  @override
+  String get jobs_posted => 'الوظائف المنشورة';
+
+  @override
+  String get invitations_sent => 'الدعوات المرسلة';
+
+  @override
+  String get applications_received => 'الطلبات المستلمة';
 }

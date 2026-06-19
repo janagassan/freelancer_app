@@ -468,24 +468,22 @@ class _MyProjectsScreenState extends State<MyProjectsScreen> {
                       radius: 18,
                       backgroundColor: Colors.transparent,
                       backgroundImage:
-                          project.client?.avatar != null &&
-                              project.client!.avatar!.isNotEmpty
-                          ? NetworkImage(project.client!.avatar!)
-                          : null,
-                      child:
-                          project.client?.avatar == null ||
-                              project.client!.avatar!.isEmpty
-                          ? Text(
-                              project.client?.name?[0].toUpperCase() ??
-                                  t.client[0],
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            )
-                          : null,
-                    ),
+                      project.client?.avatar != null &&
+                          project.client!.avatar!.isNotEmpty
+                      ? NetworkImage(_getAvatarUrl(project.client!.avatar!))
+                      : null,
+                  child: project.client?.avatar == null
+                      ? Text(
+                          project.client?.name?[0].toUpperCase() ??
+                              'C',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.accent,
+                          ),
+                        )
+                      : null,
+                )
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -746,6 +744,15 @@ class _MyProjectsScreenState extends State<MyProjectsScreen> {
     ),
   );
 }
+
+String _getAvatarUrl(String? avatar) {
+    if (avatar == null || avatar.isEmpty) return '';
+    if (avatar.startsWith('http')) return avatar;
+    if (avatar.startsWith('/uploads')) {
+      return 'http://localhost:5001$avatar';
+    }
+    return avatar;
+  }
 
   @override
   Widget build(BuildContext context) {

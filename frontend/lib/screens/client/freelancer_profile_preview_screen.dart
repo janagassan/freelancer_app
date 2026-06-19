@@ -163,28 +163,59 @@ class _FreelancerProfilePreviewScreenState
   }
 
   Future<void> _loadFreelancerProfile() async {
-    setState(() => _loading = true);
-    try {
-      final data = await ApiService.getFreelancerPublicProfile(
-        widget.freelancerId,
+  print('🔍 === LOADING FREELANCER PROFILE ===');
+  print('📌 Freelancer ID: ${widget.freelancerId}');
+  
+  setState(() => _loading = true);
+  try {
+    final data = await ApiService.getFreelancerPublicProfile(
+      widget.freelancerId,
+    );
+    
+    print('📥 Raw API Response:');
+    print('  - Keys: ${data.keys}');
+    print('  - User exists: ${data.containsKey('user')}');
+    print('  - Profile exists: ${data.containsKey('profile')}');
+    
+    if (data.containsKey('user')) {
+      final user = data['user'];
+      print('👤 User data:');
+      print('  - name: ${user['name']}');
+      print('  - email: ${user['email']}');
+      print('  - phone: ${user['phone']}');
+      print('  - website: ${user['website']}');
+      print('  - linkedin: ${user['linkedin']}');
+      print('  - github: ${user['github']}');
+    }
+    
+    if (data.containsKey('profile')) {
+      final profile = data['profile'];
+      print('📋 Profile data:');
+      print('  - website: ${profile['website']}');
+      print('  - linkedin: ${profile['linkedin']}');
+      print('  - github: ${profile['github']}');
+      print('  - behance: ${profile['behance']}');
+    }
+    
+    if (mounted) {
+      setState(() {
+        _profileData = data;
+        _loading = false;
+      });
+      print('✅ Profile loaded successfully');
+    }
+  } catch (e) {
+    print('❌ Error loading profile: $e');
+    if (mounted) {
+      setState(() => _loading = false);
+      final t = AppLocalizations.of(context)!;
+      Fluttertoast.showToast(
+        msg: '${t.errorLoadingProfile}: $e',
+        backgroundColor: AppColors.danger,
       );
-      if (mounted) {
-        setState(() {
-          _profileData = data;
-          _loading = false;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() => _loading = false);
-        final t = AppLocalizations.of(context)!;
-        Fluttertoast.showToast(
-          msg: '${t.errorLoadingProfile}: $e',
-          backgroundColor: AppColors.danger,
-        );
-      }
     }
   }
+}
 
   Future<void> _startChat() async {
     final t = AppLocalizations.of(context)!;
@@ -326,7 +357,292 @@ class _FreelancerProfilePreviewScreenState
       ],
     );
   }
+  // screens/client/freelancer_profile_preview_screen.dart
+// أضف هذه الدوال في _FreelancerProfilePreviewScreenState
 
+Future<void> _showContactOptions() async {
+  final t = AppLocalizations.of(context)!;
+  
+  // === DEBUG: طباعة البيانات القادمة من API ===
+  print('🔍 === CONTACT OPTIONS DEBUG ===');
+  print('📦 Full _profileData keys: ${_profileData.keys}');
+  
+  final user = _profileData['user'] ?? {};
+  final profile = _profileData['profile'] ?? {};
+  
+  print('👤 User data:');
+  print('  - name: ${user['name']}');
+  print('  - email: ${user['email']}');
+  print('  - phone: ${user['phone']}');
+  print('  - website: ${user['website']}');
+  print('  - linkedin: ${user['linkedin']}');
+  print('  - github: ${user['github']}');
+  print('  - twitter: ${user['twitter']}');
+  
+  print('📋 Profile data:');
+  print('  - website: ${profile['website']}');
+  print('  - linkedin: ${profile['linkedin']}');
+  print('  - github: ${profile['github']}');
+  print('  - behance: ${profile['behance']}');
+  print('  - dribbble: ${profile['dribbble']}');
+  
+  // جلب معلومات التواصل من البيانات
+  final email = user['email']?.toString();
+  final phone = user['phone']?.toString();
+  
+  // الأولوية: profile أولاً ثم user
+  final website = (profile['website']?.toString() ?? user['website']?.toString());
+  final linkedin = (profile['linkedin']?.toString() ?? user['linkedin']?.toString());
+  final github = (profile['github']?.toString() ?? user['github']?.toString());
+  final twitter = user['twitter']?.toString();
+  final behance = profile['behance']?.toString();
+  final dribbble = profile['dribbble']?.toString();
+  
+  print('✅ Final extracted values:');
+  print('  - email: $email');
+  print('  - phone: $phone');
+  print('  - website: $website');
+  print('  - linkedin: $linkedin');
+  print('  - github: $github');
+  print('  - twitter: $twitter');
+  print('  - behance: $behance');
+  print('  - dribbble: $dribbble');
+  
+  final contactOptions = <Map<String, dynamic>>[];
+  
+  // إضافة البريد الإلكتروني
+  if (email != null && email.isNotEmpty) {
+    print('✅ Adding email option: $email');
+    contactOptions.add({
+      'icon': Icons.email_outlined,
+      'title': t.email,
+      'subtitle': email,
+      'action': () => _sendEmail(email),
+      'color': AppColors.accent,
+    });
+  } else {
+    print('⚠️ No email found');
+  }
+  
+  // إضافة رقم الجوال
+  if (phone != null && phone.isNotEmpty) {
+    print('✅ Adding phone option: $phone');
+    contactOptions.add({
+      'icon': Icons.phone_outlined,
+      'title': t.phone,
+      'subtitle': phone,
+      'action': () => _makePhoneCall(phone),
+      'color': AppColors.success,
+    });
+  } else {
+    print('⚠️ No phone found');
+  }
+  
+  // إضافة الموقع الإلكتروني
+  if (website != null && website.isNotEmpty) {
+    print('✅ Adding website option: $website');
+    contactOptions.add({
+      'icon': Icons.language_outlined,
+      'title': t.website,
+      'subtitle': website,
+      'action': () => _openUrl(website),
+      'color': AppColors.info,
+    });
+  } else {
+    print('⚠️ No website found');
+  }
+  
+  // إضافة LinkedIn
+  if (linkedin != null && linkedin.isNotEmpty) {
+    print('✅ Adding LinkedIn option: $linkedin');
+    contactOptions.add({
+      'icon': Icons.business_center_outlined,
+      'title': 'LinkedIn',
+      'subtitle': linkedin,
+      'action': () => _openUrl(linkedin),
+      'color': const Color(0xFF0077B5),
+    });
+  } else {
+    print('⚠️ No LinkedIn found');
+  }
+  
+  // إضافة GitHub
+  if (github != null && github.isNotEmpty) {
+    print('✅ Adding GitHub option: $github');
+    contactOptions.add({
+      'icon': Icons.code_outlined,
+      'title': 'GitHub',
+      'subtitle': github,
+      'action': () => _openUrl(github),
+      'color': const Color(0xFF333333),
+    });
+  } else {
+    print('⚠️ No GitHub found');
+  }
+  
+  // إضافة Twitter
+  if (twitter != null && twitter.isNotEmpty) {
+    print('✅ Adding Twitter option: $twitter');
+    contactOptions.add({
+      'icon': Icons.chat_bubble_outline,
+      'title': 'Twitter',
+      'subtitle': twitter,
+      'action': () => _openUrl(twitter),
+      'color': const Color(0xFF1DA1F2),
+    });
+  } else {
+    print('⚠️ No Twitter found');
+  }
+  
+  // إضافة Behance
+  if (behance != null && behance.isNotEmpty) {
+    print('✅ Adding Behance option: $behance');
+    contactOptions.add({
+      'icon': Icons.brush_outlined,
+      'title': 'Behance',
+      'subtitle': behance,
+      'action': () => _openUrl(behance),
+      'color': const Color(0xFF1769FF),
+    });
+  } else {
+    print('⚠️ No Behance found');
+  }
+  
+  // إضافة Dribbble
+  if (dribbble != null && dribbble.isNotEmpty) {
+    print('✅ Adding Dribbble option: $dribbble');
+    contactOptions.add({
+      'icon': Icons.sports_basketball_outlined,
+      'title': 'Dribbble',
+      'subtitle': dribbble,
+      'action': () => _openUrl(dribbble),
+      'color': const Color(0xFFEA4C89),
+    });
+  } else {
+    print('⚠️ No Dribbble found');
+  }
+  
+  print('📊 Total contact options found: ${contactOptions.length}');
+  
+  // إذا ما في وسائل تواصل، نفتح محادثة عادية
+  if (contactOptions.isEmpty) {
+    print('⚠️ No contact options available, falling back to chat');
+    _startChat();
+    return;
+  }
+  
+  print('🎯 Showing contact bottom sheet');
+  
+  showModalBottomSheet(
+    context: context,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    builder: (context) => SafeArea(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            margin: const EdgeInsets.only(top: 12),
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: Colors.grey[300],
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            t.contactOptions,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            _profileData['user']?['name'] ?? t.freelancer,
+            style: TextStyle(fontSize: 14, color: AppColors.gray),
+          ),
+          const Divider(height: 24),
+          ...contactOptions.map(
+            (option) => ListTile(
+              leading: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: (option['color'] as Color).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(option['icon'], color: option['color']),
+              ),
+              title: Text(
+                option['title'],
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+              subtitle: Text(
+                option['subtitle'],
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(fontSize: 12, color: AppColors.gray),
+              ),
+              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+              onTap: () {
+                print('🖱️ User tapped on: ${option['title']}');
+                Navigator.pop(context);
+                option['action']();
+              },
+            ),
+          ),
+          const SizedBox(height: 8),
+        ],
+      ),
+    ),
+  );
+}
+
+// أضف هذه الدوال المساعدة مع debugging
+Future<void> _sendEmail(String email) async {
+  print('📧 Sending email to: $email');
+  final Uri emailUri = Uri(
+    scheme: 'mailto',
+    path: email,
+    query: 'subject=Inquiry%20about%20your%20freelance%20services&body=Hello,%0D%0A%0D%0AI%20saw%20your%20profile%20and%20I%27m%20interested%20in%20working%20with%20you.%0D%0A%0D%0ABest%20regards',
+  );
+  
+  if (await canLaunchUrl(emailUri)) {
+    print('✅ Email app launched');
+    await launchUrl(emailUri);
+  } else {
+    print('❌ Could not open email app');
+    Fluttertoast.showToast(msg: 'Could not open email app');
+  }
+}
+
+Future<void> _makePhoneCall(String phone) async {
+  print('📞 Making phone call to: $phone');
+  final Uri phoneUri = Uri(scheme: 'tel', path: phone);
+  if (await canLaunchUrl(phoneUri)) {
+    print('✅ Phone dialer launched');
+    await launchUrl(phoneUri);
+  } else {
+    print('❌ Could not make phone call');
+    Fluttertoast.showToast(msg: 'Could not make phone call');
+  }
+}
+
+Future<void> _openUrl(String url) async {
+  print('🌐 Opening URL: $url');
+  var uri = url.trim();
+  if (!uri.startsWith('http')) {
+    uri = 'https://$uri';
+    print('🔄 Normalized URL: $uri');
+  }
+  final Uri parsedUri = Uri.parse(uri);
+  if (await canLaunchUrl(parsedUri)) {
+    print('✅ URL launched successfully');
+    await launchUrl(parsedUri, mode: LaunchMode.externalApplication);
+  } else {
+    print('❌ Could not open URL');
+    Fluttertoast.showToast(msg: 'Could not open link');
+  }
+}
   Future<void> _hireOrOpenProjectHire() async {
     final t = AppLocalizations.of(context)!;
     if (widget.projectId == null) {
@@ -793,12 +1109,10 @@ class _FreelancerProfilePreviewScreenState
                         const SizedBox(width: 12),
                         Expanded(
                           child: _buildActionButton(
-                            icon: Icons.work_outline,
-                            label: widget.projectId != null
-                                ? t.hireForProject
-                                : t.contact,
-                            onPressed: _hireOrOpenProjectHire,
-                            isLoading: _isHiring,
+                            icon: Icons.contact_phone_outlined,
+                            label: t.contact, // "Contact"
+                            onPressed: _showContactOptions, // يفتح الحوار
+                            isLoading: false,
                             outlined: false,
                             theme: theme,
                           ),

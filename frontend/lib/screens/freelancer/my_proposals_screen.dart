@@ -325,6 +325,8 @@ class _MyProposalsScreenState extends State<MyProposalsScreen>
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
+    
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
@@ -392,26 +394,24 @@ class _MyProposalsScreenState extends State<MyProposalsScreen>
                         radius: 20,
                         backgroundColor: Colors.transparent,
                         backgroundImage:
-                            proposal.project?.client?.avatar != null &&
-                                proposal.project!.client!.avatar!.isNotEmpty
-                            ? NetworkImage(proposal.project!.client!.avatar!)
-                            : null,
-                        child:
-                            proposal.project?.client?.avatar == null ||
-                                proposal.project!.client!.avatar!.isEmpty
-                            ? Text(
-                                proposal.project?.client?.name?[0]
-                                        .toUpperCase() ??
-                                    t.client[0],
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              )
-                            : null,
-                      ),
-                    ),
+                      proposal.project?.client?.avatar != null &&
+                          proposal.project!.client!.avatar!.isNotEmpty
+                      ? NetworkImage(_getAvatarUrl(proposal.project!.client!.avatar!))
+                      : null,
+                  child: proposal.project?.client?.avatar == null
+                      ? Text(
+                          proposal.project?.client?.name?[0]
+                                  .toUpperCase() ??
+                              'C',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.accent,
+                          ),
+                        )
+                      : null,
+                      )
+                ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
@@ -640,6 +640,15 @@ class _MyProposalsScreenState extends State<MyProposalsScreen>
         },
       ),
     );
+  }
+
+  String _getAvatarUrl(String? avatar) {
+    if (avatar == null || avatar.isEmpty) return '';
+    if (avatar.startsWith('http')) return avatar;
+    if (avatar.startsWith('/uploads')) {
+      return 'http://localhost:5001$avatar';
+    }
+    return avatar;
   }
 
   @override

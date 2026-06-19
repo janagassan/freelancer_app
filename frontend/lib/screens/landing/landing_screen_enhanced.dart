@@ -15,16 +15,17 @@ import '../auth/login_screen.dart';
 import '../auth/signup_screen.dart';
 
 class BrandColors {
-  static const brand = Color(0xFF6C3AFF);
-  static const brand2 = Color(0xFF9B59FF);
-  static const accent = Color(0xFFFF6B35);
-  static const accent2 = Color(0xFFFFB347);
+  static const brand = Color(0xFF0B1727);   // كحلي غامق
+  static const brand2 = Color(0xFF122543);  // أزرق كحلي
+  static const accent = Color(0xFFE2FF65);  // أخضر ليموني
+  static const accent2 = Color(0xFFF7F5F0); // أبيض فاتح
 
   static const LinearGradient brandGradient = LinearGradient(
     colors: [brand, brand2],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
+
   static const LinearGradient accentGradient = LinearGradient(
     colors: [accent, accent2],
     begin: Alignment.topLeft,
@@ -548,18 +549,11 @@ class _LandingScreenEnhancedState extends State<LandingScreenEnhanced>
             padding: EdgeInsets.symmetric(horizontal: isMobile ? 20 : 48),
             child: Row(
               children: [
-                ShaderMask(
-                  shaderCallback: (bounds) =>
-                      BrandColors.brandGradient.createShader(bounds),
-                  child: const Text(
-                    '⚡ FreelanceX',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
+                Image.asset(
+  'assets/images/logoo.png',
+  height: 40,
+  
+),
                 const Spacer(),
                 if (!isMobile) ...[
                   _navLink('Find Work'),
@@ -880,10 +874,10 @@ class _LandingScreenEnhancedState extends State<LandingScreenEnhanced>
         ),
         const SizedBox(width: 8),
         const Text(
-          '#1 Freelance Platform 2025',
+          '#1 Freelance Platform 2026',
           style: TextStyle(
             fontSize: 13,
-            color: BrandColors.brand2,
+            color: BrandColors.accent2,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -1094,7 +1088,7 @@ class _LandingScreenEnhancedState extends State<LandingScreenEnhanced>
       ),
       child: Column(
         children: [
-          FadeInDown(child: _sectionLabel('Why FreelanceX')),
+          FadeInDown(child: _sectionLabel('Why iPal')),
           const SizedBox(height: 12),
           FadeInDown(
             delay: const Duration(milliseconds: 100),
@@ -1766,7 +1760,7 @@ class _LandingScreenEnhancedState extends State<LandingScreenEnhanced>
             ),
             const SizedBox(height: 16),
             Text(
-              'Join 50,000+ professionals already building their future on FreelanceX',
+              'Join 50,000+ professionals already building their future on iPal',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 17,
@@ -1881,7 +1875,7 @@ class _LandingScreenEnhancedState extends State<LandingScreenEnhanced>
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                '© 2025 FreelanceX. All rights reserved.',
+                '© 2026 iPal. All rights reserved.',
                 style: TextStyle(
                   fontSize: 13,
                   color: DynamicColors.textMuted(context),
@@ -1954,17 +1948,11 @@ class _LandingScreenEnhancedState extends State<LandingScreenEnhanced>
   Widget _footerBrand() => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      ShaderMask(
-        shaderCallback: (b) => BrandColors.brandGradient.createShader(b),
-        child: const Text(
-          '⚡ FreelanceX',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w800,
-            color: Colors.white,
-          ),
-        ),
-      ),
+      Image.asset(
+  'assets/images/logoo.png',
+  height: 45,
+  fit: BoxFit.contain,
+),
       const SizedBox(height: 12),
       Text(
         'The world\'s leading platform connecting top freelancers with innovative businesses.',

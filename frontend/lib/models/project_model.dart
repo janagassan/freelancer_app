@@ -181,4 +181,29 @@ class Project {
         return status ?? 'Unknown';
     }
   }
+
+  Project copyWith({
+    int? id,
+    String? title,
+    String? name,
+    String? description,
+    double? budget,
+    int? duration,
+    String? status,
+    User? client,
+    List<String>? skills,
+    DateTime? createdAt,
+  }) {
+    return Project(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      budget: budget ?? this.budget,
+      duration: duration ?? this.duration,
+      status: status ?? this.status,
+      client: client ?? this.client,
+      skills: skills ?? this.skills,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
 }

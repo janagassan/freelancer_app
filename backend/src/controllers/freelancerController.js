@@ -652,6 +652,10 @@ export const getFreelancerStats = async (req, res) => {
       where: { UserId: userId, status: "accepted" },
     });
 
+    const pendingProposals = await Proposal.count({
+      where: { UserId: userId, status: "pending" },
+    });
+
     const profile = await FreelancerProfile.findOne({
       where: { UserId: userId },
       attributes: ["rating", "total_earnings"],
@@ -667,6 +671,8 @@ export const getFreelancerStats = async (req, res) => {
         activeProjects,
         totalProposals,
         acceptedProposals,
+        pendingProposals,
+        pendingOffers: pendingProposals,
         totalEarnings: parseFloat(totalEarnings),
         acceptanceRate:
           totalProposals > 0
@@ -811,12 +817,10 @@ export const getProjectContract = async (req, res) => {
   }
 };
 
+
 export const getProposals = async (req, res) => {
   try {
-    console.log(
-      "📥 [getProposals] Fetching proposals for freelancer:",
-      req.user.id,
-    );
+    console.log("📥 [getProposals] Fetching proposals for freelancer:", req.user.id);
 
     const proposals = await Proposal.findAll({
       where: { UserId: req.user.id },
@@ -835,14 +839,45 @@ export const getProposals = async (req, res) => {
       order: [["createdAt", "DESC"]],
     });
 
-    console.log(`✅ [getProposals] Found ${proposals.length} proposals`);
+    const formattedProposals = proposals.map(proposal => {
+      const proposalJson = proposal.toJSON();
+      
+      if (proposalJson.Project) {
+        proposalJson.project = proposalJson.Project;
+        delete proposalJson.Project;
+      }
+      
+      if (proposalJson.project && proposalJson.project.client) {
+        proposalJson.project.client = {
+          id: proposalJson.project.client.id,
+          name: proposalJson.project.client.name || 'Unknown Client',
+          avatar: proposalJson.project.client.avatar || null,
+          email: proposalJson.project.client.email || '',
+        };
+      } else if (proposalJson.project) {
+        proposalJson.project.client = {
+          id: null,
+          name: 'Unknown Client',
+          avatar: null,
+          email: '',
+        };
+      }
+      
+      if (proposalJson.project && !proposalJson.project.title) {
+        proposalJson.project.title = 'Untitled Project';
+      }
+      
+      return proposalJson;
+    });
 
-    res.json(proposals);
+    console.log(`✅ [getProposals] Found ${formattedProposals.length} proposals`);
+    res.json(formattedProposals);
   } catch (err) {
     console.error("❌ [getProposals] Error:", err);
     res.status(500).json({ message: "Server error", error: err.message });
   }
 };
+
 
 export const getAISuggestedProjects = async (req, res) => {
   try {

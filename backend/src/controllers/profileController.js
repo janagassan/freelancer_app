@@ -699,233 +699,148 @@ export const getFreelancerPublicProfile = async (req, res) => {
   try {
     const { userId } = req.params;
 
-    const user = await User.findByPk(userId, {
+    console.log("🔍 === GET FREELANCER PUBLIC PROFILE ===");
+    console.log("📌 Freelancer ID:", userId);
+    console.log("📌 Request params:", req.params);
+
+    const freelancerId = parseInt(userId);
+    if (isNaN(freelancerId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid user ID",
+      });
+    }
+
+    const user = await User.findByPk(freelancerId, {
       attributes: [
         "id",
         "name",
+        "email",
+        "phone",
         "avatar",
-        "cover_image",
-        "tagline",
+        "role",
         "bio",
         "location",
+        "createdAt",
         "website",
         "linkedin",
         "github",
         "twitter",
-        "profile_views",
-        "last_seen",
-        "createdAt",
-        "is_verified",
-        "verification_level",
       ],
     });
 
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    if (req.user?.id !== parseInt(userId)) {
-      await user.increment("profile_views");
+    if (!user || user.role !== "freelancer") {
+      return res.status(404).json({
+        success: false,
+        message: "Freelancer not found",
+      });
     }
 
     const profile = await FreelancerProfile.findOne({
-      where: { UserId: userId },
+      where: { UserId: user.id },
     });
 
-    const portfolioItems = await Portfolio.findAll({
-      where: { UserId: userId },
-      order: [
-        ["featured", "DESC"],
-        ["completion_date", "DESC"],
-      ],
-      limit: 24,
-    });
+    console.log("📧 Email from database:", user.email);
+    console.log("📞 Phone from database:", user.phone);
 
-    const totalReviews = await Rating.count({
-      where: { toUserId: userId, role: "client" },
-    });
-
-    let avgRating = 0;
-    if (totalReviews > 0) {
-      const sum = await Rating.sum("rating", {
-        where: { toUserId: userId, role: "client" },
-      });
-      avgRating = Math.round((parseFloat(sum) / totalReviews) * 10) / 10;
-    } else if (profile?.rating) {
-      avgRating = Math.round(parseFloat(profile.rating) * 10) / 10;
-    }
-
-    const ratingsData = await Rating.findAll({
-      where: { toUserId: userId, role: "client" },
-      include: [
-        { model: User, as: "fromUser", attributes: ["id", "name", "avatar"] },
-      ],
-      order: [["createdAt", "DESC"]],
-      limit: 12,
-    });
-
-    const completedContracts = await Contract.count({
-      where: { FreelancerId: userId, status: "completed" },
-    });
-
-    const activeContracts = await Contract.count({
-      where: { FreelancerId: userId, status: "active" },
-    });
-
-    const recentCompletedContracts = await Contract.findAll({
-      where: { FreelancerId: userId, status: "completed" },
-      include: [
-        {
-          model: Project,
-          attributes: ["id", "title", "category", "budget"],
-          required: false,
-        },
-      ],
-      attributes: ["id", "ProjectId", "agreed_amount", "end_date", "updatedAt"],
-      order: [
-        ["end_date", "DESC"],
-        ["updatedAt", "DESC"],
-      ],
-      limit: 8,
-    });
-
-    const skills = parseJSON(profile?.skills);
-    const topSkills =
-      parseJSON(profile?.top_skills).length > 0
-        ? parseJSON(profile?.top_skills)
-        : skills.slice(0, 8);
-
-    const socialFromProfile = parseJSON(profile?.social_links, {});
-
-    const contact_links = {
-      website:
-        user.website || profile?.website || socialFromProfile.website || null,
-      github:
-        user.github || profile?.github || socialFromProfile.github || null,
-      linkedin:
-        user.linkedin ||
-        profile?.linkedin ||
-        socialFromProfile.linkedin ||
-        null,
-      behance: profile?.behance || socialFromProfile.behance || null,
-      dribbble: profile?.dribbble || socialFromProfile.dribbble || null,
-      twitter: user.twitter || socialFromProfile.twitter || null,
-    };
-
-    const displayBio =
-      (profile?.bio && String(profile.bio).trim()) ||
-      (user.bio && String(user.bio).trim()) ||
-      "";
-    const displayLocation =
-      (profile?.location && String(profile.location).trim()) ||
-      (user.location && String(user.location).trim()) ||
-      "";
-
-    res.json({
+    const responseData = {
       user: {
         id: user.id,
         name: user.name,
+        email: user.email,
+        phone: user.phone,
         avatar: user.avatar,
-        cover_image: user.cover_image,
-        tagline: user.tagline,
         bio: user.bio,
         location: user.location,
         website: user.website,
         linkedin: user.linkedin,
         github: user.github,
         twitter: user.twitter,
-        last_seen: user.last_seen,
         member_since: user.createdAt,
-        profile_views: user.profile_views,
-        is_verified: user.is_verified,
-        verification_level: user.verification_level,
+        profile_views: user.profile_views || 0,
       },
-      profile: profile
-        ? {
-            id: profile.id,
-            title: profile.title,
-            bio: profile.bio,
-            tagline: profile.tagline,
-            skills,
-            top_skills: topSkills,
-            categories: parseJSON(profile.categories),
-            experience_years: profile.experience_years,
-            hourly_rate: profile.hourly_rate,
-            availability: profile.availability,
-            weekly_hours: profile.weekly_hours,
-            languages: parseJSON(profile.languages),
-            education: parseJSON(profile.education),
-            certifications: parseJSON(profile.certifications),
-            work_experience: parseJSON(profile.work_experience),
-            cv_url: profile.cv_url,
-            is_available: profile.is_available,
-            is_featured: profile.is_featured,
-            is_verified: profile.is_verified,
-            is_top_rated: profile.is_top_rated,
-            is_rising_talent: profile.is_rising_talent,
-            response_time: profile.response_time,
-            job_success_score: profile.job_success_score,
-            timezone: profile.timezone,
-            display_bio: displayBio,
-            display_location: displayLocation,
-          }
-        : {
-            display_bio: displayBio,
-            display_location: displayLocation,
-            skills: [],
-            top_skills: [],
-            categories: [],
-            languages: [],
-            education: [],
-            certifications: [],
-            work_experience: [],
-          },
-      contact_links,
-      trust: {
-        identity_verified: !!user.is_verified,
-        profile_verified: !!profile?.is_verified,
-        top_rated: !!profile?.is_top_rated,
-        rising_talent: !!profile?.is_rising_talent,
+      profile: {
+        id: profile?.id,
+        title: profile?.title || "",
+        bio: profile?.bio || "",
+        skills: profile?.skills
+          ? typeof profile.skills === "string"
+            ? JSON.parse(profile.skills)
+            : profile.skills
+          : [],
+        languages: profile?.languages
+          ? typeof profile.languages === "string"
+            ? JSON.parse(profile.languages)
+            : profile.languages
+          : [],
+        education: profile?.education
+          ? typeof profile.education === "string"
+            ? JSON.parse(profile.education)
+            : profile.education
+          : [],
+        certifications: profile?.certifications
+          ? typeof profile.certifications === "string"
+            ? JSON.parse(profile.certifications)
+            : profile.certifications
+          : [],
+        work_experience: profile?.work_experience
+          ? typeof profile.work_experience === "string"
+            ? JSON.parse(profile.work_experience)
+            : profile.work_experience
+          : [],
+        hourly_rate: profile?.hourly_rate || 0,
+        experience_years: profile?.experience_years || 0,
+        rating: profile?.rating || 0,
+        is_available: profile?.is_available ?? true,
+        availability: profile?.availability,
+        weekly_hours: profile?.weekly_hours || 40,
+        completed_projects_count: profile?.completed_projects_count || 0,
+        total_earnings: profile?.total_earnings || 0,
+        job_success_score: profile?.job_success_score || 0,
+        response_time: profile?.response_time || 24,
+        website: profile?.website,
+        linkedin: profile?.linkedin,
+        github: profile?.github,
+        behance: profile?.behance,
+        dribbble: profile?.dribbble,
       },
       stats: {
-        rating: avgRating,
-        total_reviews: totalReviews,
-        completed_projects: completedContracts,
-        active_projects: activeContracts,
+        rating: profile?.rating || 0,
+        total_reviews: 0,
+        completed_projects: profile?.completed_projects_count || 0,
+        active_projects: 0,
+        portfolio_count: 0,
         job_success_score: profile?.job_success_score || 0,
-        response_time: profile?.response_time || 0,
-        portfolio_count: portfolioItems.length,
+        response_time: profile?.response_time || 24,
       },
-      portfolio: portfolioItems.map((p) => ({
-        id: p.id,
-        title: p.title,
-        description: p.description,
-        images: parseJSON(p.images),
-        technologies: parseJSON(p.technologies),
-        project_url: p.project_url,
-        github_url: p.github_url,
-        featured: p.featured,
-        completion_date: p.completion_date,
-      })),
-      reviews: ratingsData.map((r) => ({
-        id: r.id,
-        rating: r.rating,
-        comment: r.comment,
-        role: r.role,
-        createdAt: r.createdAt,
-        from_user: r.fromUser,
-      })),
-      recent_completed_projects: recentCompletedContracts.map((c) => ({
-        contract_id: c.id,
-        project_id: c.ProjectId,
-        title: c.Project?.title || `Project #${c.ProjectId}`,
-        category: c.Project?.category || null,
-        budget: c.Project?.budget || c.agreed_amount || null,
-        delivered_at: c.end_date || c.updatedAt,
-      })),
+      trust: {
+        identity_verified: user.is_verified || false,
+        top_rated: (profile?.rating || 0) >= 4.8,
+        rising_talent: false,
+      },
+      contact_links: {
+        website: user.website || profile?.website,
+        linkedin: user.linkedin || profile?.linkedin,
+        github: user.github || profile?.github,
+        twitter: user.twitter,
+        behance: profile?.behance,
+        dribbble: profile?.dribbble,
+      },
+      reviews: [],
+      portfolio: [],
+      recent_completed_projects: [],
+    };
+
+    console.log("📤 Response email:", responseData.user.email);
+    console.log("📤 Response phone:", responseData.user.phone);
+
+    res.json(responseData);
+  } catch (error) {
+    console.error("Get freelancer public profile error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching freelancer profile",
+      error: error.message,
     });
-  } catch (err) {
-    console.error("Error in getFreelancerPublicProfile:", err);
-    res.status(500).json({ message: "Server error", error: err.message });
   }
 };

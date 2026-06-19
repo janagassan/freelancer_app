@@ -1,15 +1,13 @@
-import 'dart:typed_data';
+// enhanced_client_profile_screen.dart
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:freelancer_platform/screens/client/client_profile_screen.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:fl_chart/fl_chart.dart';
+import '../../l10n/app_localizations.dart';
 import '../../services/profile_api_service.dart';
 import '../../services/api_service.dart';
-import '../../models/client_profile.dart';
+import '../../theme/app_theme.dart';
+import 'client_profile_screen.dart';
 
 class EnhancedClientProfileScreen extends StatefulWidget {
   final int? targetUserId;
@@ -29,18 +27,6 @@ class _EnhancedClientProfileScreenState
   late TabController _tabController;
   late ScrollController _scrollController;
   bool _showAppBarTitle = false;
-
-  static const Color _primary = Color(0xFF6366F1);
-  static const Color _primaryDark = Color(0xFF4F46E5);
-  static const Color _secondary = Color(0xFF10B981);
-  static const Color _accent = Color(0xFFF59E0B);
-  static const Color _success = Color(0xFF10B981);
-  static const Color _warning = Color(0xFFF59E0B);
-  static const Color _danger = Color(0xFFEF4444);
-  static const Color _dark = Color(0xFF1F2937);
-  static const Color _gray = Color(0xFF6B7280);
-  static const Color _light = Color(0xFFF9FAFB);
-  static const Color _white = Color(0xFFFFFFFF);
 
   @override
   void initState() {
@@ -99,9 +85,12 @@ class _EnhancedClientProfileScreenState
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final localizations = AppLocalizations.of(context)!;
+
     if (_loading) {
       return Scaffold(
-        backgroundColor: _light,
+        backgroundColor: isDark ? AppColors.darkBackground : AppColors.lightBackground,
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -110,26 +99,22 @@ class _EnhancedClientProfileScreenState
                 width: 60,
                 height: 60,
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [_primary, _primaryDark],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
+                  gradient: AppColors.primaryGradient,
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: const Center(
                   child: CircularProgressIndicator(
-                    color: _white,
+                    color: Colors.white,
                     strokeWidth: 3,
                   ),
                 ),
               ),
               const SizedBox(height: 24),
               Text(
-                'Loading Profile...',
+                localizations.loading_profile,
                 style: TextStyle(
                   fontSize: 16,
-                  color: _gray,
+                  color: isDark ? AppColors.darkTextHint : AppColors.gray,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -168,34 +153,30 @@ class _EnhancedClientProfileScreenState
 
     final totalSpent = (profile['total_spent'] ?? 0) as num;
     final totalProjects = (profile['total_projects'] ?? 0) as num;
-    final activeContracts = (profile['active_contracts'] ?? 0) as num;
     final completedContracts = (profile['completed_contracts'] ?? 0) as num;
     final clientRating = (profile['client_rating'] ?? 0) as num;
-    final totalReviewsReceived =
-        (profile['total_reviews_received'] ?? 0) as num;
+    final totalReviewsReceived = (profile['total_reviews_received'] ?? 0) as num;
     final hireRate = (profile['hire_rate'] ?? 0) as num;
-    final avgProjectBudget = (profile['avg_project_budget'] ?? 0) as num;
 
     final isPaymentVerified = profile['payment_verified'] ?? false;
-    final isIdVerified = profile['id_verified'] ?? false;
     final isCompanyVerified = profile['company_verified'] ?? false;
     final isTopClient = profile['is_top_client'] ?? false;
 
     return Scaffold(
-      backgroundColor: _light,
+      backgroundColor: isDark ? AppColors.darkBackground : AppColors.lightBackground,
       body: CustomScrollView(
         controller: _scrollController,
         slivers: [
           SliverAppBar(
             expandedHeight: 280,
             pinned: true,
-            backgroundColor: _white,
+            backgroundColor: isDark ? AppColors.darkSurface : AppColors.lightSurface,
             elevation: 0,
             leading: IconButton(
               icon: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: _white.withOpacity(0.9),
+                  color: (isDark ? AppColors.darkCard : AppColors.lightSurface).withOpacity(0.9),
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
@@ -205,13 +186,13 @@ class _EnhancedClientProfileScreenState
                     ),
                   ],
                 ),
-                child: Icon(Icons.arrow_back, color: _dark, size: 20),
+                child: Icon(Icons.arrow_back, color: isDark ? AppColors.darkTextPrimary : AppColors.dark, size: 20),
               ),
               onPressed: () => Navigator.pop(context),
             ),
             actions: [
               if (_isOwnProfile) ...[
-                _buildActionButton(Icons.edit, 'Edit', () {
+                _buildActionButton(Icons.edit, localizations.edit, () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -219,10 +200,10 @@ class _EnhancedClientProfileScreenState
                     ),
                   ).then((_) => _load());
                 }),
-                _buildActionButton(Icons.share, 'Share', () {}),
+                _buildActionButton(Icons.share, localizations.share, () {}),
               ] else ...[
-                _buildActionButton(Icons.message, 'Message', () {}),
-                _buildActionButton(Icons.more_vert, 'More', () {}),
+                _buildActionButton(Icons.message, localizations.message, () {}),
+                _buildActionButton(Icons.more_vert, localizations.more, () {}),
               ],
             ],
             flexibleSpace: FlexibleSpaceBar(
@@ -230,7 +211,7 @@ class _EnhancedClientProfileScreenState
                   ? Text(
                       companyName.isNotEmpty ? companyName : name,
                       style: TextStyle(
-                        color: _dark,
+                        color: isDark ? AppColors.darkTextPrimary : AppColors.dark,
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
                       ),
@@ -247,8 +228,8 @@ class _EnhancedClientProfileScreenState
                         )
                       : Container(
                           decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [_primary, _secondary, _accent],
+                            gradient: const LinearGradient(
+                              colors: [AppColors.primary, AppColors.secondary, AppColors.accent],
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                             ),
@@ -276,13 +257,13 @@ class _EnhancedClientProfileScreenState
                       totalProjects.toInt(),
                       completedContracts.toInt(),
                       hireRate.toInt(),
+                      localizations,
                     ),
                   ),
                 ],
               ),
             ),
           ),
-
           SliverToBoxAdapter(
             child: Column(
               children: [
@@ -294,47 +275,33 @@ class _EnhancedClientProfileScreenState
                     name,
                     companyName,
                     title,
-                    bio,
                     location,
                     industry,
                     isPaymentVerified,
-                    isIdVerified,
                     isCompanyVerified,
+                    localizations,
                   ),
                 ),
-
                 const SizedBox(height: 24),
-
                 if (badges.isNotEmpty || isTopClient)
-                  _buildBadgesSection(badges, isTopClient),
-
+                  _buildBadgesSection(badges, isTopClient, localizations),
                 const SizedBox(height: 24),
-
-                _buildCompanySection(companySize, foundedYear, website),
-
+                _buildCompanySection(companySize, foundedYear, website, localizations),
                 const SizedBox(height: 24),
-
-                _buildHiringStats(profile, stats),
-
+                _buildHiringStats(profile, localizations),
                 const SizedBox(height: 24),
-
-                _buildTabsSection(),
+                _buildTabsSection(localizations),
               ],
             ),
           ),
-
           SliverFillRemaining(
             child: TabBarView(
               controller: _tabController,
               children: [
-                _buildOverviewTab(profile, user),
-                _buildJobsTab(jobs),
-                _buildReviewsTab(
-                  reviews,
-                  clientRating.toDouble(),
-                  totalReviewsReceived.toInt(),
-                ),
-                _buildAnalyticsTab(profile, stats),
+                _buildOverviewTab(profile, user, localizations),
+                _buildJobsTab(jobs, localizations, _isOwnProfile),
+                _buildReviewsTab(reviews, clientRating.toDouble(), totalReviewsReceived.toInt(), localizations),
+                _buildAnalyticsTab(profile, localizations),
               ],
             ),
           ),
@@ -343,18 +310,13 @@ class _EnhancedClientProfileScreenState
     );
   }
 
-  String _getClientTypeIcon() {
-    final clientType = _data['profile']?['client_type'] ?? 'individual';
-    return clientType == 'company' ? '🏢' : '👤';
+  String _getClientTypeText(Map profile, AppLocalizations localizations) {
+    final clientType = profile['client_type'] ?? 'individual';
+    return clientType == 'company' ? localizations.verified_business : localizations.individual_client;
   }
 
-  String _getClientTypeText() {
-    final clientType = _data['profile']?['client_type'] ?? 'individual';
-    return clientType == 'company' ? 'Verified Business' : 'Individual Client';
-  }
-
-  Widget _buildClientTypeBadge() {
-    final clientType = _data['profile']?['client_type'] ?? 'individual';
+  Widget _buildClientTypeBadge(Map profile, AppLocalizations localizations) {
+    final clientType = profile['client_type'] ?? 'individual';
     final isCompany = clientType == 'company';
 
     return Container(
@@ -362,8 +324,8 @@ class _EnhancedClientProfileScreenState
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: isCompany
-              ? [_success, _success.withOpacity(0.8)]
-              : [_primary, _primaryDark],
+              ? [AppColors.success, AppColors.success.withOpacity(0.8)]
+              : [AppColors.primary, AppColors.primaryDark],
         ),
         borderRadius: BorderRadius.circular(20),
       ),
@@ -373,15 +335,15 @@ class _EnhancedClientProfileScreenState
           Icon(
             isCompany ? Icons.business : Icons.person,
             size: 14,
-            color: _white,
+            color: Colors.white,
           ),
           const SizedBox(width: 6),
           Text(
-            _getClientTypeText(),
+            _getClientTypeText(profile, localizations),
             style: const TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: _white,
+              color: Colors.white,
             ),
           ),
         ],
@@ -390,13 +352,14 @@ class _EnhancedClientProfileScreenState
   }
 
   Widget _buildActionButton(IconData icon, String tooltip, VoidCallback onTap) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Tooltip(
       message: tooltip,
       child: IconButton(
         icon: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: _white.withOpacity(0.9),
+            color: (isDark ? AppColors.darkCard : AppColors.lightSurface).withOpacity(0.9),
             shape: BoxShape.circle,
             boxShadow: [
               BoxShadow(
@@ -406,7 +369,7 @@ class _EnhancedClientProfileScreenState
               ),
             ],
           ),
-          child: Icon(icon, color: _dark, size: 18),
+          child: Icon(icon, color: isDark ? AppColors.darkTextPrimary : AppColors.dark, size: 18),
         ),
         onPressed: onTap,
       ),
@@ -418,24 +381,21 @@ class _EnhancedClientProfileScreenState
     int totalProjects,
     int completedContracts,
     int hireRate,
+    AppLocalizations localizations,
   ) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: _white.withOpacity(0.1),
+        color: Colors.white.withOpacity(0.1),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _buildQuickStat(
-            '\$',
-            '\$${totalSpent.toStringAsFixed(0)}',
-            'Total Spent',
-          ),
-          _buildQuickStat('📋', totalProjects.toString(), 'Projects'),
-          _buildQuickStat('✅', completedContracts.toString(), 'Completed'),
-          if (hireRate > 0) _buildQuickStat('🎯', '$hireRate%', 'Hire Rate'),
+          _buildQuickStat('\$', '\$${totalSpent.toStringAsFixed(0)}', localizations.totalSpent),
+          _buildQuickStat('📋', totalProjects.toString(), localizations.projects),
+          _buildQuickStat('✅', completedContracts.toString(), localizations.completed),
+          if (hireRate > 0) _buildQuickStat('🎯', '$hireRate%', localizations.hire_rate),
         ],
       ),
     );
@@ -449,14 +409,14 @@ class _EnhancedClientProfileScreenState
         Text(
           value,
           style: const TextStyle(
-            color: _white,
+            color: Colors.white,
             fontSize: 18,
             fontWeight: FontWeight.w700,
           ),
         ),
         Text(
           label,
-          style: TextStyle(color: _white.withOpacity(0.8), fontSize: 12),
+          style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 12),
         ),
       ],
     );
@@ -468,21 +428,21 @@ class _EnhancedClientProfileScreenState
     String name,
     String companyName,
     String title,
-    String bio,
     String location,
     String industry,
     bool isPaymentVerified,
-    bool isIdVerified,
     bool isCompanyVerified,
+    AppLocalizations localizations,
   ) {
     final companySize = profile['company_size'] ?? '';
     final foundedYear = profile['founded_year'];
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: _white,
+        color: isDark ? AppColors.darkCard : AppColors.lightSurface,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -504,12 +464,8 @@ class _EnhancedClientProfileScreenState
                     height: 80,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      gradient: LinearGradient(
-                        colors: [_primary, _primaryDark],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      border: Border.all(color: _white, width: 4),
+                      gradient: AppColors.primaryGradient,
+                      border: Border.all(color: isDark ? AppColors.darkSurface : Colors.white, width: 4),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.black.withOpacity(0.15),
@@ -519,38 +475,33 @@ class _EnhancedClientProfileScreenState
                       ],
                     ),
                     child: ClipOval(
-                      child:
-                          profile['company_logo'] != null &&
+                      child: profile['company_logo'] != null &&
                               profile['company_logo'].toString().isNotEmpty
                           ? CachedNetworkImage(
                               imageUrl: _img(profile['company_logo']),
                               fit: BoxFit.cover,
                             )
                           : user['avatar'] != null &&
-                                user['avatar'].toString().isNotEmpty
-                          ? CachedNetworkImage(
-                              imageUrl: _img(user['avatar']),
-                              fit: BoxFit.cover,
-                            )
-                          : Center(
-                              child: Text(
-                                (companyName.isNotEmpty ? companyName : name)
-                                        .isNotEmpty
-                                    ? (companyName.isNotEmpty
-                                              ? companyName
-                                              : name)[0]
-                                          .toUpperCase()
-                                    : '?',
-                                style: const TextStyle(
-                                  fontSize: 28,
-                                  fontWeight: FontWeight.w700,
-                                  color: _white,
+                                  user['avatar'].toString().isNotEmpty
+                              ? CachedNetworkImage(
+                                  imageUrl: _img(user['avatar']),
+                                  fit: BoxFit.cover,
+                                )
+                              : Center(
+                                  child: Text(
+                                    (companyName.isNotEmpty ? companyName : name).isNotEmpty
+                                        ? (companyName.isNotEmpty ? companyName : name)[0].toUpperCase()
+                                        : '?',
+                                    style: const TextStyle(
+                                      fontSize: 28,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.white,
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ),
                     ),
                   ),
-                  if (isPaymentVerified || isIdVerified || isCompanyVerified)
+                  if (isPaymentVerified || isCompanyVerified)
                     Positioned(
                       bottom: -4,
                       right: -4,
@@ -562,30 +513,22 @@ class _EnhancedClientProfileScreenState
                               width: 24,
                               height: 24,
                               decoration: BoxDecoration(
-                                color: _success,
+                                color: AppColors.success,
                                 shape: BoxShape.circle,
-                                border: Border.all(color: _white, width: 2),
+                                border: Border.all(color: isDark ? AppColors.darkSurface : Colors.white, width: 2),
                               ),
-                              child: const Icon(
-                                Icons.business,
-                                color: _white,
-                                size: 14,
-                              ),
+                              child: const Icon(Icons.business, color: Colors.white, size: 14),
                             ),
                           if (isPaymentVerified)
                             Container(
                               width: 24,
                               height: 24,
                               decoration: BoxDecoration(
-                                color: _primary,
+                                color: AppColors.primary,
                                 shape: BoxShape.circle,
-                                border: Border.all(color: _white, width: 2),
+                                border: Border.all(color: isDark ? AppColors.darkSurface : Colors.white, width: 2),
                               ),
-                              child: const Icon(
-                                Icons.payment,
-                                color: _white,
-                                size: 14,
-                              ),
+                              child: const Icon(Icons.payment, color: Colors.white, size: 14),
                             ),
                         ],
                       ),
@@ -605,33 +548,24 @@ class _EnhancedClientProfileScreenState
                             style: TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.w800,
-                              color: _dark,
+                              color: isDark ? AppColors.darkTextPrimary : AppColors.dark,
                             ),
                           ),
                         ),
                         if (companyName.isNotEmpty) ...[
                           const SizedBox(width: 8),
-                          _buildClientTypeBadge(),
+                          _buildClientTypeBadge(profile, localizations),
                         ],
                         if (!_isOwnProfile)
                           Container(
                             decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [_primary, _primaryDark],
-                              ),
+                              gradient: AppColors.primaryGradient,
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: TextButton.icon(
                               onPressed: () {},
-                              icon: const Icon(
-                                Icons.handshake,
-                                color: _white,
-                                size: 16,
-                              ),
-                              label: const Text(
-                                'Hire',
-                                style: TextStyle(color: _white),
-                              ),
+                              icon: const Icon(Icons.handshake, color: Colors.white, size: 16),
+                              label: Text(localizations.hire, style: const TextStyle(color: Colors.white)),
                             ),
                           ),
                       ],
@@ -643,7 +577,7 @@ class _EnhancedClientProfileScreenState
                           title,
                           style: TextStyle(
                             fontSize: 16,
-                            color: _gray,
+                            color: isDark ? AppColors.darkTextSecondary : AppColors.gray,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -653,24 +587,17 @@ class _EnhancedClientProfileScreenState
                         padding: const EdgeInsets.only(top: 2),
                         child: Text(
                           industry,
-                          style: TextStyle(fontSize: 14, color: _gray),
+                          style: TextStyle(fontSize: 14, color: isDark ? AppColors.darkTextHint : AppColors.gray),
                         ),
                       ),
                     const SizedBox(height: 12),
-                    Row(
+                    Wrap(
+                      spacing: 16,
+                      runSpacing: 8,
                       children: [
-                        if (location.isNotEmpty)
-                          _buildHeaderIcon(
-                            Icons.location_on_outlined,
-                            location,
-                          ),
-                        if (companySize.isNotEmpty)
-                          _buildHeaderIcon(Icons.people_outline, companySize),
-                        if (foundedYear != null)
-                          _buildHeaderIcon(
-                            Icons.calendar_today,
-                            'Since $foundedYear',
-                          ),
+                        if (location.isNotEmpty) _buildHeaderIcon(Icons.location_on_outlined, location),
+                        if (companySize.isNotEmpty) _buildHeaderIcon(Icons.people_outline, companySize),
+                        if (foundedYear != null) _buildHeaderIcon(Icons.calendar_today, '${localizations.since} $foundedYear'),
                       ],
                     ),
                   ],
@@ -686,19 +613,13 @@ class _EnhancedClientProfileScreenState
                   child: Container(
                     height: 50,
                     decoration: BoxDecoration(
-                      border: Border.all(color: _primary),
+                      border: Border.all(color: AppColors.primary),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: TextButton.icon(
                       onPressed: () {},
-                      icon: const Icon(Icons.message_outlined, color: _primary),
-                      label: const Text(
-                        'Message',
-                        style: TextStyle(
-                          color: _primary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+                      icon: const Icon(Icons.message_outlined, color: AppColors.primary),
+                      label: Text(localizations.message, style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600)),
                     ),
                   ),
                 ),
@@ -706,22 +627,11 @@ class _EnhancedClientProfileScreenState
                 Expanded(
                   child: Container(
                     height: 50,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [_primary, _primaryDark],
-                      ),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+                    decoration: BoxDecoration(gradient: AppColors.primaryGradient, borderRadius: BorderRadius.circular(12)),
                     child: TextButton.icon(
                       onPressed: () {},
-                      icon: const Icon(Icons.favorite_border, color: _white),
-                      label: const Text(
-                        'Follow',
-                        style: TextStyle(
-                          color: _white,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+                      icon: const Icon(Icons.favorite_border, color: Colors.white),
+                      label: Text(localizations.follow, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
                     ),
                   ),
                 ),
@@ -734,65 +644,38 @@ class _EnhancedClientProfileScreenState
   }
 
   Widget _buildHeaderIcon(IconData icon, String text) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 16),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 16, color: _gray),
-          const SizedBox(width: 6),
-          Text(
-            text,
-            style: TextStyle(
-              fontSize: 14,
-              color: _gray,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 16, color: isDark ? AppColors.darkTextHint : AppColors.gray),
+        const SizedBox(width: 6),
+        Text(text, style: TextStyle(fontSize: 14, color: isDark ? AppColors.darkTextHint : AppColors.gray, fontWeight: FontWeight.w500)),
+      ],
     );
   }
 
-  Widget _buildBadgesSection(List badges, bool isTopClient) {
+  Widget _buildBadgesSection(List badges, bool isTopClient, AppLocalizations localizations) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: _white,
+        color: isDark ? AppColors.darkCard : AppColors.lightSurface,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 12,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 12, offset: const Offset(0, 2))],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Achievements',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              color: _dark,
-            ),
-          ),
+          Text(localizations.achievements, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: isDark ? AppColors.darkTextPrimary : AppColors.dark)),
           const SizedBox(height: 16),
           Wrap(
             spacing: 12,
             runSpacing: 12,
             children: [
-              if (isTopClient) _buildBadge('Top Client', Icons.star, _warning),
-              ...badges.map(
-                (badge) => _buildBadge(
-                  badge['name'] ?? 'Badge',
-                  Icons.emoji_events,
-                  _primary,
-                ),
-              ),
+              if (isTopClient) _buildBadge(localizations.top_client, Icons.star, AppColors.warning),
+              ...badges.map((badge) => _buildBadge(badge['name'] ?? localizations.badge, Icons.emoji_events, AppColors.primary)),
             ],
           ),
         ],
@@ -813,70 +696,33 @@ class _EnhancedClientProfileScreenState
         children: [
           Icon(icon, size: 16, color: color),
           const SizedBox(width: 6),
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: color,
-            ),
-          ),
+          Text(title, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: color)),
         ],
       ),
     );
   }
 
-  Widget _buildCompanySection(
-    String companySize,
-    int? foundedYear,
-    String website,
-  ) {
+  Widget _buildCompanySection(String companySize, int? foundedYear, String website, AppLocalizations localizations) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: _white,
+        color: isDark ? AppColors.darkCard : AppColors.lightSurface,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 12,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 12, offset: const Offset(0, 2))],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Company Information',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              color: _dark,
-            ),
-          ),
+          Text(localizations.company_information, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: isDark ? AppColors.darkTextPrimary : AppColors.dark)),
           const SizedBox(height: 20),
           Row(
             children: [
-              Expanded(
-                child: _buildInfoCard(
-                  'Company Size',
-                  companySize.isNotEmpty ? companySize : 'Not specified',
-                  Icons.people,
-                  _primary,
-                ),
-              ),
+              Expanded(child: _buildInfoCard(localizations.company_size, companySize.isNotEmpty ? companySize : localizations.notSpecified, Icons.people, AppColors.primary)),
               if (foundedYear != null) ...[
                 const SizedBox(width: 12),
-                Expanded(
-                  child: _buildInfoCard(
-                    'Founded',
-                    foundedYear.toString(),
-                    Icons.calendar_today,
-                    _secondary,
-                  ),
-                ),
+                Expanded(child: _buildInfoCard(localizations.founded, foundedYear.toString(), Icons.calendar_today, AppColors.secondary)),
               ],
             ],
           ),
@@ -885,28 +731,16 @@ class _EnhancedClientProfileScreenState
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: _primary.withOpacity(0.05),
+                color: AppColors.primary.withOpacity(0.05),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: _primary.withOpacity(0.2)),
+                border: Border.all(color: AppColors.primary.withOpacity(0.2)),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.language, color: _primary, size: 20),
+                  Icon(Icons.language, color: AppColors.primary, size: 20),
                   const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      website,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: _primary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () => launchUrl(Uri.parse('https://$website')),
-                    icon: Icon(Icons.open_in_new, color: _primary, size: 18),
-                  ),
+                  Expanded(child: Text(website, style: TextStyle(fontSize: 14, color: AppColors.primary, fontWeight: FontWeight.w600))),
+                  IconButton(onPressed: () => launchUrl(Uri.parse('https://$website')), icon: Icon(Icons.open_in_new, color: AppColors.primary, size: 18)),
                 ],
               ),
             ),
@@ -916,12 +750,8 @@ class _EnhancedClientProfileScreenState
     );
   }
 
-  Widget _buildInfoCard(
-    String title,
-    String value,
-    IconData icon,
-    Color color,
-  ) {
+  Widget _buildInfoCard(String title, String value, IconData icon, Color color) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -934,95 +764,41 @@ class _EnhancedClientProfileScreenState
         children: [
           Icon(icon, color: color, size: 20),
           const SizedBox(height: 8),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              color: _dark,
-            ),
-          ),
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 12,
-              color: _gray,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
+          Text(value, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: isDark ? AppColors.darkTextPrimary : AppColors.dark)),
+          Text(title, style: TextStyle(fontSize: 12, color: isDark ? AppColors.darkTextHint : AppColors.gray, fontWeight: FontWeight.w500)),
         ],
       ),
     );
   }
 
-  Widget _buildHiringStats(Map profile, Map stats) {
+  Widget _buildHiringStats(Map profile, AppLocalizations localizations) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: _white,
+        color: isDark ? AppColors.darkCard : AppColors.lightSurface,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 12,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 12, offset: const Offset(0, 2))],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Hiring Statistics',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              color: _dark,
-            ),
-          ),
+          Text(localizations.hiring_statistics, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: isDark ? AppColors.darkTextPrimary : AppColors.dark)),
           const SizedBox(height: 20),
           Row(
             children: [
-              Expanded(
-                child: _buildMetricCard(
-                  'Avg Budget',
-                  '\$${(profile['avg_project_budget'] ?? 0).toStringAsFixed(0)}',
-                  Icons.account_balance_wallet,
-                  _success,
-                ),
-              ),
+              Expanded(child: _buildMetricCard(localizations.avg_budget, '\$${(profile['avg_project_budget'] ?? 0).toStringAsFixed(0)}', Icons.account_balance_wallet, AppColors.success)),
               const SizedBox(width: 12),
-              Expanded(
-                child: _buildMetricCard(
-                  'Active Contracts',
-                  '${profile['active_contracts'] ?? 0}',
-                  Icons.assignment,
-                  _warning,
-                ),
-              ),
+              Expanded(child: _buildMetricCard(localizations.active_contracts, '${profile['active_contracts'] ?? 0}', Icons.assignment, AppColors.warning)),
             ],
           ),
           const SizedBox(height: 12),
           Row(
             children: [
-              Expanded(
-                child: _buildMetricCard(
-                  'Client Rating',
-                  '${(profile['client_rating'] ?? 0).toStringAsFixed(1)}',
-                  Icons.star,
-                  _accent,
-                ),
-              ),
+              Expanded(child: _buildMetricCard(localizations.client_rating, '${(profile['client_rating'] ?? 0).toStringAsFixed(1)}', Icons.star, AppColors.accent)),
               const SizedBox(width: 12),
-              Expanded(
-                child: _buildMetricCard(
-                  'Repeat Hire Rate',
-                  '${(profile['repeat_hire_rate'] ?? 0).toStringAsFixed(0)}%',
-                  Icons.repeat,
-                  _primary,
-                ),
-              ),
+              Expanded(child: _buildMetricCard(localizations.repeat_hire_rate, '${(profile['repeat_hire_rate'] ?? 0).toStringAsFixed(0)}%', Icons.repeat, AppColors.primary)),
             ],
           ),
         ],
@@ -1030,12 +806,8 @@ class _EnhancedClientProfileScreenState
     );
   }
 
-  Widget _buildMetricCard(
-    String title,
-    String value,
-    IconData icon,
-    Color color,
-  ) {
+  Widget _buildMetricCard(String title, String value, IconData icon, Color color) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -1048,152 +820,69 @@ class _EnhancedClientProfileScreenState
         children: [
           Icon(icon, color: color, size: 20),
           const SizedBox(height: 8),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-              color: _dark,
-            ),
-          ),
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 12,
-              color: _gray,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
+          Text(value, style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: isDark ? AppColors.darkTextPrimary : AppColors.dark)),
+          Text(title, style: TextStyle(fontSize: 12, color: isDark ? AppColors.darkTextHint : AppColors.gray, fontWeight: FontWeight.w500)),
         ],
       ),
     );
   }
 
-  Widget _buildTabsSection() {
+  Widget _buildTabsSection(AppLocalizations localizations) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: _white,
+        color: isDark ? AppColors.darkCard : AppColors.lightSurface,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 12,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 12, offset: const Offset(0, 2))],
       ),
       child: TabBar(
         controller: _tabController,
-        labelColor: _primary,
-        unselectedLabelColor: _gray,
-        indicatorColor: _primary,
+        labelColor: AppColors.primary,
+        unselectedLabelColor: isDark ? AppColors.darkTextHint : AppColors.gray,
+        indicatorColor: AppColors.primary,
         indicatorSize: TabBarIndicatorSize.tab,
         labelStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
-        unselectedLabelStyle: const TextStyle(
-          fontWeight: FontWeight.w500,
-          fontSize: 14,
-        ),
-        tabs: const [
-          Tab(text: 'Overview'),
-          Tab(text: 'Jobs'),
-          Tab(text: 'Reviews'),
-          Tab(text: 'Analytics'),
+        unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
+        tabs: [
+          Tab(text: localizations.overview),
+          Tab(text: localizations.jobs),
+          Tab(text: localizations.reviews),
+          Tab(text: localizations.analytics),
         ],
       ),
     );
   }
 
-  Widget _buildOverviewTab(Map profile, Map user) {
+  Widget _buildOverviewTab(Map profile, Map user, AppLocalizations localizations) {
     final bio = profile['bio'] ?? user['bio'] ?? '';
-    final preferredSkills = List<String>.from(
-      profile['preferred_skills'] ?? [],
-    );
+    final preferredSkills = List<String>.from(profile['preferred_skills'] ?? []);
     final hiringFor = List<String>.from(profile['hiring_for'] ?? []);
-    final communicationMethods = List<String>.from(
-      profile['preferred_communication_methods'] ?? [],
-    );
-    final projectTools = List<String>.from(
-      profile['project_management_tools'] ?? [],
-    );
+    final communicationMethods = List<String>.from(profile['preferred_communication_methods'] ?? []);
+    final projectTools = List<String>.from(profile['project_management_tools'] ?? []);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
-          if (bio.isNotEmpty) ...[
-            _buildSectionCard('About Company', Icons.business, [
-              Text(
-                bio,
-                style: TextStyle(fontSize: 15, color: _gray, height: 1.5),
-              ),
-            ]),
-            const SizedBox(height: 16),
-          ],
-          if (preferredSkills.isNotEmpty) ...[
-            _buildSectionCard('Preferred Skills', Icons.psychology, [
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: preferredSkills
-                    .map((skill) => _buildSkillChip(skill))
-                    .toList(),
-              ),
-            ]),
-            const SizedBox(height: 16),
-          ],
-          if (hiringFor.isNotEmpty) ...[
-            _buildSectionCard('Currently Hiring For', Icons.person_search, [
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: hiringFor
-                    .map((role) => _buildSkillChip(role))
-                    .toList(),
-              ),
-            ]),
-            const SizedBox(height: 16),
-          ],
-          if (communicationMethods.isNotEmpty) ...[
-            _buildSectionCard('Communication Methods', Icons.chat, [
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: communicationMethods
-                    .map((method) => _buildSkillChip(method))
-                    .toList(),
-              ),
-            ]),
-            const SizedBox(height: 16),
-          ],
-          if (projectTools.isNotEmpty) ...[
-            _buildSectionCard('Project Management Tools', Icons.settings, [
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: projectTools
-                    .map((tool) => _buildSkillChip(tool))
-                    .toList(),
-              ),
-            ]),
-          ],
-        ],
+          if (bio.isNotEmpty) _buildSectionCard(localizations.about_company, Icons.business, [Text(bio, style: TextStyle(fontSize: 15, color: Theme.of(context).brightness == Brightness.dark ? AppColors.darkTextSecondary : AppColors.gray, height: 1.5))]),
+          if (preferredSkills.isNotEmpty) _buildSectionCard(localizations.preferred_skills, Icons.psychology, [Wrap(spacing: 8, runSpacing: 8, children: preferredSkills.map((skill) => _buildSkillChip(skill)).toList())]),
+          if (hiringFor.isNotEmpty) _buildSectionCard(localizations.currently_hiring_for, Icons.person_search, [Wrap(spacing: 8, runSpacing: 8, children: hiringFor.map((role) => _buildSkillChip(role)).toList())]),
+          if (communicationMethods.isNotEmpty) _buildSectionCard(localizations.communication_methods, Icons.chat, [Wrap(spacing: 8, runSpacing: 8, children: communicationMethods.map((method) => _buildSkillChip(method)).toList())]),
+          if (projectTools.isNotEmpty) _buildSectionCard(localizations.project_management_tools, Icons.settings, [Wrap(spacing: 8, runSpacing: 8, children: projectTools.map((tool) => _buildSkillChip(tool)).toList())]),
+        ].where((widget) => widget != null).toList(),
       ),
     );
   }
 
   Widget _buildSectionCard(String title, IconData icon, List<Widget> children) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
+      margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: _white,
+        color: isDark ? AppColors.darkCard : AppColors.lightSurface,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 12,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 12, offset: const Offset(0, 2))],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1202,34 +891,14 @@ class _EnhancedClientProfileScreenState
             padding: const EdgeInsets.all(20),
             child: Row(
               children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: _primary.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Icon(icon, color: _primary, size: 20),
-                ),
+                Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: AppColors.primary.withOpacity(0.1), borderRadius: BorderRadius.circular(10)), child: Icon(icon, color: AppColors.primary, size: 20)),
                 const SizedBox(width: 12),
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: _dark,
-                  ),
-                ),
+                Text(title, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: isDark ? AppColors.darkTextPrimary : AppColors.dark)),
               ],
             ),
           ),
-          const Divider(height: 1, color: Color(0xFFE5E7EB)),
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: children,
-            ),
-          ),
+          const Divider(height: 1, color: AppColors.border),
+          Padding(padding: const EdgeInsets.all(20), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: children)),
         ],
       ),
     );
@@ -1239,139 +908,68 @@ class _EnhancedClientProfileScreenState
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [_primary.withOpacity(0.1), _primaryDark.withOpacity(0.1)],
-        ),
+        gradient: LinearGradient(colors: [AppColors.primary.withOpacity(0.1), AppColors.primaryDark.withOpacity(0.1)]),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: _primary.withOpacity(0.3)),
+        border: Border.all(color: AppColors.primary.withOpacity(0.3)),
       ),
-      child: Text(
-        skill,
-        style: const TextStyle(
-          fontSize: 14,
-          color: _primary,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
+      child: Text(skill, style: const TextStyle(fontSize: 14, color: AppColors.primary, fontWeight: FontWeight.w600)),
     );
   }
 
-  Widget _buildJobsTab(List jobs) {
+  Widget _buildJobsTab(List jobs, AppLocalizations localizations, bool isOwnProfile) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     if (jobs.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.work_outline, size: 64, color: _gray),
+            Icon(Icons.work_outline, size: 64, color: isDark ? AppColors.darkTextHint : AppColors.gray),
             const SizedBox(height: 16),
-            Text(
-              'No active jobs',
-              style: TextStyle(
-                fontSize: 18,
-                color: _gray,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
+            Text(localizations.no_active_jobs, style: TextStyle(fontSize: 18, color: isDark ? AppColors.darkTextHint : AppColors.gray, fontWeight: FontWeight.w600)),
             const SizedBox(height: 8),
-            Text(
-              _isOwnProfile
-                  ? 'Post a job to start hiring freelancers'
-                  : 'This client hasn\'t posted any jobs yet',
-              style: TextStyle(fontSize: 14, color: _gray),
-              textAlign: TextAlign.center,
-            ),
+            Text(isOwnProfile ? localizations.post_job_to_start : localizations.client_no_jobs, style: TextStyle(fontSize: 14, color: isDark ? AppColors.darkTextHint : AppColors.gray), textAlign: TextAlign.center),
           ],
         ),
       );
     }
-
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: jobs.length,
-      itemBuilder: (context, index) {
-        final job = jobs[index];
-        return _buildJobCard(job);
-      },
-    );
+    return ListView.builder(padding: const EdgeInsets.all(16), itemCount: jobs.length, itemBuilder: (context, index) => _buildJobCard(jobs[index], localizations));
   }
 
-  Widget _buildJobCard(Map job) {
+  Widget _buildJobCard(Map job, AppLocalizations localizations) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: _white,
+        color: isDark ? AppColors.darkCard : AppColors.lightSurface,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 12,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 12, offset: const Offset(0, 2))],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Expanded(
-                child: Text(
-                  job['title'] ?? 'Job Title',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: _dark,
-                  ),
-                ),
-              ),
+              Expanded(child: Text(job['title'] ?? localizations.job_title, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: isDark ? AppColors.darkTextPrimary : AppColors.dark))),
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: _success.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  job['status'] ?? 'Active',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: _success,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(color: AppColors.success.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
+                child: Text(job['status'] ?? localizations.active, style: TextStyle(fontSize: 12, color: AppColors.success, fontWeight: FontWeight.w600)),
               ),
             ],
           ),
           const SizedBox(height: 12),
-          Text(
-            job['description'] ?? '',
-            style: TextStyle(fontSize: 14, color: _gray, height: 1.4),
-            maxLines: 3,
-            overflow: TextOverflow.ellipsis,
-          ),
+          Text(job['description'] ?? '', style: TextStyle(fontSize: 14, color: isDark ? AppColors.darkTextSecondary : AppColors.gray, height: 1.4), maxLines: 3, overflow: TextOverflow.ellipsis),
           const SizedBox(height: 12),
           Row(
             children: [
-              Icon(Icons.attach_money, color: _primary, size: 16),
+              Icon(Icons.attach_money, color: AppColors.primary, size: 16),
               const SizedBox(width: 4),
-              Text(
-                '\$${job['budget'] ?? '0'}',
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: _primary,
-                ),
-              ),
+              Text('\$${job['budget'] ?? '0'}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.primary)),
               const SizedBox(width: 16),
-              Icon(Icons.schedule, color: _gray, size: 16),
+              Icon(Icons.schedule, color: isDark ? AppColors.darkTextHint : AppColors.gray, size: 16),
               const SizedBox(width: 4),
-              Text(
-                job['duration'] ?? 'Not specified',
-                style: TextStyle(fontSize: 14, color: _gray),
-              ),
+              Text(job['duration'] ?? localizations.notSpecified, style: TextStyle(fontSize: 14, color: isDark ? AppColors.darkTextHint : AppColors.gray)),
             ],
           ),
         ],
@@ -1379,108 +977,59 @@ class _EnhancedClientProfileScreenState
     );
   }
 
-  Widget _buildReviewsTab(List reviews, double avg, int total) {
+  Widget _buildReviewsTab(List reviews, double avg, int total, AppLocalizations localizations) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
-          if (total > 0) ...[
-            _buildRatingOverview(avg, total),
-            const SizedBox(height: 20),
-          ],
+          if (total > 0) _buildRatingOverview(avg, total, localizations),
           if (reviews.isEmpty)
             Center(
               child: Column(
                 children: [
-                  Icon(Icons.star_outline, size: 64, color: _gray),
+                  Icon(Icons.star_outline, size: 64, color: isDark ? AppColors.darkTextHint : AppColors.gray),
                   const SizedBox(height: 16),
-                  Text(
-                    'No reviews yet',
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: _gray,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                  Text(localizations.noReviewsYet, style: TextStyle(fontSize: 18, color: isDark ? AppColors.darkTextHint : AppColors.gray, fontWeight: FontWeight.w600)),
                   const SizedBox(height: 8),
-                  Text(
-                    'Reviews from freelancers will appear here',
-                    style: TextStyle(fontSize: 14, color: _gray),
-                  ),
+                  Text(localizations.reviews_will_appear, style: TextStyle(fontSize: 14, color: isDark ? AppColors.darkTextHint : AppColors.gray)),
                 ],
               ),
             )
           else
-            ...reviews.map(
-              (review) => Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: _buildReviewCard(review),
-              ),
-            ),
+            ...reviews.map((review) => Padding(padding: const EdgeInsets.only(bottom: 16), child: _buildReviewCard(review, localizations))),
         ],
       ),
     );
   }
 
-  Widget _buildRatingOverview(double avg, int total) {
+  Widget _buildRatingOverview(double avg, int total, AppLocalizations localizations) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [_primary.withOpacity(0.05), _primaryDark.withOpacity(0.05)],
-        ),
+        gradient: LinearGradient(colors: [AppColors.primary.withOpacity(0.05), AppColors.primaryDark.withOpacity(0.05)]),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: _primary.withOpacity(0.2)),
+        border: Border.all(color: AppColors.primary.withOpacity(0.2)),
       ),
       child: Column(
         children: [
-          Row(
-            children: [
-              Column(
-                children: [
-                  Text(
-                    avg.toStringAsFixed(1),
-                    style: TextStyle(
-                      fontSize: 48,
-                      fontWeight: FontWeight.w800,
-                      color: _primary,
-                    ),
-                  ),
-                  Row(
-                    children: List.generate(5, (index) {
-                      return Icon(
-                        index < avg.floor() ? Icons.star : Icons.star_border,
-                        color: _accent,
-                        size: 20,
-                      );
-                    }),
-                  ),
-                  Text(
-                    '$total reviews',
-                    style: TextStyle(fontSize: 14, color: _gray),
-                  ),
-                ],
-              ),
-            ],
-          ),
+          Text(avg.toStringAsFixed(1), style: TextStyle(fontSize: 48, fontWeight: FontWeight.w800, color: AppColors.primary)),
+          Row(mainAxisAlignment: MainAxisAlignment.center, children: List.generate(5, (index) => Icon(index < avg.floor() ? Icons.star : Icons.star_border, color: AppColors.warning, size: 20))),
+          Text('$total ${localizations.reviews}', style: TextStyle(fontSize: 14, color: isDark ? AppColors.darkTextHint : AppColors.gray)),
         ],
       ),
     );
   }
 
-  Widget _buildReviewCard(Map review) {
+  Widget _buildReviewCard(Map review, AppLocalizations localizations) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: _white,
+        color: isDark ? AppColors.darkCard : AppColors.lightSurface,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 12,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 12, offset: const Offset(0, 2))],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1490,50 +1039,20 @@ class _EnhancedClientProfileScreenState
               Container(
                 width: 40,
                 height: 40,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(colors: [_primary, _primaryDark]),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Center(
-                  child: Text(
-                    (review['freelancer_name'] ?? 'F')[0].toUpperCase(),
-                    style: const TextStyle(
-                      color: _white,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 16,
-                    ),
-                  ),
-                ),
+                decoration: BoxDecoration(gradient: AppColors.primaryGradient, borderRadius: BorderRadius.circular(20)),
+                child: Center(child: Text((review['freelancer_name'] ?? 'F')[0].toUpperCase(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 16))),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      review['freelancer_name'] ?? 'Freelancer',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: _dark,
-                      ),
-                    ),
+                    Text(review['freelancer_name'] ?? localizations.freelancer, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: isDark ? AppColors.darkTextPrimary : AppColors.dark)),
                     Row(
                       children: [
-                        ...List.generate(5, (index) {
-                          return Icon(
-                            index < (review['rating'] ?? 0)
-                                ? Icons.star
-                                : Icons.star_border,
-                            color: _accent,
-                            size: 14,
-                          );
-                        }),
+                        ...List.generate(5, (index) => Icon(index < (review['rating'] ?? 0) ? Icons.star : Icons.star_border, color: AppColors.warning, size: 14)),
                         const SizedBox(width: 8),
-                        Text(
-                          review['created_at'] ?? '',
-                          style: TextStyle(fontSize: 12, color: _gray),
-                        ),
+                        Text(review['created_at'] ?? '', style: TextStyle(fontSize: 12, color: isDark ? AppColors.darkTextHint : AppColors.gray)),
                       ],
                     ),
                   ],
@@ -1542,87 +1061,48 @@ class _EnhancedClientProfileScreenState
             ],
           ),
           const SizedBox(height: 16),
-          Text(
-            review['comment'] ?? '',
-            style: TextStyle(fontSize: 14, color: _gray, height: 1.4),
-          ),
+          Text(review['comment'] ?? '', style: TextStyle(fontSize: 14, color: isDark ? AppColors.darkTextSecondary : AppColors.gray, height: 1.4)),
         ],
       ),
     );
   }
 
-  Widget _buildAnalyticsTab(Map profile, Map stats) {
+  Widget _buildAnalyticsTab(Map profile, AppLocalizations localizations) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
-          _buildAnalyticsCard(
-            'Profile Views',
-            profile['profile_views'] ?? 0,
-            Icons.visibility,
-          ),
+          _buildAnalyticsCard(localizations.profileViews, profile['profile_views'] ?? 0, Icons.visibility),
           const SizedBox(height: 16),
-          _buildAnalyticsCard(
-            'Jobs Posted',
-            profile['jobs_posted'] ?? 0,
-            Icons.work,
-          ),
+          _buildAnalyticsCard(localizations.jobs_posted, profile['jobs_posted'] ?? 0, Icons.work),
           const SizedBox(height: 16),
-          _buildAnalyticsCard(
-            'Invitations Sent',
-            profile['invitations_sent'] ?? 0,
-            Icons.email,
-          ),
+          _buildAnalyticsCard(localizations.invitations_sent, profile['invitations_sent'] ?? 0, Icons.email),
           const SizedBox(height: 16),
-          _buildAnalyticsCard(
-            'Applications Received',
-            profile['applications_received'] ?? 0,
-            Icons.inbox,
-          ),
+          _buildAnalyticsCard(localizations.applications_received, profile['applications_received'] ?? 0, Icons.inbox),
         ],
       ),
     );
   }
 
   Widget _buildAnalyticsCard(String title, int value, IconData icon) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: _white,
+        color: isDark ? AppColors.darkCard : AppColors.lightSurface,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 12,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 12, offset: const Offset(0, 2))],
       ),
       child: Row(
         children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: _primary.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(icon, color: _primary, size: 24),
-          ),
+          Container(width: 48, height: 48, decoration: BoxDecoration(color: AppColors.primary.withOpacity(0.1), borderRadius: BorderRadius.circular(12)), child: Icon(icon, color: AppColors.primary, size: 24)),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  value.toString(),
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w800,
-                    color: _dark,
-                  ),
-                ),
-                Text(title, style: TextStyle(fontSize: 14, color: _gray)),
+                Text(value.toString(), style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: isDark ? AppColors.darkTextPrimary : AppColors.dark)),
+                Text(title, style: TextStyle(fontSize: 14, color: isDark ? AppColors.darkTextHint : AppColors.gray)),
               ],
             ),
           ),

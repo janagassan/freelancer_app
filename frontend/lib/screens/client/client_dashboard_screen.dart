@@ -1,5 +1,6 @@
 // lib/screens/client/client_dashboard_screen.dart
 import 'dart:async';
+import 'dart:convert';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:freelancer_platform/screens/ads/ads_management_screen.dart';
@@ -14,6 +15,7 @@ import 'package:freelancer_platform/screens/freelancer/profile_screen.dart'
     hide RatingStars;
 import 'package:freelancer_platform/screens/rating/reviews_screen.dart';
 import 'enhanced_client_profile_screen.dart';
+import 'client_analytics_screen.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:freelancer_platform/screens/client/client_profile_screen.dart';
@@ -25,6 +27,7 @@ import '../../models/notification_model.dart';
 import '../../models/user_model.dart';
 import '../../services/api_service.dart';
 import '../../services/draft_local_storage.dart';
+import '../../widgets/avatar_widget.dart';
 import '../chat/chats_list_screen.dart';
 import '../contract/my_contracts_screen.dart';
 import '../notifications/notifications_screen.dart';
@@ -171,6 +174,7 @@ class _StatusSlice {
 
 class _ProposalItem {
   final int id;
+  final int? freelancerId;
   final String status;
   final double price;
   final int deliveryTime;
@@ -182,6 +186,7 @@ class _ProposalItem {
 
   _ProposalItem({
     required this.id,
+    this.freelancerId,
     required this.status,
     required this.price,
     required this.deliveryTime,
@@ -199,22 +204,55 @@ class _ProposalItem {
     final fp = j['freelancerProfile'];
     final f = j['freelancer'];
     final p = j['project'];
+
     List<String> skills = [];
     if (fp?['skills'] is List) {
       skills = (fp!['skills'] as List).map((e) => e.toString()).toList();
+    } else if (fp?['skills'] is String && (fp['skills'] as String).isNotEmpty) {
+      try {
+        final parsed = jsonDecode(fp['skills']);
+        if (parsed is List) {
+          skills = parsed.map((e) => e.toString()).toList();
+        }
+      } catch (e) {}
     }
+
+    int? freelancerId;
+    if (j['freelancerId'] != null) {
+      freelancerId = j['freelancerId'];
+    } else if (f != null && f['id'] != null) {
+      freelancerId = f['id'];
+    }
+
+    String? freelancerName;
+    if (j['freelancerName'] != null) {
+      freelancerName = j['freelancerName'];
+    } else if (f != null && f['name'] != null) {
+      freelancerName = f['name'];
+    }
+
+    if (freelancerName == null || freelancerName.isEmpty) {
+      freelancerName = 'Freelancer';
+    }
+
+    print(
+      '📊 Parsing proposal: id=${j['id']}, freelancerId=$freelancerId, name=$freelancerName',
+    );
+
     return _ProposalItem(
       id: j['id'] ?? 0,
+      freelancerId: freelancerId,
       status: j['status'] ?? 'pending',
       price: (j['price'] ?? 0).toDouble(),
       deliveryTime: j['deliveryTime'] ?? 0,
       proposalText: j['proposalText'] ?? '',
-      projectTitle: p?['title'],
-      projectId: p?['id'],
-      freelancerName: f?['name'],
-      freelancerAvatar: f?['avatar'],
-      freelancerTitle: fp?['title'],
-      freelancerRating: (fp?['rating'] ?? 0).toDouble(),
+      projectTitle: p?['title'] ?? j['projectTitle'],
+      projectId: p?['id'] ?? j['projectId'],
+      freelancerName: freelancerName,
+      freelancerAvatar: j['freelancerAvatar'] ?? f?['avatar'],
+      freelancerTitle: fp?['title'] ?? j['freelancerTitle'],
+      freelancerRating: (fp?['rating'] ?? j['freelancerRating'] ?? 0)
+          .toDouble(),
       skills: skills,
     );
   }
@@ -367,6 +405,7 @@ class _Sidebar extends StatelessWidget {
   final String avatarUrl;
   final VoidCallback onProfile;
   final VoidCallback? onSettings;
+  final DashboardOverview? dashboardData;
 
   const _Sidebar({
     required this.selectedIndex,
@@ -375,32 +414,36 @@ class _Sidebar extends StatelessWidget {
     required this.avatarUrl,
     required this.onProfile,
     this.onSettings,
+    this.dashboardData,
   });
 
-  static const _items = [
-    _SidebarItem(icon: Icons.dashboard_outlined, labelKey: 'overview'),
-    _SidebarItem(
-      icon: Icons.folder_open_outlined,
-      labelKey: 'myProjects',
-      badge: 5,
-    ),
-    _SidebarItem(icon: Icons.send_outlined, labelKey: 'proposals', badge: 8),
-    _SidebarItem(
-      icon: Icons.description_outlined,
-      labelKey: 'contracts',
-      badge: 2,
-      badgeGreen: true,
-    ),
-    _SidebarItem(icon: Icons.gavel_outlined, labelKey: 'disputes'),
-    _SidebarItem(icon: Icons.interpreter_mode, labelKey: 'interviews'),
-    _SidebarItem(
-      icon: Icons.account_balance_wallet_outlined,
-      labelKey: 'wallet',
-    ),
-    _SidebarItem(icon: Icons.campaign_outlined, labelKey: 'ads'),
-    _SidebarItem(icon: Icons.people_outline, labelKey: 'findFreelancers'),
-    _SidebarItem(icon: Icons.bar_chart_outlined, labelKey: 'analytics'),
-  ];
+  List<_SidebarItem> get _items {
+    final stats = dashboardData?.stats;
+    return [
+      _SidebarItem(icon: Icons.dashboard_outlined, labelKey: 'overview'),
+      _SidebarItem(
+        icon: Icons.folder_open_outlined,
+        labelKey: 'myProjects',
+        badge: stats?.openProjects,
+      ),
+      _SidebarItem(
+        icon: Icons.send_outlined,
+        labelKey: 'proposals',
+        badge: stats?.pendingProposals,
+      ),
+      _SidebarItem(
+        icon: Icons.description_outlined,
+        labelKey: 'contracts',
+        badge: stats?.inProgressProjects,
+        badgeGreen: true,
+      ),
+      _SidebarItem(icon: Icons.gavel_outlined, labelKey: 'disputes'),
+      _SidebarItem(icon: Icons.interpreter_mode, labelKey: 'interviews'),
+      _SidebarItem(icon: Icons.campaign_outlined, labelKey: 'ads'),
+      _SidebarItem(icon: Icons.people_outline, labelKey: 'findFreelancers'),
+      _SidebarItem(icon: Icons.bar_chart_outlined, labelKey: 'analytics'),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1814,10 +1857,13 @@ class _ClientDashboardState extends State<ClientDashboard> {
     if (mounted) setState(() => _showPublishDraftReminder = show);
   }
 
-  String _getAvatarUrl(String? a) {
-    if (a == null || a.isEmpty) return '';
-    if (a.startsWith('http')) return a;
-    return 'http://localhost:5000$a';
+  String _getAvatarUrl(String? avatar) {
+    if (avatar == null || avatar.isEmpty) return '';
+    if (avatar.startsWith('http')) return avatar;
+    if (avatar.startsWith('/uploads')) {
+      return 'http://localhost:5001$avatar';
+    }
+    return avatar;
   }
 
   String _timeAgo(DateTime dt) {
@@ -2025,6 +2071,7 @@ class _ClientDashboardState extends State<ClientDashboard> {
             avatarUrl: avatarUrl,
             onProfile: _navigateToProfile,
             onSettings: () => Navigator.pushNamed(context, '/settings'),
+            dashboardData: _data,
           ),
 
           Expanded(
@@ -2049,7 +2096,6 @@ class _ClientDashboardState extends State<ClientDashboard> {
       t.contracts,
       t.disputes,
       t.interviews,
-      t.myWallet,
       t.ads,
       t.findWork,
       t.analytics,
@@ -2260,13 +2306,11 @@ class _ClientDashboardState extends State<ClientDashboard> {
       case 5:
         return const InterviewsScreen();
       case 6:
-        return _buildPlaceholder(t.myWallet);
-      case 7:
         return const AdsManagementScreen();
-      case 8:
+      case 7:
         return const FindFreelancersScreen();
-      case 9:
-        return _buildPlaceholder(t.analytics);
+      case 8:
+        return const ClientAnalyticsScreen();
       default:
         return _buildOverviewTab();
     }
@@ -3463,8 +3507,26 @@ class _ClientDashboardState extends State<ClientDashboard> {
   Widget _buildProposalCard(_ProposalItem p) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final accepted = p.status == 'accepted';
+
+    print('📊 Proposal Card Data:');
+    print('   - ID: ${p.id}');
+    print('   - Freelancer ID: ${p.freelancerId}');
+    print('   - Freelancer Name: ${p.freelancerName}');
+    print('   - Status: ${p.status}');
+
     return GestureDetector(
-      onTap: () => _navigateToFreelancerProfile(p.id),
+      onTap: () {
+        print('🖱️ Tapped on proposal card');
+        print('   - Freelancer ID to navigate: ${p.freelancerId}');
+
+        if (p.freelancerId != null && p.freelancerId! > 0) {
+          _navigateToFreelancerProfile(p.freelancerId!);
+        } else {
+          Fluttertoast.showToast(
+            msg: 'Cannot open freelancer profile: No valid ID',
+          );
+        }
+      },
       child: Container(
         margin: const EdgeInsets.only(bottom: 10),
         padding: const EdgeInsets.all(14),
@@ -3487,8 +3549,8 @@ class _ClientDashboardState extends State<ClientDashboard> {
         child: Row(
           children: [
             _avatarWidget(
-              p.freelancerName ?? 'F',
-              _getAvatarUrl(p.freelancerAvatar),
+              p.freelancerName ?? 'Freelancer',
+              p.freelancerAvatar,
               42,
             ),
             const SizedBox(width: 12),
@@ -3854,46 +3916,55 @@ class _ClientDashboardState extends State<ClientDashboard> {
     );
   }
 
-  Widget _avatarWidget(String name, String url, double size) {
-    final colors = [
-      AppColors.accent,
-      AppColors.info,
-      AppColors.success,
-      AppColors.warning,
-      const Color(0xFF7C3AED),
-    ];
-    final color = colors[name.codeUnitAt(0) % colors.length];
+  Widget _avatarWidget(String name, String? url, double size) {
+    final fullUrl = _getAvatarUrl(url);
+
     return Container(
       width: size,
       height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         gradient: LinearGradient(
-          colors: [color, color.withOpacity(0.7)],
+          colors: [AppColors.accent, AppColors.accentDark],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
       ),
-      child: url.isNotEmpty
+      child: fullUrl.isNotEmpty
           ? ClipOval(
               child: Image.network(
-                url,
+                fullUrl,
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => _avatarInitial(name, size),
+                width: size,
+                height: size,
+                errorBuilder: (context, error, stackTrace) {
+                  print('❌ Avatar load error for $name: $error');
+                  return _buildAvatarFallback(name, size);
+                },
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return Center(
+                    child: SizedBox(
+                      width: size * 0.5,
+                      height: size * 0.5,
+                      child: const CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  );
+                },
               ),
             )
-          : _avatarInitial(name, size),
+          : _buildAvatarFallback(name, size),
     );
   }
 
-  Widget _avatarInitial(String name, double size) {
+  Widget _buildAvatarFallback(String name, double size) {
     final initial = name.isNotEmpty ? name[0].toUpperCase() : '?';
     return Center(
       child: Text(
         initial,
         style: TextStyle(
           color: Colors.white,
-          fontSize: size * 0.38,
+          fontSize: size * 0.4,
           fontWeight: FontWeight.w700,
         ),
       ),

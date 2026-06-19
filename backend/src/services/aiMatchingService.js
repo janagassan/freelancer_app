@@ -60,10 +60,23 @@ class AIMatchingService {
         experience: freelancer.experience_years,
       });
 
+      const proposedProjectIds = (await Proposal.findAll({
+        where: { UserId: freelancerId },
+        attributes: ['ProjectId'],
+      })).map(p => p.ProjectId);
+
+      const assignedProjectIds = (await Contract.findAll({
+        where: { status: ['active', 'pending_client', 'pending_freelancer'] },
+        attributes: ['ProjectId'],
+      })).map(c => c.ProjectId);
+
       const projects = await Project.findAll({
         where: {
           status: "open",
           UserId: { [Op.ne]: freelancerId },
+          id: {
+            [Op.not]: [...proposedProjectIds, ...assignedProjectIds],
+          },
         },
         include: [
           {
@@ -75,14 +88,10 @@ class AIMatchingService {
         limit: 50,
       });
 
-      console.log(`📊 Found ${projects.length} open projects`);
+      console.log(`📊 Found ${projects.length} open projects (filtered)`);
 
       const scoredProjects = await Promise.all(
         projects.map(async (project) => {
-          const existingProposal = await Proposal.findOne({
-            where: { ProjectId: project.id, UserId: freelancerId },
-          });
-
           const matchScore = await this.calculateProjectMatchScore(
             project,
             freelancer,
@@ -95,7 +104,7 @@ class AIMatchingService {
             ...projectData,
             matchScore: matchScore.total,
             matchDetails: matchScore,
-            hasApplied: !!existingProposal,
+            hasApplied: false,
           };
         }),
       );
@@ -189,10 +198,6 @@ class AIMatchingService {
     );
     const freelancerId =
       freelancer.UserId || freelancer.user_id || freelancer.id;
-    // const testMatch = await this.calculateTestBasedMatchScore(
-    //   freelancerId,
-    //   projectSkills,
-    // );
     const testMatch = { score: 0, matchedSkills: [], testsCount: 0 };
 
     return {

@@ -4605,7 +4605,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get nothingOnThisDay => 'Nothing on this day';
 
   @override
-  String get more => 'more';
+  String get more => 'More';
 
   @override
   String get milestonesRemindersInterviews =>
@@ -5131,4 +5131,115 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get avgCpc => 'Avg CPC';
+
+  @override
+  String get contactOptions => 'Contact Options';
+
+  @override
+  String get addToFavorites => 'Add to Favorites';
+
+  @override
+  String get loading_profile => 'Loading Profile...';
+
+  @override
+  String get verified_business => 'Verified Business';
+
+  @override
+  String get individual_client => 'Individual Client';
+
+  @override
+  String get total_spent => 'Total Spent';
+
+  @override
+  String get hire_rate => 'Hire Rate';
+
+  @override
+  String get since => 'Since';
+
+  @override
+  String get follow => 'Follow';
+
+  @override
+  String get achievements => 'Achievements';
+
+  @override
+  String get top_client => 'Top Client';
+
+  @override
+  String get badge => 'Badge';
+
+  @override
+  String get company_information => 'Company Information';
+
+  @override
+  String get company_size => 'Company Size';
+
+  @override
+  String get not_specified => 'Not specified';
+
+  @override
+  String get founded => 'Founded';
+
+  @override
+  String get hiring_statistics => 'Hiring Statistics';
+
+  @override
+  String get avg_budget => 'Avg Budget';
+
+  @override
+  String get active_contracts => 'Active Contracts';
+
+  @override
+  String get client_rating => 'Client Rating';
+
+  @override
+  String get repeat_hire_rate => 'Repeat Hire Rate';
+
+  @override
+  String get jobs => 'Jobs';
+
+  @override
+  String get about_company => 'About Company';
+
+  @override
+  String get preferred_skills => 'Preferred Skills';
+
+  @override
+  String get currently_hiring_for => 'Currently Hiring For';
+
+  @override
+  String get communication_methods => 'Communication Methods';
+
+  @override
+  String get project_management_tools => 'Project Management Tools';
+
+  @override
+  String get no_active_jobs => 'No active jobs';
+
+  @override
+  String get post_job_to_start => 'Post a job to start hiring freelancers';
+
+  @override
+  String get client_no_jobs => 'This client hasn\'t posted any jobs yet';
+
+  @override
+  String get job_title => 'Job Title';
+
+  @override
+  String get no_reviews_yet => 'No reviews yet';
+
+  @override
+  String get reviews_will_appear => 'Reviews from freelancers will appear here';
+
+  @override
+  String get profile_views => 'Profile Views';
+
+  @override
+  String get jobs_posted => 'Jobs Posted';
+
+  @override
+  String get invitations_sent => 'Invitations Sent';
+
+  @override
+  String get applications_received => 'Applications Received';
 }

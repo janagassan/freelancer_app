@@ -294,6 +294,7 @@ class _Sidebar extends StatelessWidget {
   final FreelancerProfile? profile;
   final String avatarUrl;
   final VoidCallback onEditProfile;
+  final Map<String, dynamic>? stats;
 
   const _Sidebar({
     required this.selectedIndex,
@@ -301,23 +302,30 @@ class _Sidebar extends StatelessWidget {
     required this.profile,
     required this.avatarUrl,
     required this.onEditProfile,
+    this.stats,
   });
 
-  static const _items = [
-    _SidebarItem(icon: Icons.person_outline, labelKey: 'home'),
-    _SidebarItem(icon: Icons.search, labelKey: 'findWork'),
-    _SidebarItem(icon: Icons.send_outlined, labelKey: 'myProposals', badge: 3),
-    _SidebarItem(icon: Icons.work_outline, labelKey: 'myProjects'),
-    _SidebarItem(
-      icon: Icons.description_outlined,
-      labelKey: 'contracts',
-      badge: 2,
-      badgeGreen: true,
-    ),
-    _SidebarItem(icon: Icons.gavel_outlined, labelKey: 'disputes'),
-    _SidebarItem(icon: Icons.attach_money, labelKey: 'financial'),
-    _SidebarItem(icon: Icons.mail_outline, labelKey: 'offers', badge: 0),
-  ];
+  List<_SidebarItem> get _items {
+    final totalProposals = stats?['totalProposals'] ?? 0;
+    final activeProjects = stats?['activeProjects'] ?? 0;
+    final pendingOffers = stats?['pendingOffers'] ?? 0;
+
+    return [
+      _SidebarItem(icon: Icons.person_outline, labelKey: 'home'),
+      _SidebarItem(icon: Icons.search, labelKey: 'findWork'),
+      _SidebarItem(icon: Icons.send_outlined, labelKey: 'myProposals', badge: totalProposals > 0 ? totalProposals : null),
+      _SidebarItem(icon: Icons.work_outline, labelKey: 'myProjects'),
+      _SidebarItem(
+        icon: Icons.description_outlined,
+        labelKey: 'contracts',
+        badge: activeProjects > 0 ? activeProjects : null,
+        badgeGreen: true,
+      ),
+      _SidebarItem(icon: Icons.gavel_outlined, labelKey: 'disputes'),
+      _SidebarItem(icon: Icons.attach_money, labelKey: 'financial'),
+      _SidebarItem(icon: Icons.mail_outline, labelKey: 'offers', badge: pendingOffers > 0 ? pendingOffers : null),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -367,22 +375,24 @@ class _Sidebar extends StatelessWidget {
                   CircleAvatar(
                     radius: 24,
                     backgroundColor: AppTheme.AppColors.accent,
-                    backgroundImage: avatarUrl.isNotEmpty
-                        ? NetworkImage(avatarUrl)
-                        : null,
-                    child: avatarUrl.isEmpty
-                        ? Text(
-                            profile?.name?.isNotEmpty == true
-                                ? profile!.name![0].toUpperCase()
-                                : 'F',
-                            style: const TextStyle(
-                              color: AppTheme.AppColors.primaryDark,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          )
-                        : null,
-                  ),
+                    backgroundImage:
+                      profile?.avatar != null &&
+                          profile!.avatar!.isNotEmpty
+                      ? NetworkImage(_getAvatarUrl(profile!.avatar!))
+                      : null,
+                  child: profile?.avatar == null
+                      ? Text(
+                          profile?.name?.isNotEmpty == true
+                              ? profile!.name![0].toUpperCase()
+                              : 'F',
+                          style: const TextStyle(
+                            color: AppTheme.AppColors.primaryDark,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        )
+                      : null,
+                ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Column(
@@ -526,6 +536,15 @@ class _Sidebar extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  String _getAvatarUrl(String? avatar) {
+    if (avatar == null || avatar.isEmpty) return '';
+    if (avatar.startsWith('http')) return avatar;
+    if (avatar.startsWith('/uploads')) {
+      return 'http://localhost:5001$avatar';
+    }
+    return avatar;
   }
 
   String _getLabel(AppLocalizations t, String key) {
@@ -2886,6 +2905,7 @@ class _FreelancerHomeScreenState extends State<FreelancerHomeScreen> {
             profile: profile,
             avatarUrl: avatarUrl,
             onEditProfile: navigateToEditProfile,
+            stats: stats,
           ),
 
           Expanded(

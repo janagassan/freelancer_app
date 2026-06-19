@@ -6,7 +6,7 @@ import 'dart:io' show Platform;
 import 'package:fluttertoast/fluttertoast.dart';
 
 class PDFViewer {
-  static const String baseUrl = 'http://localhost:5001';
+  static const String baseUrl = 'https://spoils-defog-nylon.ngrok-free.dev';
 
   static Future<void> openPDF(String pdfPath) async {
     try {
