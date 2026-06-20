@@ -23,15 +23,7 @@ import '../models/subscription_stats_model.dart';
 import 'package:dio/dio.dart';
 
 class ApiService {
-  static String get BASE_URL {
-    if (kIsWeb) {
-      return 'https://freelancer-app-h6os.onrender.com/api';
-    }
-    if (Platform.isAndroid) {
-      return 'https://freelancer-app-h6os.onrender.com/api';
-    }
-    return 'https://freelancer-app-h6os.onrender.com/api';
-  }
+  
 
   static String? _token;
 
