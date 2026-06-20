@@ -30,7 +30,7 @@ export const getUserSubscription = async (req, res) => {
 export const createCheckoutSession = async (req, res) => {
   try {
     const { planSlug } = req.body;
-    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5000";
+    const frontendUrl = process.env.FRONTEND_URL || "https://freelancer-app-h6os.onrender.com";
 
     const { sessionId, checkoutUrl } =
       await SubscriptionService.createCheckoutSession(
@@ -91,7 +91,7 @@ export const confirmSubscriptionPayment = async (req, res) => {
 export const createSubscriptionCheckoutSession = async (req, res) => {
   try {
     const { planSlug } = req.body;
-    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:58940";
+    const frontendUrl = process.env.FRONTEND_URL || "https://freelancer-app-h6os.onrender.com";
 
     const result = await SubscriptionService.createSubscriptionCheckoutSession(
       planSlug,

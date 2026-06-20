@@ -891,7 +891,7 @@ export const createCheckoutSession = async (req, res) => {
     console.log("🔍 Creating checkout session for contract:", contractId);
     console.log("🔍 Payment Intent ID:", paymentIntentId);
 
-    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5000";
+    const frontendUrl = process.env.FRONTEND_URL || "https://freelancer-app-h6os.onrender.com";
     console.log("🔍 Frontend URL:", frontendUrl);
 
     const result = await PaymentService.createCheckoutSession(

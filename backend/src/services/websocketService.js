@@ -12,8 +12,8 @@ export const initWebSocket = (server) => {
   io = new Server(server, {
     cors: {
       origin: [
-        "http://localhost:3000",
-        "http://localhost:5000",
+        "https://freelancer-app-h6os.onrender.com",
+        "https://freelancer-app-h6os.onrender.com",
         "https://spoils-defog-nylon.ngrok-free.dev",
         "http://127.0.0.1:3000",
       ],

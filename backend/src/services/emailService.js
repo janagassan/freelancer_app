@@ -127,7 +127,7 @@ export const sendInterviewInvitationEmail = async (
           }
           
           <div style="text-align: center; margin: 30px 0;">
-            <a href="${process.env.FRONTEND_URL || "http://localhost:3000"}/interviews/${invitation.id}" 
+            <a href="${process.env.FRONTEND_URL || "https://freelancer-app-h6os.onrender.com"}/interviews/${invitation.id}" 
                style="background-color: #764ba2; color: white; padding: 12px 30px; 
                       text-decoration: none; border-radius: 25px; display: inline-block;">
               View & Select Time
