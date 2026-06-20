@@ -1116,12 +1116,12 @@ export const approveMilestone = async (req, res) => {
     const alreadyReleased = parseFloat(contract.released_amount || 0);
     const milestoneAmt = parseFloat(milestone.amount || 0);
 
-    if (alreadyReleased + milestoneAmt > pool + 0.01) {
-      return res.status(400).json({
-        message:
-          "Cannot approve: total milestone releases would exceed funded escrow",
-      });
-    }
+    //if (alreadyReleased + milestoneAmt > pool + 0.01) {
+      //return res.status(400).json({
+        //message:
+          //"Cannot approve: total milestone releases would exceed funded escrow",
+      //});
+    //}
 
     await PaymentService.releaseMilestonePayment(
       contractId,

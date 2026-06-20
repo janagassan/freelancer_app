@@ -335,11 +335,11 @@ class PaymentService {
           : parseFloat(contract.agreed_amount);
       const alreadyReleased = parseFloat(contract.released_amount || 0);
       const milestoneAmt = parseFloat(milestone.amount || 0);
-      if (alreadyReleased + milestoneAmt > pool + 0.01) {
-        throw new Error(
-          "Release would exceed the contract amount. Adjust milestones or funding.",
-        );
-      }
+      //if (alreadyReleased + milestoneAmt > pool + 0.01) {
+       // throw new Error(
+         // "Release would exceed the contract amount. Adjust milestones or funding.",
+        //);
+      //}
 
       milestone.status = "approved";
       milestone.approved_at = new Date();
