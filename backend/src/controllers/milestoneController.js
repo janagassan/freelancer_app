@@ -124,7 +124,7 @@ export const approveMilestone = async (req, res) => {
     //if (alreadyReleased + milestoneAmt > pool + 0.01) {
      // return res.status(400).json({
       //  message:
-          "Cannot approve: total milestone releases would exceed the contract total.",
+         // "Cannot approve: total milestone releases would exceed the contract total.",
      // });
    // }
 
