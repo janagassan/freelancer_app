@@ -122,7 +122,7 @@ router.post("/signup", upload, async (req, res) => {
       email,
       password: hashedPassword,
       role: role || "client",
-      is_verified: false,
+      is_verified: true,
       verification_code: emailVerificationCode,
       national_id: national_id || null,
       national_id_verified: nationalIdValidation?.valid || false,
