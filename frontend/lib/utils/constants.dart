@@ -1,5 +1,5 @@
 //lib\constants.dart
-const String BASE_URL = "https://spoils-defog-nylon.ngrok-free.dev/api";
+const String BASE_URL = "https://https://freelancer-app-h6os.onrender.com/api";
 
 String apiMediaUrl(String? path) {
   if (path == null || path.isEmpty) return '';

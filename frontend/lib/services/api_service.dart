@@ -8,9 +8,7 @@ import 'package:freelancer_platform/models/financial_model.dart';
 import 'package:freelancer_platform/models/interview_model.dart';
 import 'package:freelancer_platform/models/project_model.dart';
 import 'package:freelancer_platform/models/search_response.dart';
-import 'package:freelancer_platform/models/user_model.dart';
 import 'package:freelancer_platform/models/work_submission_model.dart';
-import 'package:freelancer_platform/screens/subscription/my_subscription_screen.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/http.dart';
 import '../utils/constants.dart';
@@ -23,15 +21,17 @@ import '../models/subscription_stats_model.dart';
 import 'package:dio/dio.dart';
 
 class ApiService {
-  static String get BASE_URL {
-    if (kIsWeb) {
-      return 'http://localhost:5001/api';
-    }
-    if (Platform.isAndroid) {
-      return 'http://10.0.2.2:5001/api';
-    }
-    return 'http://localhost:5001/api';
+  static String get baseUrl {
+  if (kIsWeb) {
+    return 'https://https://freelancer-app-h6os.onrender.com/api';
   }
+
+  if (Platform.isAndroid) {
+    return 'https://freelancer-app-h6os.onrender.com/api';
+  }
+
+  return 'https://https://freelancer-app-h6os.onrender.com/api';
+}
 
   static String? _token;
 
@@ -49,12 +49,12 @@ class ApiService {
 
   static String get baseUrl {
     if (kIsWeb) {
-      return 'http://localhost:5001/api';
+      return 'https://https://freelancer-app-h6os.onrender.com/api';
     }
     if (Platform.isAndroid) {
-      return 'http://10.0.2.2:5001/api';
+      return 'https://freelancer-app-h6os.onrender.com';
     }
-    return 'http://localhost:5001/api';
+    return 'https://https://freelancer-app-h6os.onrender.com/api';
   }
 
   static Map<String, String> get headers => {
@@ -1094,32 +1094,21 @@ class ApiService {
     }
   }
 
-  // api_service.dart
-
-static Future<List<dynamic>> getMyProposals() async {
-  try {
-    final response = await http.get(
-      Uri.parse('$BASE_URL/freelancer/proposals'),
-      headers: headers,
-    );
-    
-    if (response.statusCode == 200) {
-      final List<dynamic> data = jsonDecode(response.body);
-      
-      // ✅ طباعة البيانات للتصحيح
-      print('📦 Proposals data: ${data.length} proposals');
-      if (data.isNotEmpty) {
-        print('📦 First proposal: ${data[0]}');
+  static Future<List<dynamic>> getMyProposals() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$BASE_URL/freelancer/proposals'),
+        headers: headers,
+      );
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
       }
-      
-      return data;
+      return [];
+    } catch (e) {
+      print('Error getting my proposals: $e');
+      return [];
     }
-    return [];
-  } catch (e) {
-    print('❌ Error getting my proposals: $e');
-    return [];
   }
-}
 
   static Future<List<dynamic>> getMyProjects() async {
     try {
@@ -1160,21 +1149,6 @@ static Future<List<dynamic>> getMyProposals() async {
     } catch (e) {
       print('Error getting contract: $e');
       return {'message': 'Connection error: $e'};
-    }
-  }
-
-  static Future<Map<String, dynamic>> getContractByProjectId(
-    int projectId,
-  ) async {
-    try {
-      final response = await http.get(
-        Uri.parse('$BASE_URL/contracts/project/$projectId'),
-        headers: headers,
-      );
-      return jsonDecode(response.body);
-    } catch (e) {
-      print('Error getting contract by project: $e');
-      return {'success': false, 'message': 'Connection error: $e'};
     }
   }
 
@@ -2638,36 +2612,26 @@ static Future<List<dynamic>> getMyProposals() async {
   }
 
   static Future<String?> createSubscriptionCheckoutSessionDirect(
-  String planSlug, {
-  String? couponCode,
-}) async {
-  try {
+    String planSlug, {
+    String? couponCode,
+  }) async {
     final body = {'planSlug': planSlug};
-    if (couponCode != null && couponCode.isNotEmpty) {
-      body['couponCode'] = couponCode;
-    }
-    
-    final response = await http.post(
-      Uri.parse('$BASE_URL/subscription/checkout-session'),
-      headers: headers,
-      body: jsonEncode(body),
-    );
+    if (couponCode != null) body['couponCode'] = couponCode;
+    try {
+      final response = await http.post(
+        Uri.parse('$BASE_URL/subscription/checkout-session'),
+        headers: headers,
+        body: jsonEncode({'planSlug': planSlug}),
+      );
 
-    print('🔍 Checkout session response status: ${response.statusCode}');
-    print('🔍 Checkout session response body: ${response.body}');
-
-    if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
+      print('🔍 Checkout session response: $data');
       return data['checkoutUrl'];
-    } else {
-      print('❌ Error: ${response.statusCode}');
+    } catch (e) {
+      print('Error creating subscription checkout session: $e');
       return null;
     }
-  } catch (e) {
-    print('❌ Error creating subscription checkout session: $e');
-    return null;
   }
-}
 
   static Future<Map<String, dynamic>> confirmCheckoutSession(
     String sessionId,
@@ -4175,28 +4139,17 @@ static Future<List<dynamic>> getMyProposals() async {
     }
   }
 
-  static Future<Map<String, dynamic>> getOpenProjectsForHiring({int? currentProjectId}) async {
-  try {
-    String url = '$baseUrl/client/projects/open';
-    if (currentProjectId != null) {
-      url += '?currentProjectId=$currentProjectId';
+  static Future<Map<String, dynamic>> getOpenProjectsForHiring() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/client/projects/open'),
+        headers: await headers,
+      );
+      return jsonDecode(response.body);
+    } catch (e) {
+      return {'success': false, 'message': e.toString(), 'projects': []};
     }
-    
-    print('📡 GET $url'); 
-    
-    final response = await http.get(
-      Uri.parse(url),
-      headers: await headers,
-    );
-    
-    print('📦 Response: ${response.body}');
-    
-    return jsonDecode(response.body);
-  } catch (e) {
-    print('❌ Error getting open projects: $e');
-    return {'success': false, 'message': e.toString(), 'projects': []};
   }
-}
 
   static Future<Map<String, dynamic>> getMyOffers() async {
     try {
@@ -4758,24 +4711,6 @@ static Future<List<dynamic>> getMyProposals() async {
     }
   }
 
-static Future<Map<String, dynamic>> requestMilestoneRevision({
-  required int contractId,
-  required int milestoneIndex,
-  required String revisionMessage,
-}) async {
-  try {
-    final response = await http.post(
-      Uri.parse('$BASE_URL/contracts/$contractId/milestones/$milestoneIndex/request-revision'),
-      headers: headers,
-      body: jsonEncode({'revisionMessage': revisionMessage}),
-    );
-    return jsonDecode(response.body);
-  } catch (e) {
-    print('Error requesting revision: $e');
-    return {'success': false, 'message': 'Failed to send revision request'};
-  }
-}
-
   static Future<Map<String, dynamic>> getAdvancedStats() async {
     try {
       final response = await http.get(
@@ -4801,94 +4736,6 @@ static Future<Map<String, dynamic>> requestMilestoneRevision({
       return {'success': false, 'analysis': {}};
     }
   }
-
-static Future<List<MonthlyUsage>> getMonthlyUsage() async {
-  try {
-    final response = await _dio.get('/subscription/monthly-usage');  
-    if (response.data['success'] == true) {
-      final List data = response.data['data'] ?? [];
-      return data.map((e) => MonthlyUsage(
-        month: e['month'] ?? '',
-        proposals: e['proposals'] ?? 0,
-        projects: e['projects'] ?? 0,
-      )).toList();
-    }
-    return [];
-  } catch (e) {
-    print('❌ Error fetching monthly usage: $e');
-    return [];
-  }
-}
-
-
-static Future<Map<String, dynamic>?> refreshUserData() async {
-  try {
-    final token = await TokenStorage.getToken();
-    if (token == null) return null;
-    
-    final response = await http.get(
-      Uri.parse('$BASE_URL/auth/me'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-    );
-    
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      if (data['success'] == true) {
-        return data['user'];
-      }
-    }
-    return null;
-  } catch (e) {
-    print('Error refreshing user data: $e');
-    return null;
-  }
-}
-
-static Future<Map<String, dynamic>> changePassword({
-  required String currentPassword,
-  required String newPassword,
-}) async {
-  try {
-    final response = await http.post(
-      Uri.parse('$BASE_URL/auth/change-password'),
-      headers: headers,
-      body: jsonEncode({
-        'currentPassword': currentPassword,
-        'newPassword': newPassword,
-      }),
-    );
-    return jsonDecode(response.body);
-  } catch (e) {
-    print('Error changing password: $e');
-    return {'success': false, 'message': 'Connection error'};
-  }
-}
-
-static Future<Map<String, dynamic>> createContractFromProposal({
-  required int proposalId,
-  required double agreedAmount,
-  List<Map<String, dynamic>>? milestones,
-}) async {
-  try {
-    final response = await http.post(
-      Uri.parse('$BASE_URL/client/contract/create-from-proposal'),
-      headers: headers,
-      body: jsonEncode({
-        'proposalId': proposalId,
-        'agreedAmount': agreedAmount,
-        'milestones': milestones ?? [],
-      }),
-    );
-    return jsonDecode(response.body);
-  } catch (e) {
-    print('❌ Error creating contract from proposal: $e');
-    return {'success': false, 'message': 'Connection error'};
-  }
-}
-
 }
 
 class FinancialStatsResponse {

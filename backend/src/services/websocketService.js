@@ -14,7 +14,7 @@ export const initWebSocket = (server) => {
       origin: [
         "https://freelancer-app-h6os.onrender.com",
         "https://freelancer-app-h6os.onrender.com",
-        "https://spoils-defog-nylon.ngrok-free.dev",
+        "https://https://freelancer-app-h6os.onrender.com",
         "http://127.0.0.1:3000",
       ],
       methods: ["GET", "POST"],
