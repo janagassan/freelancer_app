@@ -387,6 +387,8 @@ class _SignupScreenState extends State<SignupScreen>
     if (res['error'] != null) {
   _showErrorToast(res['error']);
 } else {
+  print("BEFORE NAVIGATION");
+print(res);
   _showSuccessToast(res['message'] ?? 'Account created successfully!');
 
   if (mounted) {
