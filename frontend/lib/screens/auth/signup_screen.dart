@@ -396,11 +396,11 @@ print(res);
         res['cvAnalysis']['has_analysis'] == true) {
       _showCVAnalysisDialog(res['cvAnalysis']);
     } else {
-      Navigator.pushNamed(
-        context,
-        '/verify',
-        arguments: emailController.text,
-      );
+      Navigator.pushNamedAndRemoveUntil(
+  context,
+  '/login',
+  (route) => false,
+);
     }
   }
 }
