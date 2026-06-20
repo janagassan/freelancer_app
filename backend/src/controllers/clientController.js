@@ -1005,15 +1005,17 @@ export const manualConfirmPayment = async (req, res) => {
     console.log("✅ Wallet updated, pending_balance:", roundedBalance);
 
     const transaction = await Transaction.create({
-      wallet_id: clientWallet.id,
-      amount: agreedAmount,
-      type: "deposit",
-      status: "completed",
-      description: `Manual escrow deposit for contract #${contract.id}`,
-      reference_id: contract.id,
-      reference_type: "contract",
-      completed_at: new Date(),
-    });
+  wallet_id: clientWallet.id,
+  user_id: contract.ClientId,
+  user_role: "client",
+  amount: agreedAmount,
+  type: "deposit",
+  status: "completed",
+  description: `Manual escrow deposit for contract #${contract.id}`,
+  reference_id: contract.id,
+  reference_type: "contract",
+  completed_at: new Date(),
+});
 
     console.log("✅ Transaction created:", transaction.id);
 
