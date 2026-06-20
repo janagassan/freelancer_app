@@ -221,8 +221,11 @@ router.post("/signup", upload, async (req, res) => {
 
     await Wallet.create({ UserId: newUser.id, balance: 0 });
 
-    await sendVerificationEmail(email, emailVerificationCode);
-
+try {
+  await sendVerificationEmail(email, emailVerificationCode);
+} catch (error) {
+  console.error("Failed to send verification email:", error);
+}
     console.log(`✅ User created with ID: ${newUser.id}`);
 
     res.status(201).json({
