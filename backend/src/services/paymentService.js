@@ -386,16 +386,17 @@ class PaymentService {
       });
 
       await Transaction.create({
-        wallet_id: freelancerWallet.id,
-        amount: milestoneAmt,
-        type: "payment",
-        status: "completed",
-        description: `Payment for milestone "${milestone.title}" - Contract #${contract.id}`,
-        reference_id: contract.id,
-        reference_type: "contract",
-        completed_at: new Date(),
-      });
-
+  wallet_id: freelancerWallet.id,
+  user_id: contract.FreelancerId,
+  user_role: "freelancer",
+  amount: milestoneAmt,
+  type: "payment",
+  status: "completed",
+  description: `Payment for milestone "${milestone.title}" - Contract #${contract.id}`,
+  reference_id: contract.id,
+  reference_type: "contract",
+  completed_at: new Date(),
+});
       await NotificationService.createNotification({
         userId: contract.FreelancerId,
         type: "payment_received",
