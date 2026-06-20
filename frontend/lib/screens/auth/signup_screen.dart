@@ -441,11 +441,11 @@ print(res);
             onPressed: () {
               Navigator.pop(context);
               if (mounted) {
-                Navigator.pushNamed(
-                  context,
-                  '/verify',
-                  arguments: emailController.text,
-                );
+                Navigator.pushNamedAndRemoveUntil(
+  context,
+  '/login',
+  (route) => false,
+);
               }
             },
             child: const Text('Continue'),
