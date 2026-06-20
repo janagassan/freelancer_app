@@ -319,13 +319,13 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ message: "❌ Invalid credentials" });
     }
 
-    if (!user.is_verified) {
-      return res.status(403).json({
-        message: "Please verify your email first",
-        requiresVerification: true,
-        email: user.email,
-      });
-    }
+    // if (!user.is_verified) {
+    //  return res.status(403).json({
+     //   message: "Please verify your email first",
+     //   requiresVerification: true,
+     //   email: user.email,
+     // });
+   // }
 
     console.log("Entered password:", password);
 console.log("Stored password:", user.password);
