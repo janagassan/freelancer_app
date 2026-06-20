@@ -722,7 +722,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   Future<void> _openFile(String url) async {
     try {
       final fullUrl = url.startsWith('/uploads/')
-          ? 'http://localhost:5000$url'
+          ? 'https://freelancer-app-h6os.onrender.com$url'
           : url;
       if (kIsWeb) {
         html.window.open(fullUrl, '_blank');

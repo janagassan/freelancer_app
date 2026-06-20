@@ -597,7 +597,7 @@ class _ProjectProposalsScreenState extends State<ProjectProposalsScreen> {
                           : Colors.blueGrey.shade100,
                       backgroundImage: freelancerAvatar != null
                           ? NetworkImage(
-                              'http://localhost:5000$freelancerAvatar',
+                              'https://freelancer-app-h6os.onrender.com$freelancerAvatar',
                             )
                           : null,
                       child: freelancerAvatar == null

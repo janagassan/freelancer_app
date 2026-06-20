@@ -68,7 +68,7 @@ class AvatarWidget extends StatelessWidget {
     if (imageUrl!.startsWith('http')) {
       fullUrl = imageUrl!;
     } else if (imageUrl!.startsWith('/uploads')) {
-      fullUrl = 'http://localhost:5001$imageUrl';
+      fullUrl = 'https://freelancer-app-h6os.onrender.com$imageUrl';
     } else {
       fullUrl = imageUrl!;
     }

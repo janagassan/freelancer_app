@@ -83,9 +83,9 @@ import 'l10n/app_localizations.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await dotenv.load(fileName: "assets/.env");
-
   if (!kIsWeb) {
+    await dotenv.load(fileName: "assets/.env");
+
     try {
       Stripe.publishableKey = dotenv.env['STRIPE_PUBLISHABLE_KEY'] ?? '';
       await Stripe.instance.applySettings();
@@ -93,12 +93,12 @@ void main() async {
     } catch (e) {
       print('❌ Stripe init error: $e');
     }
-  }
 
-  await Supabase.initialize(
-    url: dotenv.env['SUPABASE_URL']!,
-    anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
-  );
+    await Supabase.initialize(
+      url: dotenv.env['SUPABASE_URL']!,
+      anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
+    );
+  }
 
   final savedToken = await TokenStorage.getToken();
   final savedRole = await TokenStorage.getUserRole();
@@ -166,6 +166,12 @@ class _FreelancerAppState extends State<FreelancerApp> {
           navigatorKey: navigatorKey,
           debugShowCheckedModeBanner: false,
           title: 'iPal ',
+          builder: (context, child) {
+  return Directionality(
+    textDirection: TextDirection.ltr,
+    child: child!,
+  );
+},
           locale: _locale,
           supportedLocales: const [Locale('en'), Locale('ar')],
           localizationsDelegates: const [

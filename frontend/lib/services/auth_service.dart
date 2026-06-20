@@ -60,7 +60,7 @@ Future<Map<String, dynamic>> login(String email, String password) async {
         'full_name': userData['name'],
         'role': userData['role'],
         'avatar_url': userData['avatar'] != null 
-            ? 'http://localhost:5000${userData['avatar']}'
+            ? 'https://freelancer-app-h6os.onrender.com${userData['avatar']}'
             : null,
         'updated_at': DateTime.now().toIso8601String(),
       });

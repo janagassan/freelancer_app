@@ -158,7 +158,7 @@ class _ProjectDetailsScreenState extends State<ProjectDetailsScreen> {
   String _getAvatarUrl(String? avatar) {
     if (avatar == null || avatar.isEmpty) return '';
     if (avatar.startsWith('http')) return avatar;
-    return 'http://localhost:5000$avatar';
+    return 'https://freelancer-app-h6os.onrender.com$avatar';
   }
 
   void _navigateToSubmitProposal() {
