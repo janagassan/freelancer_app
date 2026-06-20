@@ -378,6 +378,9 @@ class _SignupScreenState extends State<SignupScreen>
           ? null
           : referralSourceController.text,
     );
+
+    print('SIGNUP RESPONSE: $res');
+
     
     setState(() => loading = false);
     
