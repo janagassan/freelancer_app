@@ -332,7 +332,7 @@ export const createUser = async (req, res) => {
       email,
       password: hashedPassword,
       role,
-      is_verified: false,
+      is_verified: true,
       account_status: "active",
       agreed_to_terms_at: new Date(),
       terms_accepted_version: "1.0",
