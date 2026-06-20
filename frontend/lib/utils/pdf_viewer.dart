@@ -6,7 +6,7 @@ import 'dart:io' show Platform;
 import 'package:fluttertoast/fluttertoast.dart';
 
 class PDFViewer {
-  static const String baseUrl = 'https://https://freelancer-app-h6os.onrender.com';
+  static const String baseUrl = 'https://freelancer-app-h6os.onrender.com';
 
   static Future<void> openPDF(String pdfPath) async {
     try {
