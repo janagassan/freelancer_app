@@ -76,10 +76,10 @@ class SocketService {
     print('🔌 Token exists: ${token != null}');
     print('🔌 UserId from storage: $userIdStr');
     print('🔌 Stored user: ${user?['id']} - ${user?['name']}');
-    print('🔌 =========================================');
 
     if (token == null || userIdStr == null) {
       print('❌ Cannot connect: No token or user ID');
+      print('🔌 This might be normal if user is not logged in yet');
       _connectionController.add(false);
       return;
     }
@@ -89,9 +89,14 @@ class SocketService {
 
     try {
       final String socketUrl = kIsWeb
-          ? 'https://https://freelancer-app-h6os.onrender.com'
+          ? 'https://freelancer-app-h6os.onrender.com'
           : 'https://freelancer-app-h6os.onrender.com';
       print('🔌 Connecting to socket at: $socketUrl');
+
+      if (_socket != null) {
+        _socket!.disconnect();
+        _socket!.dispose();
+      }
 
       _socket = IO.io(socketUrl, <String, dynamic>{
         'transports': ['websocket'],
@@ -218,6 +223,17 @@ class SocketService {
         _reactionController.add(data);
       }
     });
+    _socket!.on('connect', (_) {
+      print('🎯 Socket connect event fired');
+    });
+
+    _socket!.on('connect_error', (error) {
+      print('❌ Socket connect_error: $error');
+    });
+
+    _socket!.on('error', (error) {
+      print('❌ Socket error: $error');
+    });
 
     _socket!.on('message_error', (data) {
       if (_isDisposed) return;
@@ -257,6 +273,16 @@ class SocketService {
     if (_isConnected && _socket != null && chatId != null) {
       print('👋 User $_currentUserId leaving chat: $chatId');
       _socket!.emit('leave_chat', chatId);
+    }
+  }
+
+  Future<void> updateUserData(Map<String, dynamic> user) async {
+    if (_isConnected && _socket != null) {
+      print('🔄 Updating socket user data: ${user['name']}');
+      _socket!.emit('update_user', {
+        'name': user['name'],
+        'avatar': user['avatar'],
+      });
     }
   }
 
@@ -307,7 +333,7 @@ class SocketService {
     String? mediaUrl,
     String? fileName,
     int? replyTo,
-  }) {
+  }) async {
     if (!_isConnected) {
       print('⚠️ Cannot send message: Not connected (user: $_currentUserId)');
       Fluttertoast.showToast(
@@ -322,10 +348,21 @@ class SocketService {
       return;
     }
 
-    print('📤 User $_currentUserId sending message to chat $chatId: $content');
+    final user = await TokenStorage.getUser();
+    final senderName = user?['name'] ?? 'User';
+
+    print(
+      '📤 User $_currentUserId ($senderName) sending message to chat $chatId: $content',
+    );
     print('📤 Reply to: $replyTo');
 
-    final messageData = {'chatId': chatId, 'content': content, 'type': type};
+    final messageData = {
+      'chatId': chatId,
+      'content': content,
+      'type': type,
+      'senderName': senderName,
+      'senderAvatar': user?['avatar'],
+    };
 
     if (replyTo != null) {
       messageData['replyToId'] = replyTo;
