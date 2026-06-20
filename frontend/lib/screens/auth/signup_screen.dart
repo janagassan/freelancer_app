@@ -385,23 +385,24 @@ class _SignupScreenState extends State<SignupScreen>
     setState(() => loading = false);
     
     if (res['error'] != null) {
-      _showErrorToast(res['error']);
+  _showErrorToast(res['error']);
+} else {
+  _showSuccessToast(res['message'] ?? 'Account created successfully!');
+
+  if (mounted) {
+    if (res['cvAnalysis'] != null &&
+        res['cvAnalysis']['has_analysis'] == true) {
+      _showCVAnalysisDialog(res['cvAnalysis']);
     } else {
-      _showSuccessToast(res['message'] ?? 'Account created successfully!');
-      if (res['user'] != null && mounted) {
-        if (res['cvAnalysis'] != null &&
-            res['cvAnalysis']['has_analysis'] == true) {
-          _showCVAnalysisDialog(res['cvAnalysis']);
-        } else {
-          Navigator.pushNamed(
-            context,
-            '/verify',
-            arguments: emailController.text,
-          );
-        }
-      }
+      Navigator.pushNamed(
+        context,
+        '/verify',
+        arguments: emailController.text,
+      );
     }
   }
+}
+}
 
   void _showCVAnalysisDialog(Map<String, dynamic> analysis) {
     showDialog(
